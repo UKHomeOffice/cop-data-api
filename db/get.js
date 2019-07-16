@@ -2,7 +2,7 @@
 const logger = require('../config/logger');
 const pool = require('./index');
 
-const getEntitiesOrViewsData = (role, name, filters) => new Promise((resolve, reject) => {
+const get = (role, name, filters) => new Promise((resolve, reject) => {
   pool.query(`SET ROLE ${role};`)
     .then(() => {
       if (filters === null) {
@@ -22,4 +22,4 @@ const getEntitiesOrViewsData = (role, name, filters) => new Promise((resolve, re
     });
 });
 
-module.exports = getEntitiesOrViewsData;
+module.exports = get;

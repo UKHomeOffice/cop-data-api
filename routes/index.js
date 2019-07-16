@@ -4,7 +4,7 @@ const jwtDecode = require('jwt-decode');
 const moment = require('moment');
 
 // local imports
-const getEntitiesOrViewsData = require('../db/tables');
+const get = require('../db/get');
 const logger = require('../config/logger');
 
 const app = express();
@@ -41,7 +41,7 @@ app.get('/v1/:name', (req, res) => {
   const queryParams = req.url.split('?')[1];
   let queryFilters = null;
 
-  const data = getEntitiesOrViewsData(dbrole, name, queryFilters);
+  const data = get(dbrole, name, queryFilters);
 
   Promise.all([data])
     .then((resultsArray) => {
