@@ -2,15 +2,11 @@
 const logger = require('../config/logger');
 const pool = require('./index');
 
-const get = (role, name, filters) => new Promise((resolve, reject) => {
+const get = (role, name, query) => new Promise((resolve, reject) => {
   pool.query(`SET ROLE ${role};`)
     .then(() => {
-      if (filters === null) {
-        logger.info(`Running query SELECT * FROM ${name};`);
-        return pool.query(`SELECT * FROM ${name};`);
-      }
-      logger.info(`Running query SELECT * FROM ${name} WHERE ${filters};`);
-      return pool.query(`SELECT * FROM ${name} WHERE ${filters};`);
+      logger.info(`Running query ${query}`);
+      return pool.query(`${query}`);
     })
     .then(data => resolve(data.rows))
     .catch((error) => {

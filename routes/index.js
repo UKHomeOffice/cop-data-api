@@ -6,6 +6,7 @@ const moment = require('moment');
 // local imports
 const get = require('../db/get');
 const logger = require('../config/logger');
+const queryBuilder = require('../db/utils');
 
 const app = express();
 
@@ -39,10 +40,13 @@ app.get('/v1/:name', (req, res) => {
   const { name } = req.params;
   const { dbrole } = res.locals.user;
   const queryParams = req.url.split('?')[1];
-  let queryFilters = null;
+  const query = queryBuilder(name, queryParams);
 
-  const data = get(dbrole, name, queryFilters);
+  if (!query) {
+    return res.status(400).json({ 'error': 'Bad query parameters' })
+  }
 
+  const data = get(dbrole, name, query);
   Promise.all([data])
     .then((resultsArray) => {
       return res.status(200).json(resultsArray[0])
