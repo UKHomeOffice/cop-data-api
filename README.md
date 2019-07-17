@@ -25,12 +25,12 @@ $ npm install
 
 Run the API server
 ```sh
-npm run start
+$ npm run start
 ```
 
 Run the API server with debugger
 ```sh
-mocha --inspect-brk server.js
+$ mocha --inspect-brk server.js
 ```
 
 #### Runing tests
@@ -54,7 +54,6 @@ $ mocha --inspect-brk test/db/utils.test.js
 
 ## Endpoints
 ```sh
+# <domain>/<version>/<table>
 http://localhost:5000/v1/roles
-http://localhost:5000/v1/staff
-http://localhost:5000/v1/getroles
 ```

@@ -43,7 +43,7 @@ app.get('/v1/:name', (req, res) => {
   const query = queryBuilder(name, queryParams);
 
   if (!query) {
-    return res.status(400).json({ 'error': 'Bad query parameters' })
+    return res.status(400).json({ 'error': 'Invalid query parameters' })
   }
 
   const data = get(dbrole, name, query);
