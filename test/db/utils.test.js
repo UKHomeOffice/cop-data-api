@@ -88,5 +88,11 @@ describe('Test querystring builder', () => {
       const query = queryBuilder('getoarrecords', 'shiftstartdatetime=gte.2019-06-20T12:00:00,&shiftstartdatetime=lt.2019-06-22T12:00:00');
       expect(query).to.equal(expectedQuery);
     });
+
+    it('Should return a querystring with name selected where shiftstartdatetime matches the date range values', () => {
+      const expectedQuery = 'SELECT firstname FROM getoarrecords WHERE firstname = \'Julius\' AND shiftstartdatetime > \'2019-06-20T12:00:00\' AND shiftstartdatetime <= \'2019-06-22T12:00:00\';'
+      const query = queryBuilder('getoarrecords', 'select=firstname&firstname=eq.Julius,&shiftstartdatetime=gt.2019-06-20T12:00:00,&shiftstartdatetime=lte.2019-06-22T12:00:00');
+      expect(query).to.equal(expectedQuery);
+    });
   });
 });

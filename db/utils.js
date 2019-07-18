@@ -28,10 +28,14 @@ function queryBuilder(name, queryParams='') {
 
       if (field === 'select') {
         field = field.toUpperCase();
+      } else if (filter === 'gt' && !isNull) {
+        filter = '>';
       } else if (filter === 'gte' && !isNull) {
         filter = '>=';
       } else if (filter === 'lt' && !isNull) {
         filter = '<';
+      } else if (filter === 'lte' && !isNull) {
+        filter = '<=';
       } else if (filter === 'eq' && !isNull) {
         filter = '=';
       } else if (filter === 'eq' && isNull) {
