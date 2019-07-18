@@ -4,13 +4,13 @@ const { expect } = require('chai');
 const logger = require('../../config/logger');
 const queryBuilder = require('../../db/utils');
 
-describe('Test query filter decoder', () => {
+describe('Test querystring builder', () => {
   before(() => {
     // disable logging
     logger.silent = true;
   });
 
-  describe('GET', () => {
+  describe('GET - querystring builder', () => {
     it('Should return a querystring with two columns selected', () => {
       const expectedQuery = 'SELECT developer, linemanager FROM roles;';
       const query = queryBuilder('roles', 'select=developer,linemanager');
@@ -80,6 +80,12 @@ describe('Test query filter decoder', () => {
     it('Should return a querystring witha select to a sql view with filtering parameters', () => {
       const expectedQuery = 'SELECT * FROM view_rolemembers WHERE email = \'manager@mail.com\';'
       const query = queryBuilder('view_rolemembers', 'email=eq.manager@mail.com');
+      expect(query).to.equal(expectedQuery);
+    });
+
+    it('Should return a querystring for all data where shiftstartdatetime matches the date range values', () => {
+      const expectedQuery = 'SELECT * FROM getoarrecords WHERE shiftstartdatetime >= \'2019-06-20T12:00:00\' AND shiftstartdatetime < \'2019-06-22T12:00:00\';'
+      const query = queryBuilder('getoarrecords', 'shiftstartdatetime=gte.2019-06-20T12:00:00,&shiftstartdatetime=lt.2019-06-22T12:00:00');
       expect(query).to.equal(expectedQuery);
     });
   });
