@@ -55,25 +55,31 @@ describe('Test query filter decoder', () => {
 
     it('Should return a querystring with a column selected filtering by an array', () => {
       const expectedQuery = 'SELECT email FROM users WHERE staffid IN (\'123\', \'222\');'
-      const query = queryBuilder('users', 'select=email&staffid=in.%28123,222%29')
+      const query = queryBuilder('users', 'select=email&staffid=in.%28123,222%29');
       expect(query).to.equal(expectedQuery);
     });
 
     it('Should return a querystring with two columns selected filtering by an array', () => {
       const expectedQuery = 'SELECT email, name FROM users WHERE staffid IN (\'123\', \'222\');'
-      const query = queryBuilder('users', 'select=email,name&staffid=in.%28123,222%29')
+      const query = queryBuilder('users', 'select=email,name&staffid=in.%28123,222%29');
       expect(query).to.equal(expectedQuery);
     });
 
     it('Should return a querystring for all data where id and continent match the provided values', () => {
       const expectedQuery = 'SELECT * FROM countries WHERE id = 3 AND continent = \'Asia\';'
-      const query = queryBuilder('countries', 'id=eq.3,&continent=eq.Asia')
+      const query = queryBuilder('countries', 'id=eq.3,&continent=eq.Asia');
       expect(query).to.equal(expectedQuery);
     });
 
     it('Should return a querystring with name, id and continent selected where id and continent match the provided values', () => {
       const expectedQuery = 'SELECT name, id, continent FROM countries WHERE id = 3 AND continent = \'Asia\';'
-      const query = queryBuilder('countries', 'select=name,id,continent&id=eq.3,&continent=eq.Asia')
+      const query = queryBuilder('countries', 'select=name,id,continent&id=eq.3,&continent=eq.Asia');
+      expect(query).to.equal(expectedQuery);
+    });
+
+    it('Should return a querystring witha select to a sql view with filtering parameters', () => {
+      const expectedQuery = 'SELECT * FROM view_rolemembers WHERE email = \'manager@mail.com\';'
+      const query = queryBuilder('view_rolemembers', 'email=eq.manager@mail.com');
       expect(query).to.equal(expectedQuery);
     });
   });
