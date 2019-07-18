@@ -4,13 +4,13 @@ const { expect } = require('chai');
 const logger = require('../../config/logger');
 const queryBuilder = require('../../db/utils');
 
-describe('Test query filter decoder', () => {
+describe('Test querystring builder', () => {
   before(() => {
     // disable logging
     logger.silent = true;
   });
 
-  describe('GET', () => {
+  describe('GET - querystring builder', () => {
     it('Should return a querystring with two columns selected', () => {
       const expectedQuery = 'SELECT developer, linemanager FROM roles;';
       const query = queryBuilder('roles', 'select=developer,linemanager');
@@ -55,25 +55,43 @@ describe('Test query filter decoder', () => {
 
     it('Should return a querystring with a column selected filtering by an array', () => {
       const expectedQuery = 'SELECT email FROM users WHERE staffid IN (\'123\', \'222\');'
-      const query = queryBuilder('users', 'select=email&staffid=in.%28123,222%29')
+      const query = queryBuilder('users', 'select=email&staffid=in.%28123,222%29');
       expect(query).to.equal(expectedQuery);
     });
 
     it('Should return a querystring with two columns selected filtering by an array', () => {
       const expectedQuery = 'SELECT email, name FROM users WHERE staffid IN (\'123\', \'222\');'
-      const query = queryBuilder('users', 'select=email,name&staffid=in.%28123,222%29')
+      const query = queryBuilder('users', 'select=email,name&staffid=in.%28123,222%29');
       expect(query).to.equal(expectedQuery);
     });
 
     it('Should return a querystring for all data where id and continent match the provided values', () => {
       const expectedQuery = 'SELECT * FROM countries WHERE id = 3 AND continent = \'Asia\';'
-      const query = queryBuilder('countries', 'id=eq.3,&continent=eq.Asia')
+      const query = queryBuilder('countries', 'id=eq.3,&continent=eq.Asia');
       expect(query).to.equal(expectedQuery);
     });
 
     it('Should return a querystring with name, id and continent selected where id and continent match the provided values', () => {
       const expectedQuery = 'SELECT name, id, continent FROM countries WHERE id = 3 AND continent = \'Asia\';'
-      const query = queryBuilder('countries', 'select=name,id,continent&id=eq.3,&continent=eq.Asia')
+      const query = queryBuilder('countries', 'select=name,id,continent&id=eq.3,&continent=eq.Asia');
+      expect(query).to.equal(expectedQuery);
+    });
+
+    it('Should return a querystring witha select to a sql view with filtering parameters', () => {
+      const expectedQuery = 'SELECT * FROM view_rolemembers WHERE email = \'manager@mail.com\';'
+      const query = queryBuilder('view_rolemembers', 'email=eq.manager@mail.com');
+      expect(query).to.equal(expectedQuery);
+    });
+
+    it('Should return a querystring for all data where shiftstartdatetime matches the date range values', () => {
+      const expectedQuery = 'SELECT * FROM getoarrecords WHERE shiftstartdatetime >= \'2019-06-20T12:00:00\' AND shiftstartdatetime < \'2019-06-22T12:00:00\';'
+      const query = queryBuilder('getoarrecords', 'shiftstartdatetime=gte.2019-06-20T12:00:00,&shiftstartdatetime=lt.2019-06-22T12:00:00');
+      expect(query).to.equal(expectedQuery);
+    });
+
+    it('Should return a querystring with name selected where shiftstartdatetime matches the date range values', () => {
+      const expectedQuery = 'SELECT firstname FROM getoarrecords WHERE firstname = \'Julius\' AND shiftstartdatetime > \'2019-06-20T12:00:00\' AND shiftstartdatetime <= \'2019-06-22T12:00:00\';'
+      const query = queryBuilder('getoarrecords', 'select=firstname&firstname=eq.Julius,&shiftstartdatetime=gt.2019-06-20T12:00:00,&shiftstartdatetime=lte.2019-06-22T12:00:00');
       expect(query).to.equal(expectedQuery);
     });
   });
