@@ -77,6 +77,7 @@ pipeline:
     when:
       event: deployment
       environment: staging
+      branch: master
 
   deploy_to_prod:
     image: quay.io/ukhomeofficedigital/kd
@@ -98,3 +99,4 @@ pipeline:
     when:
       event: deployment
       environment: production
+      branch: master
