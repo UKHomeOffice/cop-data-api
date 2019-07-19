@@ -1,15 +1,35 @@
 // local imports
 const logger = require('../config/logger');
 
-function queryBuilder(name, queryParams='') {
-  if (queryParams) {
+function argsBuilder(body='') {
+  let args = '';
+
+  if (body) {
+    for (const key in body) {
+      args += args ? ',' : '';
+      args += `${key}=>'${body[key]}'`;
+    }
+  }
+  return args ? `(${args})` : args;
+}
+
+function queryBuilder(name, queryParams='', body='') {
+  let args = '';
+  let query ='';
+
+  if (!body && !queryParams) {
+    query = `SELECT * FROM ${name}`;
+  } else if(body && !queryParams) {
+    args = argsBuilder(body);
+    query = `SELECT * FROM ${name}${args}`;
+  } else {
     logger.info(`Query parameters received '${queryParams}'`);
 
-    let query ='';
     queryParams = queryParams.replace(/,&/g, ';AND%20');
     queryParams = queryParams.replace(/&/g, ';&');
     queryParams = queryParams.split(';');
     queryParams.map((params) => {
+      args = argsBuilder(body);
       params = params.replace('=', ' ').replace('.', ' ').split(' ');
       let [field='', filter='', value=''] = params;
       let options = '';
@@ -54,7 +74,7 @@ function queryBuilder(name, queryParams='') {
         filter = filter.replace(/,/g, ' ');
         filter = filter.trim();
         filter = filter.replace(/ /g, ', ');
-        query += `${field} ${filter} FROM ${name}`;
+        query = `${field} ${filter} FROM ${name}${args}`;
       } else {
         if (query) {
           query += query.includes('WHERE') ? `%20${field} ${filter} ${value}` : `%20WHERE ${field} ${filter} ${value}`;
@@ -63,12 +83,11 @@ function queryBuilder(name, queryParams='') {
         }
       }
     });
-
-    query = query.replace(/%20/g, ' ');
-    query = query.replace('&', '');
-    return query ? `${query};` : query;
   }
-  return `SELECT * FROM ${name};`;
+
+  query = query.replace(/%20/g, ' ');
+  query = query.replace('&', '');
+  return query ? `${query};` : query;
 }
 
 module.exports = queryBuilder;
