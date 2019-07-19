@@ -68,3 +68,21 @@ docker network create db
 docker network create web
 OPERATIONAL_FLYWAY=/FULL_PATH_TO_FLYWAY_SOURCE/private_operational_flyway docker-compose up
 ```
+
+### Clean up
+
+To stop and clean up the docker process run:
+
+```bash
+docker-compose rm -vs
+docker network rm db
+docker network rm web
+docker rmi quay.io/ukhomeofficedigital/cop-data-api:dev
+```
+
+**note** The docker networks my fail to remove if you have other containers using them.
+
+## Roles
+
+The API is secured using JWT keycloak tokens. It requires a claim called 'dbrole' to be included in the token.
+The value given for dbrole will enable the API to switch to the correct role within the database.

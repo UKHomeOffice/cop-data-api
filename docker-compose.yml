@@ -43,9 +43,9 @@ services:
     build: .
     image: quay.io/ukhomeofficedigital/cop-data-api:dev
     environment:
-      LOG_LEVEL: DEBUG
+      LOG_LEVEL: debug
       PORT: 5000
-      DB_CONNECTION_STRING: postgres://authenticatoroperation:auth1234@postgres_operational_data:5432/operation"
+      DB_CONNECTION_STRING: postgres://authenticatoroperation:auth1234@postgres_operational_data:5432/operation
     depends_on:
       - postgres_operational_data
       - operational_flyway
