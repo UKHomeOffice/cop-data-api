@@ -57,3 +57,14 @@ $ mocha --inspect-brk test/db/utils.test.js
 # <domain>/<version>/<table>
 http://localhost:5000/v1/roles
 ```
+
+## Build and run locally in docker
+
+1. Ensure you have cloned the Operational flyway source from the internal repos.
+2. Run the following to build the docker container and start up
+
+```bash
+docker network create db
+docker network create web
+OPERATIONAL_FLYWAY=/FULL_PATH_TO_FLYWAY_SOURCE/private_operational_flyway docker-compose up
+```

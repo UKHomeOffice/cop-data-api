@@ -1,0 +1,70 @@
+version: '3.7'
+
+services:
+  postgres_operational_data:
+    image: postgres:10-alpine
+    restart: on-failure
+    container_name: postgres_operational_data
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: mysecretpassword
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    ports:
+      - 5434:5432
+    networks:
+      - db
+
+  operational_flyway:
+    image: quay.io/ukhomeofficedigital/docker-flyway:9b4c62ed90c599a9bc3282ef06b58818b24762f9
+    container_name: operational_flyway
+    command: /mnt/docker/run.sh
+    working_dir: /mnt
+    environment:
+      PGPASSWORD: mysecretpassword
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_SERVER: postgres_operational_data
+      FLYWAY_PLACEHOLDERS_OPERATION_READONLY_USER: readonly
+      POSTGRES_PORT: 5432
+    volumes:
+      - ${OPERATIONAL_FLYWAY}:/mnt
+    depends_on: 
+      - postgres_operational_data
+    networks:
+      - db
+
+  cop_data_api:
+    build: .
+    image: quay.io/ukhomeofficedigital/cop-data-api:dev
+    environment:
+      LOG_LEVEL: DEBUG
+      PORT: 5000
+      DB_CONNECTION_STRING: postgres://authenticatoroperation:auth1234@postgres_operational_data:5432/operation"
+    depends_on:
+      - postgres_operational_data
+      - operational_flyway
+    healthcheck:
+      test: ["CMD-SHELL", "node", "/src/healthcheck.js"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    ports:
+     - 5000:5000
+    networks:
+      - db
+      - web
+
+networks:
+  db:
+    external:
+      name: db
+  web:
+    external:
+      name: web
