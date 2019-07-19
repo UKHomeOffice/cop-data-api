@@ -10,14 +10,14 @@ pipeline:
   unit_tests:
     image: quay.io/ukhomeofficedigital/drone-docker
     commands:
-      - docker run -t cop-data-api:$${DRONE_COMMIT_SHA} sh -c "npm run test"
+      - docker run -t cop-data-api:$${DRONE_COMMIT_SHA} sh -c "npm test"
     when:
       event: push
 
   # lint_checks:
   #   image: quay.io/ukhomeofficedigital/drone-docker
   #   commands:
-  #     - docker run -t cop-data-api:$${DRONE_COMMIT_SHA} sh -c "npm run lint -- ."
+  #     - docker run -t cop-data-api:$${DRONE_COMMIT_SHA} sh -c "npm lint -- ."
   #   when:
   #     event: push
 
