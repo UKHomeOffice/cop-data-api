@@ -30,10 +30,19 @@ app.use((req, res, next) => {
       logger.error(`${req.method} - ${req.url} - Request by ${token.name}, ${token.email} - Unauthorized - Token expired at ${tokenExpiryDate.format()}`);
       res.status(401).json({ 'error': 'Unauthorized' });
     }
-  } else {
+  } else if (req.path !== '/_health') {
+    // not an health check and no authorization token was passed,
     // don't process the request further
     res.status(401).json({ 'error': 'Unauthorized' });
+  } else {
+    // process request for `/_health`
+    next();
   }
+});
+
+app.get('/_health', (req, res) => {
+  logger.verbose('API is Alive & Kicking!');
+  return res.status(200).json({ 'status': 'UP' });
 });
 
 app.get('/v1/:name', (req, res) => {
