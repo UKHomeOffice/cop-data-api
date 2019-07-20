@@ -7,6 +7,7 @@ const moment = require('moment');
 const get = require('../db/get');
 const logger = require('../config/logger');
 const queryBuilder = require('../db/utils');
+const config = require('../config/core');
 
 const app = express();
 
@@ -19,7 +20,14 @@ app.use((req, res, next) => {
     const token = jwtDecode(req.headers.authorization);
     const tokenExpiryDate = moment(token.exp * 1000);
     const currentDate = moment(new Date());
+    const tokenIss = token.Iss;
 
+    // check token belongs to our SSO
+    if (tokenIss != config.iss) {
+      logger.error(`${req.method} - ${req.url} - Request by ${token.name}, Token not valid for our SSO endpoint`);
+      res.status(401).json({ 'error': 'Unauthorized' });
+    }
+    
     // check if the token expiry time is in the future
     if (currentDate.unix() < tokenExpiryDate.unix()) {
       logger.info(`${req.method} - ${req.url} - Request by ${token.name}, ${token.email} - Token valid until - ${tokenExpiryDate.format()}`);
