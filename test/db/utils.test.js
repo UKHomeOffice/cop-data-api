@@ -95,4 +95,34 @@ describe('Test querystring builder', () => {
       expect(query).to.equal(expectedQuery);
     });
   });
+
+  describe('POST - querystring builder', () => {
+    it('Should return a querystring for a function view', () => {
+      const body = {'argstaffemail': 'daisy@mail.com'};
+      const expectedQuery = 'SELECT * FROM staffdetails(argstaffemail=>\'daisy@mail.com\');';
+      const query = queryBuilder('staffdetails', '', body);
+      expect(query).to.equal(expectedQuery);
+    });
+
+    it('Should return a querystring for a function view with multiple arguments', () => {
+      const body = {'argfirstname': 'Andy', 'argstaffid': 'af4601db-1640-4ff2-a4cc-da44bce99226'};
+      const expectedQuery = 'SELECT * FROM staffdetails(argfirstname=>\'Andy\',argstaffid=>\'af4601db-1640-4ff2-a4cc-da44bce99226\');';
+      const query = queryBuilder('staffdetails', '', body);
+      expect(query).to.equal(expectedQuery);
+    });
+
+    it('Should return a querystring for a function view with multiple arguments and selected columns', () => {
+      const body = {'argfirstname': 'Lauren', 'argstaffid': 'af4601db-1640-4ff2-a4cc-da44bce99226'};
+      const expectedQuery = 'SELECT email FROM staffdetails(argfirstname=>\'Lauren\',argstaffid=>\'af4601db-1640-4ff2-a4cc-da44bce99226\');';
+      const query = queryBuilder('staffdetails', 'select=email', body);
+      expect(query).to.equal(expectedQuery);
+    });
+
+    it('Should return a querystring for a function view with multiple arguments selected columns and filtering parameters', () => {
+      const body = {'argfirstname': 'John', 'argstaffid': 'af4601db-1640-4ff2-a4cc-da44bce99226'};
+      const expectedQuery = 'SELECT email FROM staffdetails(argfirstname=>\'John\',argstaffid=>\'af4601db-1640-4ff2-a4cc-da44bce99226\') WHERE lastname = \'Smith\';';
+      const query = queryBuilder('staffdetails', 'select=email&lastname=eq.Smith', body);
+      expect(query).to.equal(expectedQuery);
+    });
+  });
 });

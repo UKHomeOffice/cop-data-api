@@ -1,4 +1,5 @@
 const bodyParser = require('body-parser');
+const cors = require('cors');
 const express = require('express');
 const jwtDecode = require('jwt-decode');
 const moment = require('moment');
@@ -9,7 +10,13 @@ const logger = require('../config/logger');
 const queryBuilder = require('../db/utils');
 
 const app = express();
-
+const corsConfiguration = {
+  'origin': '*',
+  'methods': ['GET', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
+  'allowedHeaders': ['Content-Type', 'Authorization'],
+};
+app.use(cors(corsConfiguration));
+// 'extended': 'true' allows the values of the objects passed, to be of any type
 app.use(bodyParser.urlencoded({ 'extended': 'true' }));
 app.use(bodyParser.json());
 // check each request for authorization token
@@ -40,6 +47,8 @@ app.use((req, res, next) => {
   }
 });
 
+app.options('*', cors(corsConfiguration));
+
 app.get('/_health', (req, res) => {
   logger.verbose('API is Alive & Kicking!');
   return res.status(200).json({ 'status': 'UP' });
@@ -53,6 +62,28 @@ app.get('/v1/:name', (req, res) => {
 
   if (!query) {
     return res.status(400).json({ 'error': 'Invalid query parameters' })
+  }
+
+  const data = get(dbrole, name, query);
+  Promise.all([data])
+    .then((resultsArray) => {
+      return res.status(200).json(resultsArray[0])
+    })
+    .catch((error) => {
+      logger.error(error.stack);
+      res.status(400).json({ 'error': error.message });
+    });
+});
+
+app.post('/v1/rpc/:name', (req, res) => {
+  const { body } = req;
+  const { dbrole } = res.locals.user;
+  const { name } = req.params;
+  const queryParams = req.url.split('?')[1];
+  const query = queryBuilder(name, queryParams, body);
+
+  if (!query) {
+    return res.status(400).json({ 'error': 'Invalid query parameters' });
   }
 
   const data = get(dbrole, name, query);
