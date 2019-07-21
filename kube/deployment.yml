@@ -54,6 +54,10 @@ spec:
           value: '5000'
         - name: SEARCH_SCHEMA
           value: {{.SEARCH_SCHEMA}}
+        - name: KEYCLOAK_URL
+          value: {{.KEYCLOAK_URL}}
+        - name: CLIENT_ID
+          value: {{.CLIENT_ID}}
         ports:
           - name: api
             containerPort: 5000

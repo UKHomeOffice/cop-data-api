@@ -27,8 +27,18 @@ app.use((req, res, next) => {
     const tokenExpiryDate = moment(token.exp * 1000);
     const currentDate = moment(new Date());
 
+    // check token belongs to our SSO
+    if (token.iss !== config.iss) {
+      logger.error(`${req.method} - ${req.url} - Request by ${token.name}, Token not valid for our SSO endpoint - token presented: ${token.iss}`);
+      res.status(401).json({ 'error': 'Unauthorized' });
+    }
+    // check our client id is present in aud claim
+    else if (token.aud.indexOf(config.client_id) === -1) {
+      logger.error(`${req.method} - ${req.url} - Request by ${token.name}, Token did not present the correct audience claims for this endpoint - token aud presented: ${token.aud}`);
+      res.status(401).json({ 'error': 'Unauthorized' });
+    }
     // check if the token expiry time is in the future
-    if (currentDate.unix() < tokenExpiryDate.unix()) {
+    else if (currentDate.unix() < tokenExpiryDate.unix()) {
       logger.info(`${req.method} - ${req.url} - Request by ${token.name}, ${token.email} - Token valid until - ${tokenExpiryDate.format()}`);
       res.locals.user = token;
       // process request
