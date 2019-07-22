@@ -69,7 +69,28 @@ app.get('/v1/:name', (req, res) => {
   const { name } = req.params;
   const { dbrole } = res.locals.user;
   const queryParams = req.url.split('?')[1];
-  const query = queryBuilder(name, queryParams);
+  const query = queryBuilder(name, { queryParams });
+
+  if (!query) {
+    return res.status(400).json({ 'error': 'Invalid query parameters' })
+  }
+
+  const data = get(dbrole, name, query);
+  Promise.all([data])
+    .then((resultsArray) => {
+      return res.status(200).json(resultsArray[0])
+    })
+    .catch((error) => {
+      logger.error(error.stack);
+      res.status(400).json({ 'error': error.message });
+    });
+});
+
+app.delete('/v1/:name', (req, res) => {
+  const { name } = req.params;
+  const { dbrole } = res.locals.user;
+  const queryParams = req.url.split('?')[1];
+  const query = queryBuilder(name, { queryParams, method: req.method });
 
   if (!query) {
     return res.status(400).json({ 'error': 'Invalid query parameters' })
@@ -91,7 +112,7 @@ app.post('/v1/rpc/:name', (req, res) => {
   const { dbrole } = res.locals.user;
   const { name } = req.params;
   const queryParams = req.url.split('?')[1];
-  const query = queryBuilder(name, queryParams, body);
+  const query = queryBuilder(name, { queryParams, body });
 
   if (!query) {
     return res.status(400).json({ 'error': 'Invalid query parameters' });

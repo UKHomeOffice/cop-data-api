@@ -13,7 +13,7 @@ function argsBuilder(body='') {
   return args ? `(${args})` : args;
 }
 
-function queryBuilder(name, queryParams='', body='') {
+function queryBuilder(name, { queryParams='', body='', method='' }) {
   let args = '';
   let query ='';
 
@@ -46,7 +46,7 @@ function queryBuilder(name, queryParams='', body='') {
         value = value.toUpperCase();
       }
 
-      if (field === 'select') {
+      if (!method && field === 'select') {
         field = field.toUpperCase();
       } else if (filter === 'gt' && !isNull) {
         filter = '>';
@@ -78,6 +78,8 @@ function queryBuilder(name, queryParams='', body='') {
       } else {
         if (query) {
           query += query.includes('WHERE') ? `%20${field} ${filter} ${value}` : `%20WHERE ${field} ${filter} ${value}`;
+        } else if (method === 'DELETE') {
+          query = `DELETE FROM ${name} WHERE ${field} ${filter} ${value}`
         } else {
           query = `SELECT * FROM ${name} WHERE ${field} ${filter} ${value}`
         }
