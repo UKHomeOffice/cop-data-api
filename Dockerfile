@@ -8,7 +8,9 @@ RUN mkdir -p /src
 WORKDIR /src
 
 COPY app /src/app
+COPY test /src/test
 COPY package* /src/
+
 RUN npm install
 
 EXPOSE 5000
