@@ -7,9 +7,9 @@ RUN apk update && apk upgrade
 RUN mkdir -p /src
 WORKDIR /src
 
-COPY package.json .
+COPY app /src/app
+COPY package* /src/
 RUN npm install
-COPY . .
 
 EXPOSE 5000
 

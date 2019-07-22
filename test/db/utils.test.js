@@ -1,8 +1,8 @@
 const { expect } = require('chai');
 
 // local imports
-const logger = require('../../config/logger');
-const queryBuilder = require('../../db/utils');
+const logger = require('../../app/config/logger');
+const queryBuilder = require('../../app/db/utils');
 
 describe('Test querystring builder', () => {
   before(() => {
