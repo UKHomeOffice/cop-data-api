@@ -42,6 +42,8 @@ services:
   cop_data_api:
     build: .
     image: quay.io/ukhomeofficedigital/cop-data-api:dev
+    volumes:
+      - ./app:/src/app
     environment:
       LOG_LEVEL: debug
       PORT: 5000

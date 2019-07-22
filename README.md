@@ -13,11 +13,6 @@ git clone git@github.com:UKHomeOffice/cop-data-api.git
 ```
 
 ### Development
-Once you've cloned the project, set the following environment variables
-```sh
-export DB_CONNECTION_STRING=postgres://authenticatoroperation:auth1234@localhost:5434/operation
-```
-
 Install project dependencies
 ```sh
 $ npm install
@@ -66,11 +61,10 @@ http://localhost:5000/v1/roles
 ```bash
 docker network create db
 docker network create web
-OPERATIONAL_FLYWAY=/FULL_PATH_TO_FLYWAY_SOURCE/private_operational_flyway docker-compose up
+CLIENT_ID=cop-data-db KEYCLOAK_URL=http://keycloak.lodev.xyz/auth/realms/dev OPERATIONAL_FLYWAY=/FULL_PATH_TO_FLYWAY_SOURCE/private_operational_flyway docker-compose up
 ```
 
 ### Clean up
-
 To stop and clean up the docker process run:
 
 ```bash
