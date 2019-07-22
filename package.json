@@ -2,7 +2,7 @@
   "name": "cop-data-api",
   "version": "0.1.0",
   "description": "CRUD API to postgrest transactional data",
-  "main": "index.js",
+  "main": "app/server.js",
   "scripts": {
     "coverage": "nyc --reporter html --reporter text npm test",
     "start": "nodemon app/server.js",
