@@ -5,6 +5,7 @@ const jwtDecode = require('jwt-decode');
 const moment = require('moment');
 
 // local imports
+const config = require('../config/core');
 const get = require('../db/get');
 const logger = require('../config/logger');
 const queryBuilder = require('../db/utils');
