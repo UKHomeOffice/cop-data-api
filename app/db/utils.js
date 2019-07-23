@@ -1,7 +1,7 @@
 // local imports
 const logger = require('../config/logger');
 
-function argsBuilder(body='') {
+function viewFunctionArgsBuilder(body='') {
   let args = '';
 
   if (body) {
@@ -13,14 +13,34 @@ function argsBuilder(body='') {
   return args ? `(${args})` : args;
 }
 
+function insertIntoStringBuilder(body='') {
+  let insertIntoStr = '';
+  let columns = '';
+  let values = '';
+
+  if (body) {
+    for (const key in body) {
+      columns += columns ? ',' : '';
+      columns += `'${key}'`;
+      values += values ? ',' : '';
+      values += `'${body[key]}'`;
+    }
+    insertIntoStr = `(${columns}) VALUES (${values})`;
+  }
+  return insertIntoStr;
+}
+
 function queryBuilder(name, { queryParams='', body='', method='' }) {
   let args = '';
   let query ='';
 
   if (!body && !queryParams) {
     query = `SELECT * FROM ${name}`;
-  } else if(body && !queryParams) {
-    args = argsBuilder(body);
+  } else if (body && method === 'POST') {
+    columnsAndValues = insertIntoStringBuilder(body);
+    query = `INSERT INTO ${name} ${columnsAndValues}`;
+  } else if (body && !queryParams) {
+    args = viewFunctionArgsBuilder(body);
     query = `SELECT * FROM ${name}${args}`;
   } else {
     logger.info(`Query parameters received '${queryParams}'`);
@@ -29,7 +49,7 @@ function queryBuilder(name, { queryParams='', body='', method='' }) {
     queryParams = queryParams.replace(/&/g, ';&');
     queryParams = queryParams.split(';');
     queryParams.map((params) => {
-      args = argsBuilder(body);
+      args = viewFunctionArgsBuilder(body);
       params = params.replace('=', ' ').replace('.', ' ').split(' ');
       let [field='', filter='', value=''] = params;
       let options = '';

@@ -97,6 +97,29 @@ describe('Test querystring builder', () => {
   });
 
   describe('POST - querystring builder', () => {
+    it('Should return a querystring to insert values into columns', () => {
+      const body = {'name': 'John', 'age': 34, 'email': 'john@mail.com'};
+      const expectedQuery = 'INSERT INTO staff (\'name\',\'age\',\'email\') VALUES (\'John\',\'34\',\'john@mail.com\');';
+      const query = queryBuilder('staff', {  body: body, method: 'POST'});
+      expect(query).to.equal(expectedQuery);
+    });
+  });
+
+  describe('DELETE - querystring builder', () => {
+    it('Should return a querystring to delete a row matching the email address', () => {
+      const expectedQuery = 'DELETE FROM roles WHERE email = \'manager@mail.com\';'
+      const query = queryBuilder('roles', { queryParams: 'email=eq.manager@mail.com', method: 'DELETE' });
+      expect(query).to.equal(expectedQuery);
+    });
+
+    it('Should return a querystring to delete a row matching the email address and id', () => {
+      const expectedQuery = 'DELETE FROM roles WHERE email = \'manager@mail.com\' AND id = 123;';
+      const query = queryBuilder('roles', { queryParams: 'email=eq.manager@mail.com,&id=eq.123', method: 'DELETE' });
+      expect(query).to.equal(expectedQuery);
+    });
+  });
+
+  describe('POST To View Function - querystring builder', () => {
     it('Should return a querystring for a function view', () => {
       const body = {'argstaffemail': 'daisy@mail.com'};
       const expectedQuery = 'SELECT * FROM staffdetails(argstaffemail=>\'daisy@mail.com\');';
@@ -122,20 +145,6 @@ describe('Test querystring builder', () => {
       const body = {'argfirstname': 'John', 'argstaffid': 'af4601db-1640-4ff2-a4cc-da44bce99226'};
       const expectedQuery = 'SELECT email FROM staffdetails(argfirstname=>\'John\',argstaffid=>\'af4601db-1640-4ff2-a4cc-da44bce99226\') WHERE lastname = \'Smith\';';
       const query = queryBuilder('staffdetails', { queryParams: 'select=email&lastname=eq.Smith', body: body });
-      expect(query).to.equal(expectedQuery);
-    });
-  });
-
-  describe('DELETE - querystring builder', () => {
-    it('Should return a querystring to delete a row matching the email address', () => {
-      const expectedQuery = 'DELETE FROM roles WHERE email = \'manager@mail.com\';'
-      const query = queryBuilder('roles', { queryParams: 'email=eq.manager@mail.com', method: 'DELETE' });
-      expect(query).to.equal(expectedQuery);
-    });
-
-    it('Should return a querystring to delete a row matching the email address and id', () => {
-      const expectedQuery = 'DELETE FROM roles WHERE email = \'manager@mail.com\' AND id = 123;';
-      const query = queryBuilder('roles', { queryParams: 'email=eq.manager@mail.com,&id=eq.123', method: 'DELETE' });
       expect(query).to.equal(expectedQuery);
     });
   });
