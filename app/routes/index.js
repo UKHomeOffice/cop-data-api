@@ -34,7 +34,7 @@ app.use((req, res, next) => {
       res.status(401).json({ 'error': 'Unauthorized' });
     }
     // check our client id is present in aud claim
-    else if (token.aud.indexOf(config.client_id) === -1) {
+    else if (token.aud.indexOf(config.keycloak_client_id) === -1) {
       logger.error(`${req.method} - ${req.url} - Request by ${token.name}, Token did not present the correct audience claims for this endpoint - token aud presented: ${token.aud}`);
       res.status(401).json({ 'error': 'Unauthorized' });
     }
