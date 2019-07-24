@@ -2,7 +2,7 @@
 const logger = require('../config/logger');
 const pool = require('./index');
 
-const get = (role, name, query) => new Promise((resolve, reject) => {
+const query = (role, name, query) => new Promise((resolve, reject) => {
   pool.query(`SET ROLE ${role};`)
     .then(() => {
       logger.info(`Running query ${query}`);
@@ -10,7 +10,7 @@ const get = (role, name, query) => new Promise((resolve, reject) => {
     })
     .then(data => resolve(data.rows))
     .catch((error) => {
-      const errorMsg = `Unable to retrieve data from table ${name}`;
+      const errorMsg = `Unable to run query in table ${name}`;
       logger.error(errorMsg);
       logger.error(error.stack);
       error.message = errorMsg;
@@ -18,4 +18,4 @@ const get = (role, name, query) => new Promise((resolve, reject) => {
     });
 });
 
-module.exports = get;
+module.exports = query;
