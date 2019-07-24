@@ -47,9 +47,21 @@ describe('Test querystring builder', () => {
       expect(query).to.equal(expectedQuery);
     });
 
+    it('Should return a querystring for all data where email does not match user email', () => {
+      const expectedQuery = 'SELECT * FROM users WHERE email != \'john@mail.com\';';
+      const query = queryBuilder('users', { queryParams: 'email=neq.john@mail.com' });
+      expect(query).to.equal(expectedQuery);
+    });
+
     it('Should return a querystring for all data where name is null', () => {
       const expectedQuery = 'SELECT * FROM users WHERE name IS NULL;';
       const query = queryBuilder('users', { queryParams: 'name=eq.null' });
+      expect(query).to.equal(expectedQuery);
+    });
+
+    it('Should return a querystring for all data where name is not null', () => {
+      const expectedQuery = 'SELECT * FROM users WHERE name IS NOT NULL;';
+      const query = queryBuilder('users', { queryParams: 'name=neq.null' });
       expect(query).to.equal(expectedQuery);
     });
 
@@ -77,7 +89,7 @@ describe('Test querystring builder', () => {
       expect(query).to.equal(expectedQuery);
     });
 
-    it('Should return a querystring witha select to a sql view with filtering parameters', () => {
+    it('Should return a querystring with a select to a sql view with filtering parameters', () => {
       const expectedQuery = 'SELECT * FROM view_rolemembers WHERE email = \'manager@mail.com\';'
       const query = queryBuilder('view_rolemembers', { queryParams: 'email=eq.manager@mail.com' });
       expect(query).to.equal(expectedQuery);

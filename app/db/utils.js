@@ -60,6 +60,10 @@ function queryBuilder(name, { queryParams='', body='', method='' }) {
         filter = '=';
       } else if (filter === 'eq' && isNull) {
         filter = 'IS';
+      } else if (filter === 'neq' && !isNull) {
+        filter = '!=';
+      } else if (filter === 'neq' && isNull) {
+        filter = 'IS NOT';
       } else {
         filter = 'IN';
         value = value.replace('%28', '').replace('%29', '').replace(/%20/g, ' ');
