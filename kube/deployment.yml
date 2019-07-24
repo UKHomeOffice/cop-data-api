@@ -56,8 +56,8 @@ spec:
           value: {{.SEARCH_SCHEMA}}
         - name: KEYCLOAK_URL
           value: {{.KEYCLOAK_URL}}
-        - name: CLIENT_ID
-          value: {{.CLIENT_ID}}
+        - name: KEYCLOAK_CLIENT_ID
+          value: {{.KEYCLOAK_CLIENT_ID}}
         ports:
           - name: api
             containerPort: 5000
