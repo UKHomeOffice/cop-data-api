@@ -1,4 +1,5 @@
 ## COP Data API Service
+
 CRUD API to postgrest transactional data
 
 ## Requirements
@@ -7,25 +8,31 @@ CRUD API to postgrest transactional data
 * node v8.10.0 (minimum working version)
 
 ## Usage
+
 To use this API first clone this repo
+
 ```sh
 git clone git@github.com:UKHomeOffice/cop-data-api.git
 ```
 
 ### Development
+
 Install project dependencies
+
 ```sh
-$ npm install
+npm install
 ```
 
 Run the API server
+
 ```sh
-$ npm run start
+npm run start
 ```
 
 Run the API server with debugger
+
 ```sh
-$ mocha --inspect-brk server.js
+mocha --inspect-brk server.js
 ```
 
 #### Runing tests
@@ -48,6 +55,7 @@ $ mocha --inspect-brk test/db/utils.test.js
 ```
 
 ## Endpoints
+
 ```sh
 # <domain>/<version>/<table>
 http://localhost:5000/v1/roles
@@ -65,6 +73,7 @@ KEYCLOAK_CLIENT_ID=cop-data-db KEYCLOAK_URL=http://keycloak.lodev.xyz/auth/realm
 ```
 
 ### Clean up
+
 To stop and clean up the docker process run:
 
 ```bash
@@ -80,3 +89,28 @@ docker rmi quay.io/ukhomeofficedigital/cop-data-api:dev
 
 The API is secured using JWT keycloak tokens. It requires a claim called 'dbrole' to be included in the token.
 The value given for dbrole will enable the API to switch to the correct role within the database.
+
+### Seeding the database
+
+The database requires seeding after a fresh install if you intend to run COP against it, this is due to some of the referencial data requirements. It is suggested you change the below exports for FIRSTNAME, SURNAME, PHONE and EMAIL to match your standard login details.
+
+```bash
+docker cp /Users/molliver/GIT/cop/private_operational_flyway/docker/seed_db.sh postgres_operational_data:/tmp/
+docker exec -it postgres_operational_data sh
+POSTGRES_DB=operation FIRSTNAME=dev SURNAME=one EMAIL=dev1@lodev.xyz PHONE=00000000000 /tmp/seed_db.sh
+```
+
+### Access the local db via cli
+
+To query the database from within the docker container:
+
+* First open a new tab on your terminal;
+
+```bash
+docker exec -it postgres_operational_data sh
+psql -U authenticatoroperation -d operation
+SET search_path TO "operation";
+SET ROLE readonly;
+```
+
+If you need write access then set the role to **service**
