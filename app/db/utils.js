@@ -21,9 +21,14 @@ function insertIntoStringBuilder(body='') {
   if (body) {
     for (const key in body) {
       columns += columns ? ',' : '';
-      columns += `'${key}'`;
+      columns += key;
       values += values ? ',' : '';
-      values += `'${body[key]}'`;
+
+      if (typeof(body[key]) === 'object') {
+        values += `'${JSON.stringify(body[key])}'`
+      } else {
+        values += `'${body[key]}'`;
+      }
     }
     insertIntoStr = `(${columns}) VALUES (${values})`;
   }
