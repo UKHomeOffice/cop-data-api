@@ -98,8 +98,8 @@ describe('Test querystring builder', () => {
 
   describe('POST - querystring builder', () => {
     it('Should return a querystring to insert values into columns', () => {
-      const body = {'name': 'John', 'age': 34, 'email': 'john@mail.com'};
-      const expectedQuery = 'INSERT INTO staff (\'name\',\'age\',\'email\') VALUES (\'John\',\'34\',\'john@mail.com\');';
+      const body = {'name': 'John', 'age': 34, 'email': 'john@mail.com', 'roles': ['linemanager', 'systemuser']};
+      const expectedQuery = 'INSERT INTO staff (name,age,email,roles) VALUES (\'John\',\'34\',\'john@mail.com\',\'["linemanager","systemuser"]\');';
       const query = queryBuilder('staff', {  body: body, method: 'POST'});
       expect(query).to.equal(expectedQuery);
     });
