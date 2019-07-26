@@ -103,6 +103,14 @@ describe('Test querystring builder', () => {
       const query = queryBuilder('staff', {  body: body, method: 'POST'});
       expect(query).to.equal(expectedQuery);
     });
+
+    it('Should return a querystring with option to return all inserted data', () => {
+      const body = {'name': 'John', 'age': 34, 'email': 'john@mail.com'};
+      const prefer = 'return=representation';
+      const expectedQuery = 'INSERT INTO staff (name,age,email) VALUES (\'John\',\'34\',\'john@mail.com\') RETURNING *;';
+      const query = queryBuilder('staff', {  body: body, method: 'POST', prefer });
+      expect(query).to.equal(expectedQuery);
+    });
   });
 
   describe('DELETE - querystring builder', () => {
