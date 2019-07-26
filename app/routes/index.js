@@ -90,7 +90,8 @@ app.post('/v1/:name', (req, res) => {
   const { body } = req;
   const { dbrole } = res.locals.user;
   const { name } = req.params;
-  const queryString = queryBuilder(name, { body, method: req.method });
+  const { prefer } = req.headers;
+  const queryString = queryBuilder(name, { body, method: req.method, prefer });
 
   const data = query(dbrole, name, queryString);
   Promise.all([data])

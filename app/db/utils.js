@@ -35,7 +35,7 @@ function insertIntoStringBuilder(body='') {
   return insertIntoStr;
 }
 
-function queryBuilder(name, { queryParams='', body='', method='' }) {
+function queryBuilder(name, { queryParams='', body='', method='', prefer='' }) {
   let args = '';
   let query ='';
 
@@ -43,7 +43,8 @@ function queryBuilder(name, { queryParams='', body='', method='' }) {
     query = `SELECT * FROM ${name}`;
   } else if (body && method === 'POST') {
     columnsAndValues = insertIntoStringBuilder(body);
-    query = `INSERT INTO ${name} ${columnsAndValues}`;
+    const returning = prefer ? '%20RETURNING *' : '';
+    query = `INSERT INTO ${name} ${columnsAndValues}${returning}`;
   } else if (body && !queryParams) {
     args = viewFunctionArgsBuilder(body);
     query = `SELECT * FROM ${name}${args}`;
