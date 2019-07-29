@@ -104,6 +104,24 @@ app.post('/v1/:name', (req, res) => {
     });
 });
 
+app.patch('/v1/:name:/id', (req, res) => {
+  const { body } = req;
+  const { dbrole } = res.locals.user;
+  const { id, name } = req.params;
+  const { prefer } = req.headers;
+  const queryString = queryBuilder(name, { id, body, method: req.method, prefer });
+
+  const data = query(dbrole, name, queryString);
+  Promise.all([data])
+    .then((resultsArray) => {
+      return res.status(200).json(resultsArray[0])
+    })
+    .catch((error) => {
+      logger.error(error.stack);
+      res.status(400).json({ 'error': error.message });
+    });
+});
+
 app.delete('/v1/:name', (req, res) => {
   const { name } = req.params;
   const { dbrole } = res.locals.user;
