@@ -54,15 +54,16 @@ function updateStringBuilder(body='') {
 
 function queryBuilder(name, { id='', queryParams='', body='', method='', prefer='' }) {
   let args = '';
-  let columnsAndValues = '';
+  let insertStr = '';
   let query = '';
+  let updateStr = '';
   const returning = prefer ? '%20RETURNING *' : '';
 
   if (!body && !queryParams) {
     query = `SELECT * FROM ${name}`;
   } else if (body && method === 'POST') {
-    columnsAndValues = insertIntoStringBuilder(body);
-    query = `INSERT INTO ${name} ${columnsAndValues}${returning}`;
+    insertStr = insertIntoStringBuilder(body);
+    query = `INSERT INTO ${name} ${insertStr}${returning}`;
   } else if (body && method === 'PATCH') {
     updateStr = updateStringBuilder(body);
     query = `UPDATE ${name} SET ${updateStr} WHERE id=id${returning}`;
