@@ -35,16 +35,37 @@ function insertIntoStringBuilder(body='') {
   return insertIntoStr;
 }
 
-function queryBuilder(name, { queryParams='', body='', method='', prefer='' }) {
+function updateStringBuilder(body='') {
+  let updateStr = '';
+
+  if (body) {
+    for (const key in body) {
+      updateStr += updateStr ? ',' : '';
+
+      if (typeof(body[key]) === 'object') {
+        updateStr += `${key}=${JSON.stringify(body[key])}`;
+      } else {
+        updateStr += `${key}='${body[key]}'`;
+      }
+    }
+  }
+  return updateStr;
+}
+
+function queryBuilder(name, { id='', queryParams='', body='', method='', prefer='' }) {
   let args = '';
-  let query ='';
+  let columnsAndValues = '';
+  let query = '';
+  const returning = prefer ? '%20RETURNING *' : '';
 
   if (!body && !queryParams) {
     query = `SELECT * FROM ${name}`;
   } else if (body && method === 'POST') {
     columnsAndValues = insertIntoStringBuilder(body);
-    const returning = prefer ? '%20RETURNING *' : '';
     query = `INSERT INTO ${name} ${columnsAndValues}${returning}`;
+  } else if (body && method === 'PATCH') {
+    updateStr = updateStringBuilder(body);
+    query = `UPDATE ${name} SET ${updateStr} WHERE id=id${returning}`;
   } else if (body && !queryParams) {
     args = viewFunctionArgsBuilder(body);
     query = `SELECT * FROM ${name}${args}`;

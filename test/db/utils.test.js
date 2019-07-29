@@ -106,9 +106,26 @@ describe('Test querystring builder', () => {
 
     it('Should return a querystring with option to return all inserted data', () => {
       const body = {'name': 'John', 'age': 34, 'email': 'john@mail.com'};
-      const prefer = 'return=representation';
       const expectedQuery = 'INSERT INTO staff (name,age,email) VALUES (\'John\',\'34\',\'john@mail.com\') RETURNING *;';
+      const prefer = 'return=representation';
       const query = queryBuilder('staff', {  body: body, method: 'POST', prefer });
+      expect(query).to.equal(expectedQuery);
+    });
+  });
+
+  describe('PATCH - querystring builder', () => {
+    it('Should return a querystring to update existing data filtered by id', () => {
+      const body = {'name': 'John', 'age': 34, 'email': 'john@mail.com', 'roles': ['linemanager', 'systemuser']};
+      const expectedQuery = 'UPDATE staff SET name=\'John\',age=\'34\',email=\'john@mail.com\',roles=["linemanager","systemuser"] WHERE id=id;';
+      const query = queryBuilder('staff', {  id: 3, body: body, method: 'PATCH' });
+      expect(query).to.equal(expectedQuery);
+    });
+
+    it('Should return a querystring to update existing data filtered by id, with option to return all updated data', () => {
+      const body = {'name': 'John', 'age': 34, 'email': 'john@mail.com', 'roles': ['linemanager', 'systemuser']};
+      const expectedQuery = 'UPDATE staff SET name=\'John\',age=\'34\',email=\'john@mail.com\',roles=["linemanager","systemuser"] WHERE id=id RETURNING *;';
+      const prefer = 'return=representation';
+      const query = queryBuilder('staff', {  id: 3, body: body, method: 'PATCH', prefer });
       expect(query).to.equal(expectedQuery);
     });
   });
