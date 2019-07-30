@@ -12,7 +12,7 @@ const {
   deleteQueryBuilder,
   insertIntoQueryBuilder,
   selectQueryBuilder,
-  updateQueryBuilder
+  updateQueryBuilder,
 } = require('../db/utils');
 
 const app = express();
@@ -33,18 +33,16 @@ app.use((req, res, next) => {
     const tokenExpiryDate = moment(token.exp * 1000);
     const currentDate = moment(new Date());
 
-    // check token belongs to our SSO
+    // 1 - check token belongs to our SSO
+    // 2 - check our client id is present in aud claim
+    // 3 - check if the token expiry time is in the future
     if (token.iss !== config.iss) {
       logger.error(`${req.method} - ${req.url} - Request by ${token.name}, Token not valid for our SSO endpoint - token presented: ${token.iss}`);
       res.status(401).json({ 'error': 'Unauthorized' });
-    }
-    // check our client id is present in aud claim
-    else if (token.aud.indexOf(config.keycloak_client_id) === -1) {
+    } else if (token.aud.indexOf(config.keycloak_client_id) === -1) {
       logger.error(`${req.method} - ${req.url} - Request by ${token.name}, Token did not present the correct audience claims for this endpoint - token aud presented: ${token.aud}`);
       res.status(401).json({ 'error': 'Unauthorized' });
-    }
-    // check if the token expiry time is in the future
-    else if (currentDate.unix() < tokenExpiryDate.unix()) {
+    } else if (currentDate.unix() < tokenExpiryDate.unix()) {
       logger.info(`${req.method} - ${req.url} - Request by ${token.name}, ${token.email} - Token valid until - ${tokenExpiryDate.format()}`);
       res.locals.user = token;
       // process request
@@ -77,15 +75,13 @@ app.get('/v1/:name', (req, res) => {
   const queryString = selectQueryBuilder({ name, queryParams });
 
   if (!queryString) {
-    return res.status(400).json({ 'error': 'Invalid query parameters' })
+    return res.status(400).json({ 'error': 'Invalid query parameters' });
   }
 
   const data = query(dbrole, name, queryString);
 
   Promise.all([data])
-    .then((resultsArray) => {
-      return res.status(200).json(resultsArray[0])
-    })
+    .then(resultsArray => res.status(200).json(resultsArray[0]))
     .catch((error) => {
       logger.error(error.stack);
       res.status(400).json({ 'error': error.message });
@@ -106,9 +102,7 @@ app.post('/v1/:name', (req, res) => {
   const data = query(dbrole, name, queryString);
 
   Promise.all([data])
-    .then((resultsArray) => {
-      return res.status(200).json(resultsArray[0])
-    })
+    .then(resultsArray => res.status(200).json(resultsArray[0]))
     .catch((error) => {
       logger.error(error.stack);
       res.status(400).json({ 'error': error.message });
@@ -130,9 +124,7 @@ app.patch('/v1/:name/:id?', (req, res) => {
   const data = query(dbrole, name, queryString);
 
   Promise.all([data])
-    .then((resultsArray) => {
-      return res.status(200).json(resultsArray[0])
-    })
+    .then(resultsArray => res.status(200).json(resultsArray[0]))
     .catch((error) => {
       logger.error(error.stack);
       res.status(400).json({ 'error': error.message });
@@ -145,16 +137,14 @@ app.delete('/v1/:name', (req, res) => {
   const queryParams = req.url.split('?')[1];
 
   if (!queryParams) {
-    return res.status(400).json({ 'error': 'Invalid query parameters' })
+    return res.status(400).json({ 'error': 'Invalid query parameters' });
   }
 
   const queryString = deleteQueryBuilder({ name, queryParams });
   const data = query(dbrole, name, queryString);
 
   Promise.all([data])
-    .then((resultsArray) => {
-      return res.status(200).json(resultsArray[0])
-    })
+    .then(resultsArray => res.status(200).json(resultsArray[0]))
     .catch((error) => {
       logger.error(error.stack);
       res.status(400).json({ 'error': error.message });
@@ -174,9 +164,7 @@ app.post('/v1/rpc/:name', (req, res) => {
 
   const data = query(dbrole, name, queryString);
   Promise.all([data])
-    .then((resultsArray) => {
-      return res.status(200).json(resultsArray[0])
-    })
+    .then(resultsArray => res.status(200).json(resultsArray[0]))
     .catch((error) => {
       logger.error(error.stack);
       res.status(400).json({ 'error': error.message });

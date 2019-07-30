@@ -5,4 +5,4 @@ const port = 5000;
 
 server.listen(port, () => {
   logger.info(`Server listening on port ${port}`);
-})
+});

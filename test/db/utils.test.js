@@ -6,7 +6,7 @@ const {
   deleteQueryBuilder,
   insertIntoQueryBuilder,
   selectQueryBuilder,
-  updateQueryBuilder
+  updateQueryBuilder,
 } = require('../../app/db/utils');
 
 describe('Test querystring builder', () => {
@@ -136,7 +136,7 @@ describe('Test querystring builder', () => {
     it('Should return a querystring with name selected where shiftstartdatetime matches the date range values', () => {
       const name = 'getoarrecords';
       const queryParams = 'select=firstname&firstname=eq.Julius,&shiftstartdatetime=gt.2019-06-20T12:00:00,&shiftstartdatetime=lte.2019-06-22T12:00:00';
-      const expectedQuery = `SELECT firstname FROM getoarrecords WHERE firstname = 'Julius' AND shiftstartdatetime > '2019-06-20T12:00:00' AND shiftstartdatetime <= '2019-06-22T12:00:00';`;
+      const expectedQuery = `SELECT firstname FROM ${name} WHERE firstname = 'Julius' AND shiftstartdatetime > '2019-06-20T12:00:00' AND shiftstartdatetime <= '2019-06-22T12:00:00';`;
       const query = selectQueryBuilder({ name, queryParams });
 
       expect(query).to.equal(expectedQuery);
@@ -146,8 +146,8 @@ describe('Test querystring builder', () => {
   describe('POST - querystring builder', () => {
     it('Should return a querystring to insert values into columns', () => {
       const name = 'staff';
-      const body = {'name': 'John', 'age': 34, 'email': 'john@mail.com', 'roles': ['linemanager', 'systemuser']};
-      const expectedQuery = `INSERT INTO staff (name,age,email,roles) VALUES ('John','34','john@mail.com','["linemanager","systemuser"]');`;
+      const body = { 'name': 'John', 'age': 34, 'email': 'john@mail.com', 'roles': ['linemanager', 'systemuser'] };
+      const expectedQuery = `INSERT INTO ${name} (name,age,email,roles) VALUES ('John','34','john@mail.com','["linemanager","systemuser"]');`;
       const query = insertIntoQueryBuilder({ name, body });
 
       expect(query).to.equal(expectedQuery);
@@ -155,7 +155,7 @@ describe('Test querystring builder', () => {
 
     it('Should return a querystring with option to return all inserted data', () => {
       const name = 'staff';
-      const body = {'name': 'John', 'age': 34, 'email': 'john@mail.com'};
+      const body = { 'name': 'John', 'age': 34, 'email': 'john@mail.com' };
       const expectedQuery = `INSERT INTO ${name} (name,age,email) VALUES ('John','34','john@mail.com') RETURNING *;`;
       const prefer = 'return=representation';
       const query = insertIntoQueryBuilder({ name, body, prefer });
@@ -168,7 +168,7 @@ describe('Test querystring builder', () => {
     it('Should return a querystring to update existing data matching an id', () => {
       const name = 'identity';
       const id = '2553b00e-3cb0-441d-b29d-17196491a1e5';
-      const body = { 'email': 'john@mail.com', 'roles': ['linemanager', 'systemuser']};
+      const body = { 'email': 'john@mail.com', 'roles': ['linemanager', 'systemuser'] };
       const expectedQuery = `UPDATE ${name} SET email='${body.email}',roles=${JSON.stringify(body.roles)} WHERE id = '${id}';`;
       const query = updateQueryBuilder({ body, name, id });
 
@@ -216,7 +216,7 @@ describe('Test querystring builder', () => {
       const name = 'roles';
       const queryParams = 'email=eq.manager@mail.com';
       const expectedQuery = `DELETE FROM ${name} WHERE email = 'manager@mail.com';`;
-      const query = deleteQueryBuilder({ name, queryParams});
+      const query = deleteQueryBuilder({ name, queryParams });
 
       expect(query).to.equal(expectedQuery);
     });
@@ -234,7 +234,7 @@ describe('Test querystring builder', () => {
   describe('POST To View Function - querystring builder', () => {
     it('Should return a querystring for a function view', () => {
       const name = 'staffdetails';
-      const body = {'argstaffemail': 'daisy@mail.com'};
+      const body = { 'argstaffemail': 'daisy@mail.com' };
       const expectedQuery = `SELECT * FROM ${name}(argstaffemail=>'daisy@mail.com');`;
       const query = selectQueryBuilder({ name, body });
 
@@ -243,7 +243,7 @@ describe('Test querystring builder', () => {
 
     it('Should return a querystring for a function view with multiple arguments', () => {
       const name = 'staffdetails';
-      const body = {'argfirstname': 'Andy', 'argstaffid': 'af4601db-1640-4ff2-a4cc-da44bce99226'};
+      const body = { 'argfirstname': 'Andy', 'argstaffid': 'af4601db-1640-4ff2-a4cc-da44bce99226' };
       const expectedQuery = `SELECT * FROM ${name}(argfirstname=>'Andy',argstaffid=>'af4601db-1640-4ff2-a4cc-da44bce99226');`;
       const query = selectQueryBuilder({ name, body });
 
@@ -253,7 +253,7 @@ describe('Test querystring builder', () => {
     it('Should return a querystring for a function view with multiple arguments and selected columns', () => {
       const name = 'staffdetails';
       const queryParams = 'select=email';
-      const body = {'argfirstname': 'Lauren', 'argstaffid': 'af4601db-1640-4ff2-a4cc-da44bce99226'};
+      const body = { 'argfirstname': 'Lauren', 'argstaffid': 'af4601db-1640-4ff2-a4cc-da44bce99226' };
       const expectedQuery = `SELECT email FROM ${name}(argfirstname=>'Lauren',argstaffid=>'af4601db-1640-4ff2-a4cc-da44bce99226');`;
       const query = selectQueryBuilder({ name, body, queryParams });
 
@@ -263,7 +263,7 @@ describe('Test querystring builder', () => {
     it('Should return a querystring for a function view with multiple arguments selected columns and filtering parameters', () => {
       const name = 'staffdetails';
       const queryParams = 'select=email&lastname=eq.Smith';
-      const body = {'argfirstname': 'John', 'argstaffid': 'af4601db-1640-4ff2-a4cc-da44bce99226'};
+      const body = { 'argfirstname': 'John', 'argstaffid': 'af4601db-1640-4ff2-a4cc-da44bce99226' };
       const expectedQuery = `SELECT email FROM ${name}(argfirstname=>'John',argstaffid=>'af4601db-1640-4ff2-a4cc-da44bce99226') WHERE lastname = 'Smith';`;
       const query = selectQueryBuilder({ name, body, queryParams });
 
