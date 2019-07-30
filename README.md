@@ -47,6 +47,19 @@ $ npm run coverage
 $ mocha --inspect-brk test/db/utils.test.js
 ```
 
+#### Running linter
+To run the linter using the npm run lint command you have to specify at least the directory you want linter to run.
+
+To specify the directory and any additional arguments you need to add -- (double dash) before the arguments you want to pass, e.g.
+
+```sh
+# run lint in the current directory
+$ npm run lint -- .
+
+# run lint in the routes directory and fix all issues
+$ npm run lint -- ./app/routes/ --fix
+```
+
 ## Endpoints
 ```sh
 # <domain>/<version>/<table>
