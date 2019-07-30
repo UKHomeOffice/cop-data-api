@@ -122,7 +122,7 @@ app.patch('/v1/:name/:id?', (req, res) => {
   const { prefer } = req.headers;
   const queryParams = req.url.split('?')[1];
 
-  if (!body && (!id || !queryParams)) {
+  if (Object.entries(body).length === 0 && (!id || !queryParams)) {
     return res.status(400).json({ 'error': 'Invalid patch request' });
   }
 
