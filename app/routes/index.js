@@ -8,7 +8,12 @@ const moment = require('moment');
 const config = require('../config/core');
 const query = require('../db/query');
 const logger = require('../config/logger');
-const queryBuilder = require('../db/utils');
+const {
+  deleteQueryBuilder,
+  insertIntoQueryBuilder,
+  selectQueryBuilder,
+  updateQueryBuilder
+} = require('../db/utils');
 
 const app = express();
 const corsConfiguration = {
@@ -69,13 +74,14 @@ app.get('/v1/:name', (req, res) => {
   const { name } = req.params;
   const { dbrole } = res.locals.user;
   const queryParams = req.url.split('?')[1];
-  const queryString = queryBuilder(name, { queryParams });
+  const queryString = selectQueryBuilder({ name, queryParams });
 
   if (!queryString) {
     return res.status(400).json({ 'error': 'Invalid query parameters' })
   }
 
   const data = query(dbrole, name, queryString);
+
   Promise.all([data])
     .then((resultsArray) => {
       return res.status(200).json(resultsArray[0])
@@ -91,9 +97,38 @@ app.post('/v1/:name', (req, res) => {
   const { dbrole } = res.locals.user;
   const { name } = req.params;
   const { prefer } = req.headers;
-  const queryString = queryBuilder(name, { body, method: req.method, prefer });
 
+  if (Object.entries(body).length === 0) {
+    return res.status(400).json({ 'error': 'Invalid post request' });
+  }
+
+  const queryString = insertIntoQueryBuilder({ name, body, prefer });
   const data = query(dbrole, name, queryString);
+
+  Promise.all([data])
+    .then((resultsArray) => {
+      return res.status(200).json(resultsArray[0])
+    })
+    .catch((error) => {
+      logger.error(error.stack);
+      res.status(400).json({ 'error': error.message });
+    });
+});
+
+app.patch('/v1/:name/:id?', (req, res) => {
+  const { body } = req;
+  const { dbrole } = res.locals.user;
+  const { id, name } = req.params;
+  const { prefer } = req.headers;
+  const queryParams = req.url.split('?')[1];
+
+  if (Object.entries(body).length === 0 && (!id || !queryParams)) {
+    return res.status(400).json({ 'error': 'Invalid patch request' });
+  }
+
+  const queryString = updateQueryBuilder({ name, body, id, queryParams, prefer });
+  const data = query(dbrole, name, queryString);
+
   Promise.all([data])
     .then((resultsArray) => {
       return res.status(200).json(resultsArray[0])
@@ -108,13 +143,14 @@ app.delete('/v1/:name', (req, res) => {
   const { name } = req.params;
   const { dbrole } = res.locals.user;
   const queryParams = req.url.split('?')[1];
-  const queryString = queryBuilder(name, { queryParams, method: req.method });
 
-  if (!queryString) {
+  if (!queryParams) {
     return res.status(400).json({ 'error': 'Invalid query parameters' })
   }
 
+  const queryString = deleteQueryBuilder({ name, queryParams });
   const data = query(dbrole, name, queryString);
+
   Promise.all([data])
     .then((resultsArray) => {
       return res.status(200).json(resultsArray[0])
@@ -130,7 +166,7 @@ app.post('/v1/rpc/:name', (req, res) => {
   const { dbrole } = res.locals.user;
   const { name } = req.params;
   const queryParams = req.url.split('?')[1];
-  const queryString = queryBuilder(name, { queryParams, body });
+  const queryString = selectQueryBuilder({ name, queryParams, body });
 
   if (!queryString) {
     return res.status(400).json({ 'error': 'Invalid query parameters' });
