@@ -1,13 +1,15 @@
 // local imports
 const logger = require('../config/logger');
 
-function viewFunctionArgsBuilder(body='') {
+function viewFunctionArgsBuilder(body = '') {
   let args = '';
 
   if (body) {
     for (const key in body) {
-      args += args ? ',' : '';
-      args += `${key}=>'${body[key]}'`;
+      if (Object.prototype.hasOwnProperty.call(body, key)) {
+        args += args ? ',' : '';
+        args += `${key}=>'${body[key]}'`;
+      }
     }
   }
   return args ? `(${args})` : args;
@@ -18,20 +20,22 @@ function insertIntoOptionsBuilder(body) {
   let values = '';
 
   for (const key in body) {
-    columns += columns ? ',' : '';
-    columns += key;
-    values += values ? ',' : '';
+    if (Object.prototype.hasOwnProperty.call(body, key)) {
+      columns += columns ? ',' : '';
+      columns += key;
+      values += values ? ',' : '';
 
-    if (typeof(body[key]) === 'object') {
-      values += `'${JSON.stringify(body[key])}'`
-    } else {
-      values += `'${body[key]}'`;
+      if (typeof body[key] === 'object') {
+        values += `'${JSON.stringify(body[key])}'`;
+      } else {
+        values += `'${body[key]}'`;
+      }
     }
   }
   return `(${columns}) VALUES (${values})`;
 }
 
-function queryParamsBuilder({ queryParams, body='', name='' }) {
+function queryParamsBuilder({ queryParams, body = '', name = '' }) {
   let options = '';
   let query = '';
 
@@ -39,9 +43,9 @@ function queryParamsBuilder({ queryParams, body='', name='' }) {
   queryParams = queryParams.replace(/&/g, ';&');
   queryParams = queryParams.split(';');
   queryParams.map((params) => {
-    args = viewFunctionArgsBuilder(body);
+    const args = viewFunctionArgsBuilder(body);
     params = params.replace('=', ' ').replace('.', ' ').split(' ');
-    let [field='', filter='', value=''] = params;
+    let [field = '', filter = '', value = ''] = params;
     let isNull = false;
 
     if (!filter) {
@@ -84,12 +88,10 @@ function queryParamsBuilder({ queryParams, body='', name='' }) {
       filter = filter.trim();
       filter = filter.replace(/ /g, ', ');
       query = `${field} ${filter} FROM ${name}${args}`;
+    } else if (query) {
+      query += query.includes('WHERE') ? `${field} ${filter} ${value}` : `%20WHERE ${field} ${filter} ${value}`;
     } else {
-      if (query) {
-        query += query.includes('WHERE') ? `${field} ${filter} ${value}` : `%20WHERE ${field} ${filter} ${value}`;
-      } else {
-        options += `${field} ${filter} ${value}`;
-      }
+      options += `${field} ${filter} ${value}`;
     }
   });
 
@@ -101,37 +103,41 @@ function queryParamsBuilder({ queryParams, body='', name='' }) {
 }
 
 // Creates a SELECT querystring
-function selectQueryBuilder({ name, body='', queryParams='' }) {
+function selectQueryBuilder({ name, body = '', queryParams = '' }) {
   if (!body && !queryParams) {
     return `SELECT * FROM ${name};`;
-  } else if (body && !queryParams) {
+  }
+
+  if (body && !queryParams) {
     const args = viewFunctionArgsBuilder(body);
     return `SELECT * FROM ${name}${args};`;
-  } else {
-    const { query, options } = queryParamsBuilder({ name, queryParams, body });
-    return options ? `SELECT * FROM ${name} WHERE ${options};` : query;
   }
+
+  const { query, options } = queryParamsBuilder({ name, queryParams, body });
+  return options ? `SELECT * FROM ${name} WHERE ${options};` : query;
 }
 
 // Creates a INSERT INTO querystring
-function insertIntoQueryBuilder({ name, body, prefer='' }) {
+function insertIntoQueryBuilder({ name, body, prefer = '' }) {
   const returning = prefer ? ' RETURNING *' : '';
   const options = insertIntoOptionsBuilder(body);
   return `INSERT INTO ${name} ${options}${returning};`;
 }
 
 // Creates an UPDATE querystring
-function updateQueryBuilder({ name, body, id='', prefer='', queryParams='' }) {
+function updateQueryBuilder({ name, body, id = '', prefer = '', queryParams = '' }) {
   let values = '';
   const returning = prefer ? ' RETURNING *' : '';
 
   for (const key in body) {
-    values += values ? ',' : '';
+    if (Object.prototype.hasOwnProperty.call(body, key)) {
+      values += values ? ',' : '';
 
-    if (typeof(body[key]) === 'object') {
-      values += `${key}=${JSON.stringify(body[key])}`;
-    } else {
-      values += `${key}='${body[key]}'`;
+      if (typeof body[key] === 'object') {
+        values += `${key}=${JSON.stringify(body[key])}`;
+      } else {
+        values += `${key}='${body[key]}'`;
+      }
     }
   }
   queryParams = id ? `id=eq.${id}` : queryParams;
@@ -142,12 +148,12 @@ function updateQueryBuilder({ name, body, id='', prefer='', queryParams='' }) {
 // Creates a DELETE querystring
 function deleteQueryBuilder({ name, queryParams }) {
   const { options } = queryParamsBuilder({ queryParams });
-  return `DELETE FROM ${name} WHERE ${options};`
+  return `DELETE FROM ${name} WHERE ${options};`;
 }
 
 module.exports = {
   deleteQueryBuilder,
   insertIntoQueryBuilder,
   selectQueryBuilder,
-  updateQueryBuilder
+  updateQueryBuilder,
 };

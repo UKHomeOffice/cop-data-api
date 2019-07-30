@@ -8,9 +8,7 @@ const { dbConnectionString, searchSchema } = config;
 
 // todo -> searchSchema = operation;
 
-const pool = new Pool({
-  'connectionString': dbConnectionString,
-});
+const pool = new Pool({ 'connectionString': dbConnectionString });
 
 pool.on('connect', (client) => {
   logger.info('New database connection established');
