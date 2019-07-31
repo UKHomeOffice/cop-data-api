@@ -47,20 +47,18 @@ describe('Test routes', () => {
           'divisionid': 6,
           'commandid': 43,
           'validfrom': null,
-          'validto': null
-        }
-      ]
+          'validto': null,
+        },
+      ],
     };
 
-    it('Should return 400 when query parameters do not include filter and value', () => {
-      return request(app)
-        .get('/v1/team?name')
-        .set('Authorization', `Bearer ${token}`)
-        .then((response) => {
-          expect(response.status).to.equal(400);
-          expect(response.body).to.deep.equal({ 'error': 'Invalid query parameters' });
-        });
-    });
+    it('Should return 400 when query parameters do not include filter and value', () => request(app)
+      .get('/v1/team?name')
+      .set('Authorization', `Bearer ${token}`)
+      .then((response) => {
+        expect(response.status).to.equal(400);
+        expect(response.body).to.deep.equal({ 'error': 'Invalid query parameters' });
+      }));
 
     it('Should return 400 when the table does not exist', () => {
       const queryStub = sinon.stub(pool, 'query');
