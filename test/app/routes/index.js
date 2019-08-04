@@ -6,15 +6,9 @@ const { expect } = require('chai');
 // local imports
 const app = require('../../../app/routes');
 const config = require('../../../app/config/core');
-const logger = require('../../../app/config/logger');
 const pool = require('../../../app/db/index');
 
 describe('Test routes', () => {
-  before(() => {
-    // disable logging
-    logger.silent = true;
-  });
-
   describe('GET - endpoint', () => {
     // create a token with an expiry date 1 hour in the future
     let expiryTime = new Date();

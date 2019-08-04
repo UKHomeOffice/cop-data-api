@@ -1,7 +1,6 @@
 const { expect } = require('chai');
 
 // local imports
-const logger = require('../../../app/config/logger');
 const {
   deleteQueryBuilder,
   insertIntoQueryBuilder,
@@ -10,11 +9,6 @@ const {
 } = require('../../../app/db/utils');
 
 describe('Test querystring builder', () => {
-  before(() => {
-    // disable logging
-    logger.silent = true;
-  });
-
   describe('GET - querystring builder', () => {
     it('Should return a querystring with two columns selected', () => {
       const name = 'roles';
