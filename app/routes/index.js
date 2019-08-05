@@ -7,7 +7,7 @@ const moment = require('moment');
 // local imports
 const config = require('../config/core');
 const query = require('../db/query');
-const logger = require('../config/logger');
+const logger = require('../config/logger')(__filename);
 const {
   deleteQueryBuilder,
   insertIntoQueryBuilder,

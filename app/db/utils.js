@@ -1,5 +1,5 @@
 // local imports
-const logger = require('../config/logger');
+const logger = require('../config/logger')(__filename);
 
 function viewFunctionArgsBuilder(body = '') {
   let args = '';
