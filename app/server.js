@@ -1,8 +1,8 @@
 const logger = require('./config/logger')(__filename);
 const server = require('./routes');
+const config = require('./config/core');
 
-const port = 5000;
 
-server.listen(port, () => {
-  logger.info(`Server listening on port ${port}`);
+server.listen(config.port, () => {
+  logger.info(`Server listening on port ${config.port}`);
 });

@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
       - name: api
-        image: quay.io/ukhomeofficedigital/cop-data-api:{{.DRONE_COMMIT_SHA}}
+        image: {{.COP_DATA_API_IMAGE_REPO}}:{{.DRONE_COMMIT_SHA}}
         imagePullPolicy: Always
         securityContext:
           runAsNonRoot: true
@@ -46,31 +46,31 @@ spec:
           periodSeconds: 5
 
         env:
-        - name: DB_CONNECTION_STRING
-          value: {{.DB_CONNECTION_STRING}}
-        - name: LOG_LEVEL
-          value: {{.LOG_LEVEL}}
-        - name: PORT
-          value: '5000'
-        - name: SEARCH_SCHEMA
-          value: {{.SEARCH_SCHEMA}}
+        - name: COP_DATA_API_DB_CONNECTION_STRING
+          value: {{.COP_DATA_API_DB_CONNECTION_STRING}}
+        - name: COP_DATA_API_LOG_LEVEL
+          value: {{.COP_DATA_API_LOG_LEVEL}}
+        - name: COP_DATA_API_PORT
+          value: "{{.COP_DATA_API_PORT}}"
+        - name: COP_DATA_API_SEARCH_SCHEMA
+          value: {{.COP_DATA_API_SEARCH_SCHEMA}}
         - name: KEYCLOAK_URL
           value: {{.KEYCLOAK_URL}}
-        - name: KEYCLOAK_CLIENT_ID
-          value: {{.KEYCLOAK_CLIENT_ID}}
+        - name: COP_DATA_API_KEYCLOAK_CLIENT_ID
+          value: {{.COP_DATA_API_KEYCLOAK_CLIENT_ID}}
         ports:
           - name: api
-            containerPort: 5000
+            containerPort: "{{.COP_DATA_API_PORT}}"
 
       - name: proxy
-        image: quay.io/ukhomeofficedigital/nginx-proxy
+        image: {{.NGINX_PROXY_IMAGE_REPO}}:{{.NGINX_PROXY_IMAGE_TAG}}
         securityContext:
           runAsNonRoot: true
         env:
           - name: PROXY_SERVICE_HOST
             value: 'http://127.0.0.1'
           - name: PROXY_SERVICE_PORT
-            value: '5000'
+            value: "{{.COP_DATA_API_PORT}}"
           - name: LOG_FORMAT_NAME
             value: 'json'
           - name: NAXSI_USE_DEFAULT_RULES
