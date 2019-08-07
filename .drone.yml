@@ -28,7 +28,7 @@ pipeline:
       - DOCKER_PASSWORD
     registry: quay.io
     repo: quay.io/ukhomeofficedigital/cop-data-api
-    tags: ${DRONE_BUILD_NUMBER}
+    tags: ${DRONE_COMMIT_SHA}
     when:
       branch: master
       event: push
