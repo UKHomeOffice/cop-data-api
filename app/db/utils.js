@@ -15,24 +15,45 @@ function viewFunctionArgsBuilder(body = '') {
   return args ? `(${args})` : args;
 }
 
-function insertIntoOptionsBuilder(body) {
+function columnsAndRowsBuilder(data) {
   let columns = '';
   let values = '';
 
-  for (const key in body) {
-    if (Object.prototype.hasOwnProperty.call(body, key)) {
+  for (const key in data) {
+    if (Object.prototype.hasOwnProperty.call(data, key)) {
       columns += columns ? ',' : '';
       columns += key;
       values += values ? ',' : '';
 
-      if (typeof body[key] === 'object') {
-        values += `'${JSON.stringify(body[key])}'`;
+      if (typeof data[key] === 'object') {
+        values += `'${JSON.stringify(data[key])}'`;
       } else {
-        values += `'${body[key]}'`;
+        values += `'${data[key]}'`;
       }
     }
   }
-  return `(${columns}) VALUES (${values})`;
+  return { columns, values };
+}
+
+function insertIntoOptionsBuilder(body) {
+  let rowValues = '';
+  let columns = '';
+  let values = '';
+
+  if (Array.isArray(body)) {
+    body.map((data) => {
+      const dataObj = columnsAndRowsBuilder(data);
+      rowValues += rowValues ? ',' : '';
+      rowValues += dataObj.values ? `(${dataObj.values})` : '';
+      columns = `(${dataObj.columns})`;
+    });
+
+    return `${columns} VALUES ${rowValues}`;
+  }
+  const dataObj = columnsAndRowsBuilder(body);
+  columns = `(${dataObj.columns})`;
+
+  return `(${dataObj.columns}) VALUES (${dataObj.values})`;
 }
 
 function queryParamsBuilder({ queryParams, body = '', name = '' }) {

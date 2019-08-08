@@ -156,6 +156,31 @@ describe('Test querystring builder', () => {
 
       expect(query).to.equal(expectedQuery);
     });
+
+    it('Should return a querystring with option to insert multiple rows, without returning the data inserted', () => {
+      const name = 'staff';
+      const body = [
+        { 'name': 'John', 'age': 34, 'email': 'john@mail.com' },
+        { 'name': 'Rachel', 'age': 32, 'email': 'rachel@mail.com' },
+      ];
+      const expectedQuery = `INSERT INTO ${name} (name,age,email) VALUES ('John','34','john@mail.com'),('Rachel','32','rachel@mail.com');`;
+      const query = insertIntoQueryBuilder({ name, body });
+
+      expect(query).to.equal(expectedQuery);
+    });
+
+    it('Should return a querystring with option to insert multiple rows, returning the data inserted', () => {
+      const name = 'staff';
+      const body = [
+        { 'name': 'John', 'age': 34, 'email': 'john@mail.com' },
+        { 'name': 'Rachel', 'age': 32, 'email': 'rachel@mail.com' },
+      ];
+      const expectedQuery = `INSERT INTO ${name} (name,age,email) VALUES ('John','34','john@mail.com'),('Rachel','32','rachel@mail.com') RETURNING *;`;
+      const prefer = 'return=representation';
+      const query = insertIntoQueryBuilder({ name, body, prefer });
+
+      expect(query).to.equal(expectedQuery);
+    });
   });
 
   describe('PATCH - querystring builder', () => {
