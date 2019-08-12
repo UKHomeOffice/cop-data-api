@@ -13,6 +13,7 @@
     "consistent-return": "off",
     "prefer-destructuring": "off",
     "object-curly-newline": ["error", { "multiline": true }],
+    "no-loop-func": "off",
   },
   "extends": "airbnb/base",
   "env": {

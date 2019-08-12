@@ -5,11 +5,12 @@ const {
   deleteQueryBuilder,
   insertIntoQueryBuilder,
   selectQueryBuilder,
+  selectQueryBuilderV2,
   updateQueryBuilder,
 } = require('../../../app/db/utils');
 
-describe('Test querystring builder', () => {
-  describe('GET - querystring builder', () => {
+describe('Test database utils', () => {
+  describe('v1 GET - querystring builder', () => {
     it('Should return a querystring with two columns selected', () => {
       const name = 'roles';
       const queryParams = 'select=developer,linemanager';
@@ -137,7 +138,7 @@ describe('Test querystring builder', () => {
     });
   });
 
-  describe('POST - querystring builder', () => {
+  describe('v1 POST - querystring builder', () => {
     it('Should return a querystring to insert values into columns', () => {
       const name = 'staff';
       const body = { 'name': 'John', 'age': 34, 'email': 'john@mail.com', 'roles': ['linemanager', 'systemuser'] };
@@ -183,7 +184,7 @@ describe('Test querystring builder', () => {
     });
   });
 
-  describe('PATCH - querystring builder', () => {
+  describe('v1 PATCH - querystring builder', () => {
     it('Should return a querystring to update existing data matching an id', () => {
       const name = 'identity';
       const id = '2553b00e-3cb0-441d-b29d-17196491a1e5';
@@ -230,7 +231,7 @@ describe('Test querystring builder', () => {
     });
   });
 
-  describe('DELETE - querystring builder', () => {
+  describe('v1 DELETE - querystring builder', () => {
     it('Should return a querystring to delete a row matching the email address', () => {
       const name = 'roles';
       const queryParams = 'email=eq.manager@mail.com';
@@ -250,7 +251,7 @@ describe('Test querystring builder', () => {
     });
   });
 
-  describe('POST To View Function - querystring builder', () => {
+  describe('v1 POST To View Function - querystring builder', () => {
     it('Should return a querystring for a function view', () => {
       const name = 'staffdetails';
       const body = { 'argstaffemail': 'daisy@mail.com' };
@@ -287,6 +288,58 @@ describe('Test querystring builder', () => {
       const query = selectQueryBuilder({ name, body, queryParams });
 
       expect(query).to.equal(expectedQuery);
+    });
+  });
+
+  describe('v2 GET - querystring builder', () => {
+    it('Should return a querystring with two columns selected filtered by name and city and a limit of 5 rows', () => {
+      const name = 'roles';
+      const queryParams = {
+        'select': 'name,city',
+        'filter': [
+          'name=eq.Tilbury 1',
+          'city=eq.London',
+        ],
+        'limit': '5',
+      };
+      const expectedQuery = `SELECT name,city FROM ${name} WHERE name = 'Tilbury 1' AND city = 'London' LIMIT 5;`;
+      const query = selectQueryBuilderV2({ name, queryParams });
+
+      expect(query).to.equal(expectedQuery);
+    });
+
+    it('Should return a querystring with all columns filtering by firstname and a limit of 1 row', () => {
+      const name = 'roles';
+      const queryParams = {
+        'filter': [
+          'firstname=eq.Pedro',
+        ],
+        'limit': '1',
+      };
+      const expectedQuery = `SELECT * FROM ${name} WHERE firstname = 'Pedro' LIMIT 1;`;
+      const query = selectQueryBuilderV2({ name, queryParams });
+
+      expect(query).to.equal(expectedQuery);
+    });
+
+    it('Should return a querystring with all columns and a limit of 1 row', () => {
+      const name = 'roles';
+      const queryParams = { 'limit': '1' };
+      const expectedQuery = `SELECT * FROM ${name} LIMIT 1;`;
+      const query = selectQueryBuilderV2({ name, queryParams });
+
+      expect(query).to.equal(expectedQuery);
+    });
+
+    it('Should return an empty querystring if there is more than one select in the query params', () => {
+      const name = 'roles';
+      const queryParams = {
+        'limit': ['3', '77'],
+        'select': ['name,age', 'location'],
+      };
+      const query = selectQueryBuilderV2({ name, queryParams });
+
+      expect(query).to.equal('');
     });
   });
 });
