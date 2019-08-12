@@ -123,7 +123,65 @@ function queryParamsBuilder({ queryParams, body = '', name = '' }) {
   return { query, options };
 }
 
-// Creates a SELECT querystring
+function queryParamsBuilderV2({ name, queryParams }) {
+  let query = `SELECT * FROM ${name}`;
+
+  for (const key in queryParams) {
+    if (Object.prototype.hasOwnProperty.call(queryParams, key)) {
+      let cols = '';
+      let field = '';
+      let filter = '';
+      let value = '';
+
+      if ((key === 'select' || key === 'limit') && Array.isArray(queryParams[key])) {
+        query = '';
+        return query;
+      }
+
+      if (key === 'select') {
+        field = key.toUpperCase();
+        cols = queryParams[key];
+        query = `${field} ${cols} FROM ${name}`;
+      } else if (key === 'limit') {
+        field = key.toUpperCase();
+        value = queryParams[key];
+        query += `%20${field} ${value}`;
+      } else if (key === 'filter') {
+        queryParams[key].map((params) => {
+          let isNull = false;
+
+          params = params.replace('=', '|').replace('.', '|').split('|');
+          field = params[0];
+          filter = params[1];
+          value = params[2];
+
+          if (filter !== 'in' && isNaN(value) && value !== 'null') {
+            value = `'${value}'`;
+          } else if (isNaN(value) && value === 'null') {
+            isNull = true;
+            value = value.toUpperCase();
+          }
+
+          if (filter === 'eq' && !isNull) {
+            filter = '=';
+          } else if (filter === 'eq' && isNull) {
+            filter = 'IS';
+          }
+
+          if (query) {
+            query += query.includes('WHERE') ? `%20AND ${field} ${filter} ${value}` : `%20WHERE ${field} ${filter} ${value}`;
+          }
+        });
+      }
+    }
+  }
+
+  query = query.replace(/%20/g, ' ');
+  query = query ? `${query};` : query;
+  return query;
+}
+
+// version1 Creates a SELECT querystring
 function selectQueryBuilder({ name, body = '', queryParams = '' }) {
   if (!body && !queryParams) {
     return `SELECT * FROM ${name};`;
@@ -136,6 +194,15 @@ function selectQueryBuilder({ name, body = '', queryParams = '' }) {
 
   const { query, options } = queryParamsBuilder({ name, queryParams, body });
   return options ? `SELECT * FROM ${name} WHERE ${options};` : query;
+}
+
+// version2 Creates a SELECT querystring
+function selectQueryBuilderV2({ name, body = '', queryParams = '' }) {
+  if (!body && Object.entries(queryParams).length === 0) {
+    return `SELECT * FROM ${name};`;
+  }
+
+  return queryParamsBuilderV2({ name, queryParams });
 }
 
 // Creates a INSERT INTO querystring
@@ -176,5 +243,6 @@ module.exports = {
   deleteQueryBuilder,
   insertIntoQueryBuilder,
   selectQueryBuilder,
+  selectQueryBuilderV2,
   updateQueryBuilder,
 };

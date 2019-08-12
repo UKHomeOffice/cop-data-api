@@ -8,6 +8,7 @@ const moment = require('moment');
 const config = require('../config/core');
 const logger = require('../config/logger')(__filename);
 const v1 = require('./v1');
+const v2 = require('./v2');
 
 const app = express();
 const corsConfiguration = {
@@ -58,6 +59,7 @@ app.use((req, res, next) => {
 });
 
 app.use('/v1', v1);
+app.use('/v2', v2);
 app.get('/_health', (req, res) => {
   logger.verbose('API is Alive & Kicking!');
   return res.status(200).json({ 'status': 'UP' });
