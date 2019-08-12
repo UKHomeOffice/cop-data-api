@@ -11,6 +11,11 @@ app.get('/:name', (req, res) => {
   const { name } = req.params;
   const { dbrole } = res.locals.user;
   const queryParams = req.query;
+
+  if (queryParams.filter && !Array.isArray(queryParams.filter)) {
+    queryParams.filter = [queryParams.filter];
+  }
+
   const queryString = selectQueryBuilderV2({ name, queryParams });
 
   if (!queryString) {
