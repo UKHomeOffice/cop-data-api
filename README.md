@@ -93,3 +93,54 @@ docker rmi quay.io/ukhomeofficedigital/cop-data-api:dev
 
 The API is secured using JWT keycloak tokens. It requires a claim called 'dbrole' to be included in the token.
 The value given for dbrole will enable the API to switch to the correct role within the database.
+
+## Filtering examples
+Return columns name and age filtering user names matching 'John' and 'Rachel'
+```bash
+select=name,age&filter=name=in.(John, Rachel)
+```
+
+Return columns nationality with a limit of 3 rows
+```bash
+select=nationality&limit=3
+```
+
+Return all users where names match 'John' and 'Debbie'
+```bash
+filter=name=in.(John, Debbie)
+```
+
+Return all countries where names match 'Denmark', and 'Portugal'
+```bash
+filter=name=in.(Denmark, Portugal)
+```
+
+Return all users where name matches 'John'
+```bash
+filter=name=eq.John
+```
+
+Return all users where name is not equal to 'John'
+```bash
+filter=name=neq.John
+```
+
+Return user where name is 'John' and email is 'john@mail.com'
+```bash
+filter=name=eq.John&filter=email=eq.john@mail.com
+```
+
+Return only the entity schema
+```bash
+mode=schemaOnly
+```
+
+Return only the entity data
+```bash
+mode=dataOnly
+```
+
+Return only the entity data where user name matches 'John'
+```bash
+mode=dataOnly&filter=name=eq.John
+```
