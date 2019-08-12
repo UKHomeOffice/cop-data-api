@@ -198,10 +198,6 @@ function selectQueryBuilder({ name, body = '', queryParams = '' }) {
 
 // version2 Creates a SELECT querystring
 function selectQueryBuilderV2({ name, body = '', queryParams = '' }) {
-  if (!body && Object.entries(queryParams).length === 0) {
-    return `SELECT * FROM ${name};`;
-  }
-
   return queryParamsBuilderV2({ name, queryParams });
 }
 
