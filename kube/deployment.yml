@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
       - name: api
-        image: {{.COP_DATA_API_IMAGE_REPO}}:{{.DRONE_COMMIT_SHA}}
+        image: {{.API_COP_IMAGE_REPO}}:{{.DRONE_COMMIT_SHA}}
         imagePullPolicy: Always
         securityContext:
           runAsNonRoot: true
@@ -46,31 +46,44 @@ spec:
           periodSeconds: 5
 
         env:
-        - name: COP_DATA_API_DB_CONNECTION_STRING
-          value: {{.COP_DATA_API_DB_CONNECTION_STRING}}
-        - name: COP_DATA_API_LOG_LEVEL
-          value: {{.COP_DATA_API_LOG_LEVEL}}
-        - name: COP_DATA_API_PORT
-          value: "{{.COP_DATA_API_PORT}}"
-        - name: COP_DATA_API_SEARCH_SCHEMA
-          value: {{.COP_DATA_API_SEARCH_SCHEMA}}
+        - name: API_COP_DB_PROTOCOL
+          value: {{.API_COP_DB_PROTOCOL}}
+        - name: API_COP_DB_PORT
+          value: {{.API_COP_DB_PORT}}
+        - name: API_COP_DB_HOSTNAME
+          value: {{.API_COP_DB_HOSTNAME}}
+        - name: API_COP_DB_OPTIONS
+          value: {{.API_COP_DB_OPTIONS}}
+        - name: API_COP_DB_OPERATION_DBNAME
+          value: {{.API_COP_DB_OPERATION_DBNAME}}
+        - name: API_COP_DB_OPERATION_SCHEMA
+          value: {{.API_COP_DB_OPERATION_SCHEMA}}
+        - name: DB_COP_OPERATION_AUTHENTICATOR_USERNAME
+          value: {{.DB_COP_OPERATION_AUTHENTICATOR_USERNAME}}
+        - name: DB_COP_OPERATION_AUTHENTICATOR_PASSWORD
+          value: {{.DB_COP_OPERATION_AUTHENTICATOR_PASSWORD}}
+        - name: API_COP_LOG_LEVEL
+          value: {{.API_COP_LOG_LEVEL}}
+        - name: API_COP_PORT
+          value: "{{.API_COP_PORT}}"
+        - name: API_COP_SEARCH_SCHEMA
+          value: {{.API_COP_SEARCH_SCHEMA}}
         - name: KEYCLOAK_URL
           value: {{.KEYCLOAK_URL}}
-        - name: COP_DATA_API_KEYCLOAK_CLIENT_ID
-          value: {{.COP_DATA_API_KEYCLOAK_CLIENT_ID}}
+        - name: API_COP_KEYCLOAK_CLIENT_ID
+          value: {{.API_COP_KEYCLOAK_CLIENT_ID}}
         ports:
           - name: api
-            containerPort: "{{.COP_DATA_API_PORT}}"
-
+            containerPort: "{{.API_COP_PORT}}"
       - name: proxy
-        image: {{.NGINX_PROXY_IMAGE_REPO}}:{{.NGINX_PROXY_IMAGE_TAG}}
+        image: "{{.NGINX_IMAGE}}:{{.NGINX_TAG}}"
         securityContext:
           runAsNonRoot: true
         env:
           - name: PROXY_SERVICE_HOST
             value: 'http://127.0.0.1'
           - name: PROXY_SERVICE_PORT
-            value: "{{.COP_DATA_API_PORT}}"
+            value: "{{.API_COP_PORT}}"
           - name: LOG_FORMAT_NAME
             value: 'json'
           - name: NAXSI_USE_DEFAULT_RULES

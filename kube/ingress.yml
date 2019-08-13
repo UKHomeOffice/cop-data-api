@@ -12,7 +12,7 @@ metadata:
     stable.k8s.psg.io/kcm.provider: http
 spec:
   rules:
-  - host: {{.COP_DATA_API_URL}}
+  - host: {{.API_COP_URL}}
     http:
       paths:
       - backend:
@@ -21,5 +21,5 @@ spec:
         path: /
   tls:
   - hosts:
-    - {{.COP_DATA_API_URL}}
+    - {{.API_COP_URL}}
     secretName: operational-data-api-tls
