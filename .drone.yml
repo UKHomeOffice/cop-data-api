@@ -25,9 +25,9 @@ pipeline:
     image: quay.io/ukhomeofficedigital/drone-docker
     secrets:
     - source: DEV_QUAY_USERNAME
-      target: QUAY_USERNAME
+      target: DOCKER_USERNAME
     - source: DEV_QUAY_PASSWORD
-      target: QUAY_PASSWORD
+      target: DOCKER_PASSWORD
     registry: quay.io
     repo: quay.io/ukhomeofficedigital/cop-data-api
     tags: ${DRONE_COMMIT_SHA}
