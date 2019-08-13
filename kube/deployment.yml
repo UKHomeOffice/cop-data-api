@@ -78,7 +78,7 @@ spec:
           value: {{.API_COP_KEYCLOAK_CLIENT_ID}}
         ports:
           - name: api
-            containerPort: "{{.API_COP_PORT}}"
+            containerPort: {{.API_COP_PORT}}
       - name: proxy
         image: "{{.NGINX_IMAGE}}:{{.NGINX_TAG}}"
         securityContext:
