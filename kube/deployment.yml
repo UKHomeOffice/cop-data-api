@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
       - name: api
-        image: {{.API_COP_IMAGE_REPO}}:{{.DRONE_COMMIT_SHA}}
+        image: "{{.API_COP_IMAGE}}:{{.DRONE_COMMIT_SHA}}"
         imagePullPolicy: Always
         securityContext:
           runAsNonRoot: true
