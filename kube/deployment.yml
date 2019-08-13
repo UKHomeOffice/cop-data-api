@@ -46,18 +46,18 @@ spec:
           periodSeconds: 5
 
         env:
-        - name: API_COP_DB_PROTOCOL
-          value: {{.API_COP_DB_PROTOCOL}}
-        - name: API_COP_DB_PORT
-          value: {{.API_COP_DB_PORT}}
-        - name: API_COP_DB_HOSTNAME
-          value: {{.API_COP_DB_HOSTNAME}}
-        - name: API_COP_DB_OPTIONS
-          value: {{.API_COP_DB_OPTIONS}}
-        - name: API_COP_DB_OPERATION_DBNAME
-          value: {{.API_COP_DB_OPERATION_DBNAME}}
-        - name: API_COP_DB_OPERATION_SCHEMA
-          value: {{.API_COP_DB_OPERATION_SCHEMA}}
+        - name: DB_COP_PROTOCOL
+          value: {{.DB_COP_PROTOCOL}}
+        - name: DB_COP_PORT
+          value: {{.DB_COP_PORT}}
+        - name: DB_COP_HOSTNAME
+          value: {{.DB_COP_HOSTNAME}}
+        - name: DB_COP_OPTIONS
+          value: {{.DB_COP_OPTIONS}}
+        - name: DB_COP_OPERATION_DBNAME
+          value: {{.DB_COP_OPERATION_DBNAME}}
+        - name: DB_COP_OPERATION_SCHEMA
+          value: {{.DB_COP_OPERATION_SCHEMA}}
         - name: DB_COP_OPERATION_AUTHENTICATOR_USERNAME
           value: {{.DB_COP_OPERATION_AUTHENTICATOR_USERNAME}}
         - name: DB_COP_OPERATION_AUTHENTICATOR_PASSWORD
@@ -70,6 +70,10 @@ spec:
           value: {{.API_COP_SEARCH_SCHEMA}}
         - name: KEYCLOAK_URL
           value: {{.KEYCLOAK_URL}}
+        - name: KEYCLOAK_PROTOCOL
+          value: {{.KEYCLOAK_PROTOCOL}}
+        - name: KEYCLOAK_REALM
+          value: {{.KEYCLOAK_REALM}}
         - name: API_COP_KEYCLOAK_CLIENT_ID
           value: {{.API_COP_KEYCLOAK_CLIENT_ID}}
         ports:
