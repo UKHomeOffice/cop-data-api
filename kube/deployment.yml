@@ -66,8 +66,8 @@ spec:
           value: {{.API_COP_LOG_LEVEL}}
         - name: API_COP_PORT
           value: "{{.API_COP_PORT}}"
-        - name: API_COP_SEARCH_SCHEMA
-          value: {{.API_COP_SEARCH_SCHEMA}}
+        - name: DB_COP_OPERATION_SCHEMA
+          value: {{.DB_COP_OPERATION_SCHEMA}}
         - name: KEYCLOAK_URL
           value: {{.KEYCLOAK_URL}}
         - name: KEYCLOAK_PROTOCOL
