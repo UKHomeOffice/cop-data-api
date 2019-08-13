@@ -44,38 +44,40 @@ spec:
               - /src/app/healthcheck.js
           initialDelaySeconds: 5
           periodSeconds: 5
-
         env:
         - name: DB_COP_PROTOCOL
-          value: {{.DB_COP_PROTOCOL}}
+          value: "{{.DB_COP_PROTOCOL}}"
         - name: DB_COP_PORT
-          value: {{.DB_COP_PORT}}
+          value: "{{.DB_COP_PORT}}"
         - name: DB_COP_HOSTNAME
-          value: {{.DB_COP_HOSTNAME}}
+          value: "{{.DB_COP_HOSTNAME}}"
         - name: DB_COP_OPTIONS
-          value: {{.DB_COP_OPTIONS}}
+          value: "{{.DB_COP_OPTIONS}}"
         - name: DB_COP_OPERATION_DBNAME
-          value: {{.DB_COP_OPERATION_DBNAME}}
+          value: "{{.DB_COP_OPERATION_DBNAME}}"
         - name: DB_COP_OPERATION_SCHEMA
-          value: {{.DB_COP_OPERATION_SCHEMA}}
+          value: "{{.DB_COP_OPERATION_SCHEMA}}"
         - name: DB_COP_OPERATION_AUTHENTICATOR_USERNAME
-          value: {{.DB_COP_OPERATION_AUTHENTICATOR_USERNAME}}
+          value: "{{.DB_COP_OPERATION_AUTHENTICATOR_USERNAME}}"
         - name: DB_COP_OPERATION_AUTHENTICATOR_PASSWORD
-          value: {{.DB_COP_OPERATION_AUTHENTICATOR_PASSWORD}}
+          valueFrom:
+            secretKeyRef:
+              name: operational-data-api-secret
+              key: dbPassword
         - name: API_COP_LOG_LEVEL
-          value: {{.API_COP_LOG_LEVEL}}
+          value: "{{.API_COP_LOG_LEVEL}}"
         - name: API_COP_PORT
           value: "{{.API_COP_PORT}}"
         - name: DB_COP_OPERATION_SCHEMA
-          value: {{.DB_COP_OPERATION_SCHEMA}}
+          value: "{{.DB_COP_OPERATION_SCHEMA}}"
         - name: KEYCLOAK_URL
-          value: {{.KEYCLOAK_URL}}
+          value: "{{.KEYCLOAK_URL}}"
         - name: KEYCLOAK_PROTOCOL
-          value: {{.KEYCLOAK_PROTOCOL}}
+          value: "{{.KEYCLOAK_PROTOCOL}}"
         - name: KEYCLOAK_REALM
-          value: {{.KEYCLOAK_REALM}}
+          value: "{{.KEYCLOAK_REALM}}"
         - name: API_COP_KEYCLOAK_CLIENT_ID
-          value: {{.API_COP_KEYCLOAK_CLIENT_ID}}
+          value: "{{.API_COP_KEYCLOAK_CLIENT_ID}}"
         ports:
           - name: api
             containerPort: {{.API_COP_PORT}}
