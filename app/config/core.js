@@ -1,18 +1,26 @@
+const db = {
+  'protocol': process.env.DB_COP_PROTOCOL || 'postgres://',
+  'port': process.env.DB_COP_PORT || '5432',
+  'hostname': process.env.DB_COP_HOSTNAME || 'localhost',
+  'options': process.env.DB_COP_OPTIONS || '',
+  'name': process.env.DB_COP_OPERATION_DBNAME || 'operation',
+  'username': process.env.DB_COP_OPERATION_AUTHENTICATOR_USERNAME || 'authenticatoroperation',
+  'password': process.env.DB_COP_OPERATION_AUTHENTICATOR_PASSWORD || 'auth1234'
+}
+
+const keycloak = {
+  'url': process.env.KEYCLOAK_URL || 'keycloak.lodev.xyz',
+  'protocol': process.env.KEYCLOAK_PROTOCOL || 'http://',
+  'realm': process.env.KEYCLOAK_REALM || 'dev'
+}
+
 const config = {
   'logLevel': process.env.API_COP_LOG_LEVEL || 'info',
-  'dbProtocol': process.env.DB_COP_PROTOCOL || 'postgres://',
-  'dbPort': process.env.DB_COP_PORT || '5432',
-  'dbHostname': process.env.DB_COP_HOSTNAME || 'localhost',
-  'dbOptions': process.env.DB_COP_OPTIONS || '',
-  'dbName': process.env.DB_COP_OPERATION_DBNAME || 'operation',
-  'dbUsername': process.env.DB_COP_OPERATION_AUTHENTICATOR_USERNAME || 'authenticatoroperation',
-  'dbPassword': process.env.DB_COP_OPERATION_AUTHENTICATOR_PASSWORD || 'auth1234',
-  'dbConnectionString': process.env.DB_COP_CONNECTION_STRING || `${process.env.DB_COP_PROTOCOL}${process.env.DB_COP_OPERATION_AUTHENTICATOR_USERNAME}:${process.env.DB_COP_OPERATION_AUTHENTICATOR_PASSWORD}@${process.env.DB_COP_HOSTNAME}:${process.env.DB_COP_PORT}/${process.env.DB_COP_OPERATION_DBNAME}${process.env.DB_COP_OPTIONS}`,
+
+  'dbConnectionString': process.env.DB_COP_CONNECTION_STRING || `${db.protocol}${db.username}:${db.password}@${db.hostname}:${db.port}/${db.name}${db.options}`,
   'searchSchema': process.env.DB_COP_OPERATION_SCHEMA || 'operation',
-  'keycloakUrl': process.env.KEYCLOAK_URL || 'keycloak.lodev.xyz',
-  'keycloakProtocol': process.env.KEYCLOAK_PROTOCOL || 'http://',
-  'keycloakRealm': process.env.KEYCLOAK_REALM || 'dev',
-  'iss': process.env.ISS || `${process.env.KEYCLOAK_PROTOCOL}${process.env.KEYCLOAK_URL}/auth/realms/${process.env.KEYCLOAK_REALM}`,
+
+  'iss': process.env.ISS || `${keycloak.protocol}${keycloak.url}/auth/realms/${keycloak.realm}`,
   'keycloak_client_id': process.env.API_COP_KEYCLOAK_CLIENT_ID || 'operational-data-api',
   'port': process.env.API_COP_PORT || '5000',
 };
