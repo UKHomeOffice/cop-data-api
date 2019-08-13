@@ -5,14 +5,14 @@ const db = {
   'options': process.env.DB_COP_OPTIONS || '',
   'name': process.env.DB_COP_OPERATION_DBNAME || 'operation',
   'username': process.env.DB_COP_OPERATION_AUTHENTICATOR_USERNAME || 'authenticatoroperation',
-  'password': process.env.DB_COP_OPERATION_AUTHENTICATOR_PASSWORD || 'auth1234'
-}
+  'password': process.env.DB_COP_OPERATION_AUTHENTICATOR_PASSWORD || 'auth1234',
+};
 
 const keycloak = {
   'url': process.env.KEYCLOAK_URL || 'keycloak.lodev.xyz',
   'protocol': process.env.KEYCLOAK_PROTOCOL || 'http://',
-  'realm': process.env.KEYCLOAK_REALM || 'dev'
-}
+  'realm': process.env.KEYCLOAK_REALM || 'dev',
+};
 
 const config = {
   'logLevel': process.env.API_COP_LOG_LEVEL || 'info',
