@@ -20,7 +20,7 @@ const config = {
   'dbConnectionString': process.env.DB_COP_CONNECTION_STRING || `${db.protocol}${db.username}:${db.password}@${db.hostname}:${db.port}/${db.name}${db.options}`,
   'searchSchema': process.env.DB_COP_OPERATION_SCHEMA || 'operation',
 
-  'iss': process.env.ISS || `${keycloak.protocol}${keycloak.url}/auth/realms/${keycloak.realm}`,
+  'iss': process.env.ISS || `${keycloak.protocol}${keycloak.url}/realms/${keycloak.realm}`,
   'keycloak_client_id': process.env.API_COP_KEYCLOAK_CLIENT_ID || 'operational-data-api',
   'port': process.env.API_COP_PORT || '5000',
 };
