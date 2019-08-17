@@ -144,7 +144,7 @@ pipeline:
       - export API_COP_LOG_LEVEL=$${STAGING_API_COP_LOG_LEVEL}
       - export API_COP_PORT=$${STAGING_API_COP_PORT}
       - export API_COP_TAG=$${DRONE_COMMIT_SHA}
-      - kd --insecure-skip-tls-verify -f kube/deployment.yml -f kube/service.yml -f kube/ingress.yml -f kube/network-policy.yml
+      - kd --insecure-skip-tls-verify -f kube/secret.yml -f kube/deployment.yml -f kube/service.yml -f kube/ingress.yml -f kube/network-policy.yml
     when:
       event: deployment
       environment: staging
@@ -202,7 +202,7 @@ pipeline:
       - export API_COP_LOG_LEVEL=$${PRODUCTION_API_COP_LOG_LEVEL}
       - export API_COP_PORT=$${PRODUCTION_API_COP_PORT}
       - export API_COP_TAG=$${DRONE_COMMIT_SHA}
-      - kd --insecure-skip-tls-verify -f kube/deployment.yml -f kube/service.yml -f kube/ingress.yml -f kube/network-policy.yml
+      - kd --insecure-skip-tls-verify -f kube/secret.yml -f kube/deployment.yml -f kube/service.yml -f kube/ingress.yml -f kube/network-policy.yml
     when:
       event: deployment
       environment: production
