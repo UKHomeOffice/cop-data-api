@@ -123,61 +123,72 @@ function queryParamsBuilder({ queryParams, body = '', name = '' }) {
   return { query, options };
 }
 
+// isPositiveInteger is a function that takes a number
+// as a string and checks if that number is a positive integer
+//
+// params stringValue: a string
+// returns:            a Boolean
+function isPositiveInteger(stringValue) {
+  const number = Math.floor(Number(stringValue));
+  return number !== Infinity && String(number) === stringValue && number >= 0;
+}
+
 function queryParamsBuilderV2({ name, queryParams }) {
-  let query = `SELECT * FROM ${name}`;
+  let conditions = '';
+  let limit = '';
+  let order = '';
+  let select = '';
 
-  for (const key in queryParams) {
-    if (Object.prototype.hasOwnProperty.call(queryParams, key)) {
-      let cols = '';
-      let field = '';
-      let filter = '';
-      let value = '';
-
-      if ((key === 'select' || key === 'limit') && Array.isArray(queryParams[key])) {
-        query = '';
-        return query;
-      }
-
-      if (key === 'select') {
-        field = key.toUpperCase();
-        cols = queryParams[key];
-        query = `${field} ${cols} FROM ${name}`;
-      } else if (key === 'limit') {
-        field = key.toUpperCase();
-        value = queryParams[key];
-        query += `%20${field} ${value}`;
-      } else if (key === 'filter') {
-        queryParams[key].map((params) => {
-          let isNull = false;
-
-          params = params.replace('=', '|').replace('.', '|').split('|');
-          field = params[0];
-          filter = params[1];
-          value = params[2];
-
-          if (filter !== 'in' && isNaN(value) && value !== 'null') {
-            value = `'${value}'`;
-          } else if (isNaN(value) && value === 'null') {
-            isNull = true;
-            value = value.toUpperCase();
-          }
-
-          if (filter === 'eq' && !isNull) {
-            filter = '=';
-          } else if (filter === 'eq' && isNull) {
-            filter = 'IS';
-          }
-
-          if (query) {
-            query += query.includes('WHERE') ? `%20AND ${field} ${filter} ${value}` : `%20WHERE ${field} ${filter} ${value}`;
-          }
-        });
-      }
-    }
+  // check if select and limit are arrays
+  if ((queryParams.select || queryParams.limit)
+      && (Array.isArray(queryParams.select) || Array.isArray(queryParams.limit))) {
+    return '';
   }
 
+  // check if limit is not integer
+  // check if limit is a negative integer
+  if (queryParams.limit && !isPositiveInteger(queryParams.limit)) {
+    return '';
+  }
+
+  if (queryParams.select) {
+    select = `SELECT ${queryParams.select} FROM ${name}`;
+  } else {
+    select = `SELECT * FROM ${name}`;
+  }
+
+  if (queryParams.limit) {
+    limit = `%20LIMIT ${queryParams.limit}`;
+  }
+
+  if (queryParams.filter) {
+    queryParams.filter.map((params) => {
+      // 'id=eq.3' -> ['id', 'eq' '3']
+      params = params.replace('=', '|').replace('.', '|').split('|');
+      let [field, filter, value] = params;
+      let isNull = false;
+
+      if (filter !== 'in' && isNaN(value) && value !== 'null') {
+        value = `'${value}'`;
+      } else if (isNaN(value) && value === 'null') {
+        isNull = true;
+        value = value.toUpperCase();
+      }
+
+      if (filter === 'eq' && !isNull) {
+        // 'continent = \'Asia\''
+        filter = '=';
+      } else if (filter === 'eq' && isNull) {
+        // 'validfrom IS NULL'
+        filter = 'IS';
+      }
+
+      conditions += conditions.includes('WHERE') ? `%20AND ${field} ${filter} ${value}` : `%20WHERE ${field} ${filter} ${value}`;
+    });
+  }
+
+  let query = `${select}${conditions}${order}${limit};`;
   query = query.replace(/%20/g, ' ');
-  query = query ? `${query};` : query;
   return query;
 }
 
@@ -197,7 +208,7 @@ function selectQueryBuilder({ name, body = '', queryParams = '' }) {
 }
 
 // version2 Creates a SELECT querystring
-function selectQueryBuilderV2({ name, body = '', queryParams = '' }) {
+function selectQueryBuilderV2({ name, queryParams = '' }) {
   return queryParamsBuilderV2({ name, queryParams });
 }
 

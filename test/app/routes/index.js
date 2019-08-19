@@ -18,9 +18,9 @@ describe('Test routes', () => {
       'name': 'John',
       'email': 'john@mail.com',
       'exp': expiryTime,
-      'refdbrole': 'refreadonly',
+      'refdbrole': 'readonly',
       'iss': config.iss,
-      'aud': ['operational-data-api', 'cop-data-api'],
+      'aud': ['operational-data-api', 'api-cop'],
     };
     const secret = 'super-secret-19';
     const token = jwtSimple.encode(payload, secret);
