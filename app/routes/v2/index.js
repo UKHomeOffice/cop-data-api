@@ -8,9 +8,9 @@ const { selectQueryBuilderV2 } = require('../../db/utils');
 const app = express();
 
 app.get('/:name', (req, res) => {
+  const queryParams = req.query;
   const { name } = req.params;
   const { dbrole } = res.locals.user;
-  const queryParams = req.query;
 
   if (queryParams.filter && !Array.isArray(queryParams.filter)) {
     queryParams.filter = [queryParams.filter];
@@ -30,7 +30,6 @@ app.get('/:name', (req, res) => {
       logger.error(error.stack);
       res.status(400).json({ 'error': error.message });
     });
-  res.status(400).json({ 'error': queryParams });
 });
 
 module.exports = app;
