@@ -11,6 +11,7 @@ const {
 
 const {
   AbstractSyntaxTree,
+  INSERT_QUERY,
   SELECT_QUERY,
   OP_EQUALS,
   OP_GT,
@@ -187,8 +188,12 @@ describe('Test database utils', () => {
     it('Should return a querystring to insert values into columns', () => {
       const name = 'staff';
       const body = { 'name': 'John', 'age': 34, 'email': 'john@mail.com', 'roles': ['linemanager', 'systemuser'] };
-      const expectedQuery = `INSERT INTO ${name} (name,age,email,roles) VALUES ('John','34','john@mail.com','["linemanager","systemuser"]');`;
-      const query = insertIntoQueryBuilder({ name, body });
+      const ast = new AbstractSyntaxTree(INSERT_QUERY, name, TABLE);
+      ast.addColumns(['name', 'age', 'email', 'roles']);
+      ast.addRow(body);
+      const expectedQuery = `INSERT INTO ${name} (name, age, email, roles) VALUES ('John', '34', 'john@mail.com', '["linemanager","systemuser"]');`;
+
+      const query = generateCode(ast);
 
       expect(query).to.equal(expectedQuery);
     });
@@ -196,9 +201,14 @@ describe('Test database utils', () => {
     it('Should return a querystring with option to return all inserted data', () => {
       const name = 'staff';
       const body = { 'name': 'John', 'age': 34, 'email': 'john@mail.com' };
-      const expectedQuery = `INSERT INTO ${name} (name,age,email) VALUES ('John','34','john@mail.com') RETURNING *;`;
-      const prefer = 'return=representation';
-      const query = insertIntoQueryBuilder({ name, body, prefer });
+      const ast = new AbstractSyntaxTree(INSERT_QUERY, name, TABLE);
+      ast.addColumns(['name', 'age', 'email']);
+      ast.addRow(body);
+      ast.returnData();
+
+      const expectedQuery = `INSERT INTO ${name} (name, age, email) VALUES ('John', '34', 'john@mail.com') RETURNING *;`;
+
+      const query = generateCode(ast);
 
       expect(query).to.equal(expectedQuery);
     });
@@ -209,8 +219,13 @@ describe('Test database utils', () => {
         { 'name': 'John', 'age': 34, 'email': 'john@mail.com' },
         { 'name': 'Rachel', 'age': 32, 'email': 'rachel@mail.com' },
       ];
-      const expectedQuery = `INSERT INTO ${name} (name,age,email) VALUES ('John','34','john@mail.com'),('Rachel','32','rachel@mail.com');`;
-      const query = insertIntoQueryBuilder({ name, body });
+      const ast = new AbstractSyntaxTree(INSERT_QUERY, name, TABLE);
+      ast.addColumns(['name', 'age', 'email']);
+      ast.addRow(body[0]);
+      ast.addRow(body[1]);
+      const expectedQuery = `INSERT INTO ${name} (name, age, email) VALUES ('John', '34', 'john@mail.com'), ('Rachel', '32', 'rachel@mail.com');`;
+
+      const query = generateCode(ast);
 
       expect(query).to.equal(expectedQuery);
     });
@@ -221,9 +236,14 @@ describe('Test database utils', () => {
         { 'name': 'John', 'age': 34, 'email': 'john@mail.com' },
         { 'name': 'Rachel', 'age': 32, 'email': 'rachel@mail.com' },
       ];
-      const expectedQuery = `INSERT INTO ${name} (name,age,email) VALUES ('John','34','john@mail.com'),('Rachel','32','rachel@mail.com') RETURNING *;`;
-      const prefer = 'return=representation';
-      const query = insertIntoQueryBuilder({ name, body, prefer });
+      const ast = new AbstractSyntaxTree(INSERT_QUERY, name, TABLE);
+      ast.addColumns(['name', 'age', 'email']);
+      ast.addRow(body[0]);
+      ast.addRow(body[1]);
+      ast.returnData();
+      const expectedQuery = `INSERT INTO ${name} (name, age, email) VALUES ('John', '34', 'john@mail.com'), ('Rachel', '32', 'rachel@mail.com') RETURNING *;`;
+
+      const query = generateCode(ast);
 
       expect(query).to.equal(expectedQuery);
     });

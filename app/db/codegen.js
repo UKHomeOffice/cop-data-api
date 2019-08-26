@@ -1,4 +1,5 @@
 const {
+  INSERT_QUERY,
   SELECT_QUERY,
   OP_EQUALS,
   OP_GT,
@@ -9,11 +10,22 @@ const {
   OP_IS,
 } = require('./ast');
 
-const generateTuple = tuple => `('${tuple.join("', '")}')`;
+const arrayToString = array => (Array.isArray(array) ? JSON.stringify(array) : array);
+
+const generateTuple = tuple => `('${tuple.map(arrayToString).join("', '")}')`;
 
 const quoteStringParam = param => (isNaN(param) ? `'${param}'` : param);
 
 const generateColumns = ast => ast.columns.join(', ');
+
+const generateValues = (ast) => {
+  if (ast.data.length === 0) {
+    throw new TypeError('Must have at least one data row for insert');
+  }
+  const values = ast.data.map(generateTuple);
+
+  return `VALUES ${values.join(', ')}`;
+};
 
 const generateWhere = (ast) => {
   const filters = ast.filter.map((filter) => {
@@ -50,10 +62,21 @@ const generateSelect = (ast) => {
   return `SELECT ${selectClause} FROM ${ast.objectName}${whereClause};`;
 };
 
+const generateInsert = (ast) => {
+  let columns = generateColumns(ast);
+  columns = columns ? `(${columns})` : '';
+  const values = generateValues(ast);
+  const returning = ast.returning ? ' RETURNING *' : '';
+
+  return `INSERT INTO ${ast.objectName} ${columns} ${values}${returning};`;
+};
+
 const generateCode = (ast) => {
   switch (ast.type) {
     case SELECT_QUERY:
       return generateSelect(ast);
+    case INSERT_QUERY:
+      return generateInsert(ast);
     default:
       throw new TypeError(`Query type ${ast.type} not yet supported`);
   }

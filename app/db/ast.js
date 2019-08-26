@@ -22,12 +22,15 @@ class AbstractSyntaxTree {
     this.columns = [];
     this.data = [];
     this.filter = [];
-    this.returning = [];
+    this.returning = false;
   }
 
   addColumns(columns) {
     if (!columns) {
       throw new TypeError("Can't add a null or undefined column");
+    }
+    if (this.data.length > 0) {
+      throw new TypeError("Can't add columns once data hase been added");
     }
     if (!Array.isArray(columns)) {
       this.columns.push(columns);
@@ -39,12 +42,27 @@ class AbstractSyntaxTree {
   addFilter(fieldName, operator, operand) {
     this.filter.push(new QueryFilter(fieldName, operator, operand));
   }
+
+  addRow(data) {
+    if (!data) {
+      throw new TypeError("Can't add a null row of data");
+    }
+    const row = [];
+
+    this.columns.forEach(c => row.push(data[c] || null));
+    this.data.push(row);
+  }
+
+  returnData() {
+    this.returning = true;
+  }
 }
 
 /*
  * Query Types
  */
 const SELECT_QUERY = 'SELECT';
+const INSERT_QUERY = 'INSERT';
 
 /*
  * Object Types
@@ -66,6 +84,7 @@ const NULL = 'NULL';
 
 module.exports = {
   AbstractSyntaxTree,
+  INSERT_QUERY,
   SELECT_QUERY,
   TABLE,
   OP_EQUALS,
