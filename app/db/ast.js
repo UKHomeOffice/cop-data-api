@@ -16,6 +16,7 @@ class QueryFilter {
 const SELECT_QUERY = 'SELECT';
 const INSERT_QUERY = 'INSERT';
 const UPDATE_QUERY = 'UPDATE';
+const DELETE_QUERY = 'DELETE';
 
 
 class AbstractSyntaxTree {
@@ -88,6 +89,7 @@ const NULL = 'NULL';
 
 module.exports = {
   AbstractSyntaxTree,
+  DELETE_QUERY,
   INSERT_QUERY,
   SELECT_QUERY,
   UPDATE_QUERY,

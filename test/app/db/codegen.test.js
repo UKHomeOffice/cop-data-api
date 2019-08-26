@@ -2,8 +2,6 @@ const { expect } = require('chai');
 
 // local imports
 const {
-  deleteQueryBuilder,
-  insertIntoQueryBuilder,
   selectQueryBuilder,
   selectQueryBuilderV2,
   updateQueryBuilder,
@@ -11,6 +9,7 @@ const {
 
 const {
   AbstractSyntaxTree,
+  DELETE_QUERY,
   INSERT_QUERY,
   SELECT_QUERY,
   UPDATE_QUERY,
@@ -314,18 +313,23 @@ describe('Test database utils', () => {
   describe('v1 DELETE - querystring builder', () => {
     it('Should return a querystring to delete a row matching the email address', () => {
       const name = 'roles';
-      const queryParams = 'email=eq.manager@mail.com';
+      const ast = new AbstractSyntaxTree(DELETE_QUERY, name, TABLE);
+      ast.addFilter('email', OP_EQUALS, 'manager@mail.com');
       const expectedQuery = `DELETE FROM ${name} WHERE email = 'manager@mail.com';`;
-      const query = deleteQueryBuilder({ name, queryParams });
+
+      const query = generateCode(ast);
 
       expect(query).to.equal(expectedQuery);
     });
 
     it('Should return a querystring to delete a row matching the email address and id', () => {
       const name = 'roles';
-      const queryParams = 'email=eq.manager@mail.com,&id=eq.123';
+      const ast = new AbstractSyntaxTree(DELETE_QUERY, name, TABLE);
+      ast.addFilter('email', OP_EQUALS, 'manager@mail.com');
+      ast.addFilter('id', OP_EQUALS, 123);
       const expectedQuery = `DELETE FROM ${name} WHERE email = 'manager@mail.com' AND id = 123;`;
-      const query = deleteQueryBuilder({ name, queryParams });
+
+      const query = generateCode(ast);
 
       expect(query).to.equal(expectedQuery);
     });

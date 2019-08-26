@@ -1,4 +1,5 @@
 const {
+  DELETE_QUERY,
   INSERT_QUERY,
   SELECT_QUERY,
   UPDATE_QUERY,
@@ -96,6 +97,12 @@ const generateUpdate = (ast) => {
   return `UPDATE ${ast.objectName} SET ${fieldsToUpdate}${whereClause}${returning};`;
 };
 
+const generateDelete = (ast) => {
+  const whereClause = generateWhere(ast);
+
+  return `DELETE FROM ${ast.objectName}${whereClause};`;
+};
+
 const generateCode = (ast) => {
   switch (ast.type) {
     case SELECT_QUERY:
@@ -104,6 +111,8 @@ const generateCode = (ast) => {
       return generateInsert(ast);
     case UPDATE_QUERY:
       return generateUpdate(ast);
+    case DELETE_QUERY:
+      return generateDelete(ast);
     default:
       throw new TypeError(`Query type ${ast.type} not yet supported`);
   }
