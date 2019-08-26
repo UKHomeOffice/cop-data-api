@@ -18,6 +18,11 @@ const INSERT_QUERY = 'INSERT';
 const UPDATE_QUERY = 'UPDATE';
 const DELETE_QUERY = 'DELETE';
 
+/*
+ * Object Types
+ */
+const TABLE = 'TABLE';
+const FUNCTION = 'FUNCTION';
 
 class AbstractSyntaxTree {
   constructor(type, objectName, objectType) {
@@ -31,6 +36,7 @@ class AbstractSyntaxTree {
     this.columns = [];
     this.data = [];
     this.filter = [];
+    this.arguments = [];
     this.returning = false;
   }
 
@@ -62,18 +68,20 @@ class AbstractSyntaxTree {
     this.data.push(row);
   }
 
+  addArguments(args) {
+    if (this.objectType !== FUNCTION) {
+      throw new TypeError(`Can only use arguments with FUNCTION objects. Object type is ${this.objectType}`);
+    }
+
+    this.arguments = Object.entries(args);
+  }
+
   returnData() {
     if (this.type === UPDATE_QUERY || this.type === INSERT_QUERY) {
       this.returning = true;
     }
   }
 }
-
-/*
- * Object Types
- */
-const TABLE = 'TABLE';
-
 /*
  * Filter operators
  */
@@ -93,6 +101,7 @@ module.exports = {
   INSERT_QUERY,
   SELECT_QUERY,
   UPDATE_QUERY,
+  FUNCTION,
   TABLE,
   OP_EQUALS,
   OP_GT,

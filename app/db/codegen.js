@@ -10,6 +10,7 @@ const {
   OP_LT,
   OP_LTE,
   OP_IS,
+  TABLE,
 } = require('./ast');
 
 const arrayToString = array => (Array.isArray(array) ? JSON.stringify(array) : array);
@@ -20,6 +21,8 @@ const quoteStringParam = param => (isNaN(param) ? `'${param}'` : param);
 const quoteNonArrayParam = param => (!Array.isArray(param) ? `'${param}'` : param);
 
 const generateColumns = ast => ast.columns.join(', ');
+
+const generateArgs = ast => ast.arguments.map(([name, value]) => `${name}=>'${value}'`).join(', ');
 
 const generateValues = (ast) => {
   if (ast.data.length === 0) {
@@ -103,10 +106,21 @@ const generateDelete = (ast) => {
   return `DELETE FROM ${ast.objectName}${whereClause};`;
 };
 
+const generateFunctionCall = (ast) => {
+  const selectClause = generateColumns(ast) || '*';
+  const whereClause = generateWhere(ast);
+  const args = generateArgs(ast);
+
+  return `SELECT ${selectClause} FROM ${ast.objectName}(${args})${whereClause};`;
+};
+
 const generateCode = (ast) => {
   switch (ast.type) {
     case SELECT_QUERY:
-      return generateSelect(ast);
+      if (ast.objectType === TABLE) {
+        return generateSelect(ast);
+      }
+      return generateFunctionCall(ast);
     case INSERT_QUERY:
       return generateInsert(ast);
     case UPDATE_QUERY:
