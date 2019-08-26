@@ -1,6 +1,7 @@
 const {
   INSERT_QUERY,
   SELECT_QUERY,
+  UPDATE_QUERY,
   OP_EQUALS,
   OP_GT,
   OP_GTE,
@@ -15,6 +16,7 @@ const arrayToString = array => (Array.isArray(array) ? JSON.stringify(array) : a
 const generateTuple = tuple => `('${tuple.map(arrayToString).join("', '")}')`;
 
 const quoteStringParam = param => (isNaN(param) ? `'${param}'` : param);
+const quoteNonArrayParam = param => (!Array.isArray(param) ? `'${param}'` : param);
 
 const generateColumns = ast => ast.columns.join(', ');
 
@@ -25,6 +27,21 @@ const generateValues = (ast) => {
   const values = ast.data.map(generateTuple);
 
   return `VALUES ${values.join(', ')}`;
+};
+
+const generateFieldsToUpdate = (ast) => {
+  if (ast.data.length !== 1) {
+    throw new TypeError('Must have only one data row for update');
+  }
+  if (ast.columns.length === 0) {
+    throw new TypeError('Must have at least one column to update');
+  }
+
+  const data = ast.data[0];
+  return data.map(quoteNonArrayParam)
+    .map((e, i) => [ast.columns[i], arrayToString(e)])
+    .map(([name, value]) => `${name}=${value}`)
+    .join(', ');
 };
 
 const generateWhere = (ast) => {
@@ -71,12 +88,22 @@ const generateInsert = (ast) => {
   return `INSERT INTO ${ast.objectName} ${columns} ${values}${returning};`;
 };
 
+const generateUpdate = (ast) => {
+  const fieldsToUpdate = generateFieldsToUpdate(ast);
+  const whereClause = generateWhere(ast);
+  const returning = ast.returning ? ' RETURNING *' : '';
+
+  return `UPDATE ${ast.objectName} SET ${fieldsToUpdate}${whereClause}${returning};`;
+};
+
 const generateCode = (ast) => {
   switch (ast.type) {
     case SELECT_QUERY:
       return generateSelect(ast);
     case INSERT_QUERY:
       return generateInsert(ast);
+    case UPDATE_QUERY:
+      return generateUpdate(ast);
     default:
       throw new TypeError(`Query type ${ast.type} not yet supported`);
   }

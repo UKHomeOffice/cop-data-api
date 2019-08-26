@@ -13,6 +13,7 @@ const {
   AbstractSyntaxTree,
   INSERT_QUERY,
   SELECT_QUERY,
+  UPDATE_QUERY,
   OP_EQUALS,
   OP_GT,
   OP_GTE,
@@ -252,10 +253,15 @@ describe('Test database utils', () => {
   describe('v1 PATCH - querystring builder', () => {
     it('Should return a querystring to update existing data matching an id', () => {
       const name = 'identity';
-      const id = '2553b00e-3cb0-441d-b29d-17196491a1e5';
       const body = { 'email': 'john@mail.com', 'roles': ['linemanager', 'systemuser'] };
-      const expectedQuery = `UPDATE ${name} SET email='${body.email}',roles=${JSON.stringify(body.roles)} WHERE id = '${id}';`;
-      const query = updateQueryBuilder({ body, name, id });
+      const id = '2553b00e-3cb0-441d-b29d-17196491a1e5';
+      const ast = new AbstractSyntaxTree(UPDATE_QUERY, name, TABLE);
+      ast.addFilter('id', OP_EQUALS, id);
+      ast.addColumns(['email', 'roles']);
+      ast.addRow(body);
+      const expectedQuery = `UPDATE ${name} SET email='${body.email}', roles=${JSON.stringify(body.roles)} WHERE id = '${id}';`;
+
+      const query = generateCode(ast);
 
       expect(query).to.equal(expectedQuery);
     });
@@ -263,10 +269,15 @@ describe('Test database utils', () => {
     it('Should return a querystring to update existing data mathing an id, with option to return all updated data', () => {
       const name = 'identity';
       const id = '2553b00e-3cb0-441d-b29d-17196491a1e5';
-      const prefer = 'return=representation';
       const body = { 'age': 34, 'email': 'john@mail.com', 'roles': ['linemanager', 'systemuser'] };
-      const expectedQuery = `UPDATE ${name} SET age='${body.age}',email='${body.email}',roles=${JSON.stringify(body.roles)} WHERE id = '${id}' RETURNING *;`;
-      const query = updateQueryBuilder({ body, name, id, prefer });
+      const ast = new AbstractSyntaxTree(UPDATE_QUERY, name, TABLE);
+      ast.addFilter('id', OP_EQUALS, id);
+      ast.addColumns(['age', 'email', 'roles']);
+      ast.addRow(body);
+      ast.returnData();
+      const expectedQuery = `UPDATE ${name} SET age='${body.age}', email='${body.email}', roles=${JSON.stringify(body.roles)} WHERE id = '${id}' RETURNING *;`;
+
+      const query = generateCode(ast);
 
       expect(query).to.equal(expectedQuery);
     });
@@ -275,15 +286,19 @@ describe('Test database utils', () => {
       const name = 'identity';
       const id = '2553b00e-3cb0-441d-b29d-17196491a1e5';
       const firstname = 'Pedro';
-      const queryParams = `firstname=eq.${firstname},&id=eq.${id}`;
       const body = { 'firstname': 'John' };
+      const ast = new AbstractSyntaxTree(UPDATE_QUERY, name, TABLE);
+      ast.addFilter('firstname', OP_EQUALS, firstname);
+      ast.addFilter('id', OP_EQUALS, id);
+      ast.addColumns('firstname');
+      ast.addRow(body);
       const expectedQuery = `UPDATE ${name} SET firstname='${body.firstname}' WHERE firstname = '${firstname}' AND id = '${id}';`;
-      const query = updateQueryBuilder({ body, name, queryParams });
+      const query = generateCode(ast);
 
       expect(query).to.equal(expectedQuery);
     });
 
-    it('Should return a querystring to update existing data matching an id only, even if query parameters are provided', () => {
+    xit('Should return a querystring to update existing data matching an id only, even if query parameters are provided', () => {
       const name = 'identity';
       const id = '2553b00e-3cb0-441d-b29d-17196491a1e5';
       const firstname = 'Pedro';

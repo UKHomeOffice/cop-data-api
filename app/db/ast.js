@@ -10,6 +10,14 @@ class QueryFilter {
   }
 }
 
+/*
+ * Query Types
+ */
+const SELECT_QUERY = 'SELECT';
+const INSERT_QUERY = 'INSERT';
+const UPDATE_QUERY = 'UPDATE';
+
+
 class AbstractSyntaxTree {
   constructor(type, objectName, objectType) {
     if (!type || !objectName || !objectType) {
@@ -54,15 +62,11 @@ class AbstractSyntaxTree {
   }
 
   returnData() {
-    this.returning = true;
+    if (this.type === UPDATE_QUERY || this.type === INSERT_QUERY) {
+      this.returning = true;
+    }
   }
 }
-
-/*
- * Query Types
- */
-const SELECT_QUERY = 'SELECT';
-const INSERT_QUERY = 'INSERT';
 
 /*
  * Object Types
@@ -86,6 +90,7 @@ module.exports = {
   AbstractSyntaxTree,
   INSERT_QUERY,
   SELECT_QUERY,
+  UPDATE_QUERY,
   TABLE,
   OP_EQUALS,
   OP_GT,
