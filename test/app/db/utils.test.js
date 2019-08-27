@@ -3,6 +3,7 @@ const { expect } = require('chai');
 // local imports
 const {
   deleteQueryBuilder,
+  functionQueryBuilder,
   insertIntoQueryBuilder,
   selectQueryBuilder,
   selectQueryBuilderV2,
@@ -29,13 +30,15 @@ describe('Test database utils', () => {
       expect(query).to.equal(expectedQuery);
     });
 
-    it('Should return an empty querystring if no filters are passed', () => {
+    it('Should throw an exception if no filters are passed', () => {
       const name = 'roles';
       const queryParams = 'select=';
       const expectedQuery = '';
-      const query = selectQueryBuilder({ name, queryParams });
-
-      expect(query).to.equal(expectedQuery);
+      try {
+        const query = selectQueryBuilder({ name, queryParams });
+      } catch (err) {
+        expect(err.message).to.equal('Select clause specified with no columns');
+      }
     });
 
     it('Should return a querystring for all data', () => {
@@ -189,7 +192,7 @@ describe('Test database utils', () => {
       const name = 'identity';
       const id = '2553b00e-3cb0-441d-b29d-17196491a1e5';
       const body = { 'email': 'john@mail.com', 'roles': ['linemanager', 'systemuser'] };
-      const expectedQuery = `UPDATE ${name} SET email='${body.email}',roles=${JSON.stringify(body.roles)} WHERE id = '${id}';`;
+      const expectedQuery = `UPDATE ${name} SET email='${body.email}', roles=${JSON.stringify(body.roles)} WHERE id = '${id}';`;
       const query = updateQueryBuilder({ body, name, id });
 
       expect(query).to.equal(expectedQuery);
@@ -200,7 +203,7 @@ describe('Test database utils', () => {
       const id = '2553b00e-3cb0-441d-b29d-17196491a1e5';
       const prefer = 'return=representation';
       const body = { 'age': 34, 'email': 'john@mail.com', 'roles': ['linemanager', 'systemuser'] };
-      const expectedQuery = `UPDATE ${name} SET age='${body.age}',email='${body.email}',roles=${JSON.stringify(body.roles)} WHERE id = '${id}' RETURNING *;`;
+      const expectedQuery = `UPDATE ${name} SET age='${body.age}', email='${body.email}', roles=${JSON.stringify(body.roles)} WHERE id = '${id}' RETURNING *;`;
       const query = updateQueryBuilder({ body, name, id, prefer });
 
       expect(query).to.equal(expectedQuery);
@@ -256,7 +259,7 @@ describe('Test database utils', () => {
       const name = 'staffdetails';
       const body = { 'argstaffemail': 'daisy@mail.com' };
       const expectedQuery = `SELECT * FROM ${name}(argstaffemail=>'daisy@mail.com');`;
-      const query = selectQueryBuilder({ name, body });
+      const query = functionQueryBuilder({ name, body });
 
       expect(query).to.equal(expectedQuery);
     });
@@ -264,8 +267,8 @@ describe('Test database utils', () => {
     it('Should return a querystring for a function view with multiple arguments', () => {
       const name = 'staffdetails';
       const body = { 'argfirstname': 'Andy', 'argstaffid': 'af4601db-1640-4ff2-a4cc-da44bce99226' };
-      const expectedQuery = `SELECT * FROM ${name}(argfirstname=>'Andy',argstaffid=>'af4601db-1640-4ff2-a4cc-da44bce99226');`;
-      const query = selectQueryBuilder({ name, body });
+      const expectedQuery = `SELECT * FROM ${name}(argfirstname=>'Andy', argstaffid=>'af4601db-1640-4ff2-a4cc-da44bce99226');`;
+      const query = functionQueryBuilder({ name, body });
 
       expect(query).to.equal(expectedQuery);
     });
@@ -274,8 +277,8 @@ describe('Test database utils', () => {
       const name = 'staffdetails';
       const queryParams = 'select=email';
       const body = { 'argfirstname': 'Lauren', 'argstaffid': 'af4601db-1640-4ff2-a4cc-da44bce99226' };
-      const expectedQuery = `SELECT email FROM ${name}(argfirstname=>'Lauren',argstaffid=>'af4601db-1640-4ff2-a4cc-da44bce99226');`;
-      const query = selectQueryBuilder({ name, body, queryParams });
+      const expectedQuery = `SELECT email FROM ${name}(argfirstname=>'Lauren', argstaffid=>'af4601db-1640-4ff2-a4cc-da44bce99226');`;
+      const query = functionQueryBuilder({ name, body, queryParams });
 
       expect(query).to.equal(expectedQuery);
     });
@@ -284,8 +287,8 @@ describe('Test database utils', () => {
       const name = 'staffdetails';
       const queryParams = 'select=email&lastname=eq.Smith';
       const body = { 'argfirstname': 'John', 'argstaffid': 'af4601db-1640-4ff2-a4cc-da44bce99226' };
-      const expectedQuery = `SELECT email FROM ${name}(argfirstname=>'John',argstaffid=>'af4601db-1640-4ff2-a4cc-da44bce99226') WHERE lastname = 'Smith';`;
-      const query = selectQueryBuilder({ name, body, queryParams });
+      const expectedQuery = `SELECT email FROM ${name}(argfirstname=>'John', argstaffid=>'af4601db-1640-4ff2-a4cc-da44bce99226') WHERE lastname = 'Smith';`;
+      const query = functionQueryBuilder({ name, body, queryParams });
 
       expect(query).to.equal(expectedQuery);
     });

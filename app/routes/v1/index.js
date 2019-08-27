@@ -5,6 +5,7 @@ const logger = require('../../config/logger')(__filename);
 const query = require('../../db/query');
 const {
   deleteQueryBuilder,
+  functionQueryBuilder,
   insertIntoQueryBuilder,
   selectQueryBuilder,
   updateQueryBuilder,
@@ -16,20 +17,25 @@ app.get('/:name', (req, res) => {
   const { name } = req.params;
   const { dbrole } = res.locals.user;
   const queryParams = req.url.split('?')[1];
-  const queryString = selectQueryBuilder({ name, queryParams });
+  try {
+    const queryString = selectQueryBuilder({ name, queryParams });
 
-  if (!queryString) {
+    if (!queryString) {
+      return res.status(400).json({ 'error': 'Invalid query parameters' });
+    }
+
+    const data = query(dbrole, name, queryString);
+
+    Promise.all([data])
+      .then(resultsArray => res.status(200).json(resultsArray[0]))
+      .catch((error) => {
+        logger.error(`Error executing request ${error.message}`, error);
+        res.status(400).json({ 'error': error.message });
+      });
+  } catch (error) {
+    logger.error(`Error parsing request ${error.message}`, error);
     return res.status(400).json({ 'error': 'Invalid query parameters' });
   }
-
-  const data = query(dbrole, name, queryString);
-
-  Promise.all([data])
-    .then(resultsArray => res.status(200).json(resultsArray[0]))
-    .catch((error) => {
-      logger.error(error.stack);
-      res.status(400).json({ 'error': error.message });
-    });
 });
 
 app.post('/:name', (req, res) => {
@@ -42,15 +48,20 @@ app.post('/:name', (req, res) => {
     return res.status(400).json({ 'error': 'Invalid post request' });
   }
 
-  const queryString = insertIntoQueryBuilder({ name, body, prefer });
-  const data = query(dbrole, name, queryString);
+  try {
+    const queryString = insertIntoQueryBuilder({ name, body, prefer });
+    const data = query(dbrole, name, queryString);
 
-  Promise.all([data])
-    .then(resultsArray => res.status(200).json(resultsArray[0]))
-    .catch((error) => {
-      logger.error(error.stack);
-      res.status(400).json({ 'error': error.message });
-    });
+    Promise.all([data])
+      .then(resultsArray => res.status(200).json(resultsArray[0]))
+      .catch((error) => {
+        logger.error(`Error executing request ${error.message}`, error);
+        res.status(400).json({ 'error': error.message });
+      });
+  } catch (error) {
+    logger.error(`Error parsing request ${error.message}`, error);
+    return res.status(400).json({ 'error': 'Invalid query parameters' });
+  }
 });
 
 app.patch('/:name/:id?', (req, res) => {
@@ -63,16 +74,20 @@ app.patch('/:name/:id?', (req, res) => {
   if (Object.entries(body).length === 0 && (!id || !queryParams)) {
     return res.status(400).json({ 'error': 'Invalid patch request' });
   }
+  try {
+    const queryString = updateQueryBuilder({ name, body, id, queryParams, prefer });
+    const data = query(dbrole, name, queryString);
 
-  const queryString = updateQueryBuilder({ name, body, id, queryParams, prefer });
-  const data = query(dbrole, name, queryString);
-
-  Promise.all([data])
-    .then(resultsArray => res.status(200).json(resultsArray[0]))
-    .catch((error) => {
-      logger.error(error.stack);
-      res.status(400).json({ 'error': error.message });
-    });
+    Promise.all([data])
+      .then(resultsArray => res.status(200).json(resultsArray[0]))
+      .catch((error) => {
+        logger.error(`Error executing request ${error.message}`, error);
+        res.status(400).json({ 'error': error.message });
+      });
+  } catch (error) {
+    logger.error(`Error parsing request ${error.message}`, error);
+    return res.status(400).json({ 'error': 'Invalid query parameters' });
+  }
 });
 
 app.delete('/:name', (req, res) => {
@@ -84,15 +99,20 @@ app.delete('/:name', (req, res) => {
     return res.status(400).json({ 'error': 'Invalid query parameters' });
   }
 
-  const queryString = deleteQueryBuilder({ name, queryParams });
-  const data = query(dbrole, name, queryString);
+  try {
+    const queryString = deleteQueryBuilder({ name, queryParams });
+    const data = query(dbrole, name, queryString);
 
-  Promise.all([data])
-    .then(resultsArray => res.status(200).json(resultsArray[0]))
-    .catch((error) => {
-      logger.error(error.stack);
-      res.status(400).json({ 'error': error.message });
-    });
+    Promise.all([data])
+      .then(resultsArray => res.status(200).json(resultsArray[0]))
+      .catch((error) => {
+        logger.error(`Error executing request ${error.message}`, error);
+        res.status(400).json({ 'error': error.message });
+      });
+  } catch (error) {
+    logger.error(`Error parsing request ${error.message}`, error);
+    return res.status(400).json({ 'error': 'Invalid query parameters' });
+  }
 });
 
 app.post('/rpc/:name', (req, res) => {
@@ -100,19 +120,24 @@ app.post('/rpc/:name', (req, res) => {
   const { dbrole } = res.locals.user;
   const { name } = req.params;
   const queryParams = req.url.split('?')[1];
-  const queryString = selectQueryBuilder({ name, queryParams, body });
+  try {
+    const queryString = functionQueryBuilder({ name, queryParams, body });
 
-  if (!queryString) {
+    if (!queryString) {
+      return res.status(400).json({ 'error': 'Invalid query parameters' });
+    }
+
+    const data = query(dbrole, name, queryString);
+    Promise.all([data])
+      .then(resultsArray => res.status(200).json(resultsArray[0]))
+      .catch((error) => {
+        logger.error(`Error executing request ${error.message}`, error);
+        res.status(400).json({ 'error': error.message });
+      });
+  } catch (error) {
+    logger.error(`Error parsing request ${error.message}`, error);
     return res.status(400).json({ 'error': 'Invalid query parameters' });
   }
-
-  const data = query(dbrole, name, queryString);
-  Promise.all([data])
-    .then(resultsArray => res.status(200).json(resultsArray[0]))
-    .catch((error) => {
-      logger.error(error.stack);
-      res.status(400).json({ 'error': error.message });
-    });
 });
 
 module.exports = app;

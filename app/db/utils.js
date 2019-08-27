@@ -1,19 +1,24 @@
 // local imports
 const logger = require('../config/logger')(__filename);
+const {
+  AbstractSyntaxTree,
+  SELECT_QUERY,
+  INSERT_QUERY,
+  UPDATE_QUERY,
+  DELETE_QUERY,
+  OP_EQUALS,
+  OP_GT,
+  OP_GTE,
+  OP_IN,
+  OP_IS,
+  OP_LT,
+  OP_LTE,
+  TABLE,
+  FUNCTION,
+  NULL,
+} = require('./ast');
 
-function viewFunctionArgsBuilder(body = '') {
-  let args = '';
-
-  if (body) {
-    for (const key in body) {
-      if (Object.prototype.hasOwnProperty.call(body, key)) {
-        args += args ? ',' : '';
-        args += `${key}=>'${body[key]}'`;
-      }
-    }
-  }
-  return args ? `(${args})` : args;
-}
+const { generateCode } = require('./codegen');
 
 function columnsAndRowsBuilder(data) {
   let columns = '';
@@ -56,71 +61,61 @@ function insertIntoOptionsBuilder(body) {
   return `(${dataObj.columns}) VALUES (${dataObj.values})`;
 }
 
-function queryParamsBuilder({ queryParams, body = '', name = '' }) {
-  let options = '';
-  let query = '';
-
-  queryParams = queryParams.replace(/,&/g, ';%20AND%20');
-  queryParams = queryParams.replace(/&/g, ';&');
-  queryParams = queryParams.split(';');
+function queryParamsBuilder({ queryParams }, ast) {
+  queryParams = queryParams.split('&');
   queryParams.map((params) => {
-    const args = viewFunctionArgsBuilder(body);
-    params = params.replace('=', ' ').replace('.', ' ').split(' ');
-    let [field = '', filter = '', value = ''] = params;
-    let isNull = false;
-
-    if (!filter) {
-      return '';
+    if (!params) {
+      return;
     }
-
-    if (filter !== 'in' && isNaN(value) && value !== 'null') {
-      value = `'${value}'`;
-    } else if (isNaN(value) && value === 'null') {
-      isNull = true;
-      value = value.toUpperCase();
-    }
-
-    if (field === 'select') {
-      field = field.toUpperCase();
-    } else if (filter === 'gt' && !isNull) {
-      filter = '>';
-    } else if (filter === 'gte' && !isNull) {
-      filter = '>=';
-    } else if (filter === 'lt' && !isNull) {
-      filter = '<';
-    } else if (filter === 'lte' && !isNull) {
-      filter = '<=';
-    } else if (filter === 'eq' && !isNull) {
-      filter = '=';
-    } else if (filter === 'eq' && isNull) {
-      filter = 'IS';
+    const [paramName, paramValue] = params.split('=');
+    if (paramName === 'select') {
+      if (!paramValue) {
+        throw new TypeError('Select clause specified with no columns');
+      }
+      ast.addColumns(paramValue.split(','));
     } else {
-      filter = 'IN';
-      value = value.replace('%28', '').replace('%29', '').replace(/%20/g, ' ');
+      const field = paramName;
+      let [filter = '', value = ''] = paramValue.split(/\.(.+)/);
 
-      let values = value.split(',');
-      value = values.map(val => val.trim());
-      value = `'${value.join("', '")}'`;
-      value = `(${value})`;
-    }
+      if (value === 'null') {
+        if (filter !== 'eq') {
+          throw new TypeError('NULL value is only valid for "eq" operator"');
+        }
+        ast.addFilter(field, OP_IS, NULL);
+        return;
+      }
+      value = decodeURIComponent(value.replace(/\+/g, '%20'));
 
-    if (!value) {
-      filter = filter.replace(/,/g, ' ');
-      filter = filter.trim();
-      filter = filter.replace(/ /g, ', ');
-      query = `${field} ${filter} FROM ${name}${args}`;
-    } else if (query) {
-      query += query.includes('WHERE') ? `${field} ${filter} ${value}` : `%20WHERE ${field} ${filter} ${value}`;
-    } else {
-      options += `${field} ${filter} ${value}`;
+      switch (filter) {
+        case 'gt':
+          value = value.replace(',', '');
+          ast.addFilter(field, OP_GT, value);
+          break;
+        case 'gte':
+          value = value.replace(',', '');
+          ast.addFilter(field, OP_GTE, value);
+          break;
+        case 'lt':
+          value = value.replace(',', '');
+          ast.addFilter(field, OP_LT, value);
+          break;
+        case 'lte':
+          value = value.replace(',', '');
+          ast.addFilter(field, OP_LTE, value);
+          break;
+        case 'eq':
+          value = value.replace(',', '');
+          ast.addFilter(field, OP_EQUALS, value);
+          break;
+        case 'in':
+          value = value.replace('(', '').replace(')', '');
+          ast.addFilter(field, OP_IN, value.split(',').map(val => val.trim()));
+          break;
+        default:
+          throw new TypeError(`Unkown filter ${filter}`);
+      }
     }
   });
-
-  query = query.replace(/%20/g, ' ');
-  query = query.replace('&', '');
-  query = query ? `${query};` : query;
-  options = options.replace(/%20/g, ' ');
-  return { query, options };
 }
 
 // isPositiveInteger is a function that takes a number
@@ -194,17 +189,20 @@ function queryParamsBuilderV2({ name, queryParams }) {
 
 // version1 Creates a SELECT querystring
 function selectQueryBuilder({ name, body = '', queryParams = '' }) {
-  if (!body && !queryParams) {
-    return `SELECT * FROM ${name};`;
-  }
+  const ast = new AbstractSyntaxTree(SELECT_QUERY, name, TABLE);
 
-  if (body && !queryParams) {
-    const args = viewFunctionArgsBuilder(body);
-    return `SELECT * FROM ${name}${args};`;
-  }
+  queryParamsBuilder({ queryParams }, ast);
 
-  const { query, options } = queryParamsBuilder({ name, queryParams, body });
-  return options ? `SELECT * FROM ${name} WHERE ${options};` : query;
+  return generateCode(ast);
+}
+
+function functionQueryBuilder({ name, body = '', queryParams = '' }) {
+  const ast = new AbstractSyntaxTree(SELECT_QUERY, name, FUNCTION);
+  ast.addArguments(body);
+
+  queryParamsBuilder({ queryParams }, ast);
+
+  return generateCode(ast);
 }
 
 // version2 Creates a SELECT querystring
@@ -221,33 +219,31 @@ function insertIntoQueryBuilder({ name, body, prefer = '' }) {
 
 // Creates an UPDATE querystring
 function updateQueryBuilder({ name, body, id = '', prefer = '', queryParams = '' }) {
-  let values = '';
-  const returning = prefer ? ' RETURNING *' : '';
-
-  for (const key in body) {
-    if (Object.prototype.hasOwnProperty.call(body, key)) {
-      values += values ? ',' : '';
-
-      if (typeof body[key] === 'object') {
-        values += `${key}=${JSON.stringify(body[key])}`;
-      } else {
-        values += `${key}='${body[key]}'`;
-      }
-    }
+  const ast = new AbstractSyntaxTree(UPDATE_QUERY, name, TABLE);
+  if (prefer) {
+    ast.returnData();
   }
-  queryParams = id ? `id=eq.${id}` : queryParams;
-  const { options } = queryParamsBuilder({ queryParams });
-  return values ? `UPDATE ${name} SET ${values} WHERE ${options}${returning};` : '';
+  ast.addColumns(Object.keys(body));
+  ast.addRow(body);
+
+  if (id) {
+    ast.addFilter('id', OP_EQUALS, id);
+  } else {
+    queryParamsBuilder({ queryParams }, ast);
+  }
+  return generateCode(ast);
 }
 
 // Creates a DELETE querystring
 function deleteQueryBuilder({ name, queryParams }) {
-  const { options } = queryParamsBuilder({ queryParams });
-  return `DELETE FROM ${name} WHERE ${options};`;
+  const ast = new AbstractSyntaxTree(DELETE_QUERY, name, TABLE);
+  queryParamsBuilder({ queryParams }, ast);
+  return generateCode(ast);
 }
 
 module.exports = {
   deleteQueryBuilder,
+  functionQueryBuilder,
   insertIntoQueryBuilder,
   selectQueryBuilder,
   selectQueryBuilderV2,
