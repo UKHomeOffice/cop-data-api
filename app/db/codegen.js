@@ -82,7 +82,12 @@ const generateSelect = (ast) => {
   const whereClause = generateWhere(ast);
   const limit = generateLimit(ast);
 
-  return `SELECT ${selectClause} FROM ${ast.objectName}${whereClause}${limit};`;
+  const query = `SELECT ${selectClause} FROM ${ast.objectName}${whereClause}${limit};`;
+
+  return {
+    query,
+    'parameters': ast.parameters,
+  };
 };
 
 const generateInsert = (ast) => {
@@ -91,7 +96,12 @@ const generateInsert = (ast) => {
   const values = generateValues(ast);
   const returning = ast.returning ? ' RETURNING *' : '';
 
-  return `INSERT INTO ${ast.objectName} ${columns} ${values}${returning};`;
+  const query = `INSERT INTO ${ast.objectName} ${columns} ${values}${returning};`;
+
+  return {
+    query,
+    'parameters': ast.parameters,
+  };
 };
 
 const generateUpdate = (ast) => {
@@ -99,13 +109,23 @@ const generateUpdate = (ast) => {
   const whereClause = generateWhere(ast);
   const returning = ast.returning ? ' RETURNING *' : '';
 
-  return `UPDATE ${ast.objectName} SET ${fieldsToUpdate}${whereClause}${returning};`;
+  const query = `UPDATE ${ast.objectName} SET ${fieldsToUpdate}${whereClause}${returning};`;
+
+  return {
+    query,
+    'parameters': ast.parameters,
+  };
 };
 
 const generateDelete = (ast) => {
   const whereClause = generateWhere(ast);
 
-  return `DELETE FROM ${ast.objectName}${whereClause};`;
+  const query = `DELETE FROM ${ast.objectName}${whereClause};`;
+
+  return {
+    query,
+    'parameters': ast.parameters,
+  };
 };
 
 const generateFunctionCall = (ast) => {
@@ -114,7 +134,12 @@ const generateFunctionCall = (ast) => {
   const limit = generateLimit(ast);
   const args = generateArgs(ast);
 
-  return `SELECT ${selectClause} FROM ${ast.objectName}(${args})${whereClause}${limit};`;
+  const query = `SELECT ${selectClause} FROM ${ast.objectName}(${args})${whereClause}${limit};`;
+
+  return {
+    query,
+    'parameters': ast.parameters,
+  };
 };
 
 const generateCode = (ast) => {

@@ -40,6 +40,10 @@ class AbstractSyntaxTree {
     this.arguments = [];
     this.rowCount = 0;
     this.returning = false;
+
+    // Working storage used during code generation
+    this.parameters = [];
+    this.parameterCount = 0;
   }
 
   addColumns(columns) {

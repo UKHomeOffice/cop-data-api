@@ -16,7 +16,7 @@ describe('Test database utils', () => {
       const name = 'roles';
       const queryParams = 'select=developer,linemanager';
       const expectedQuery = `SELECT developer, linemanager FROM ${name};`;
-      const query = selectQueryBuilder({ name, queryParams });
+      const { query, parameters } = selectQueryBuilder({ name, queryParams });
 
       expect(query).to.equal(expectedQuery);
     });
@@ -25,7 +25,7 @@ describe('Test database utils', () => {
       const name = 'roles';
       const queryParams = 'select=firstname,lastname,email';
       const expectedQuery = `SELECT firstname, lastname, email FROM ${name};`;
-      const query = selectQueryBuilder({ name, queryParams });
+      const { query, parameters } = selectQueryBuilder({ name, queryParams });
 
       expect(query).to.equal(expectedQuery);
     });
@@ -35,7 +35,7 @@ describe('Test database utils', () => {
       const queryParams = 'select=';
       const expectedQuery = '';
       try {
-        const query = selectQueryBuilder({ name, queryParams });
+        const { query, parameters } = selectQueryBuilder({ name, queryParams });
       } catch (err) {
         expect(err.message).to.equal('Select clause specified with no columns');
       }
@@ -45,7 +45,7 @@ describe('Test database utils', () => {
       const name = 'users';
       const queryParams = '';
       const expectedQuery = `SELECT * FROM ${name};`;
-      const query = selectQueryBuilder({ name });
+      const { query, parameters } = selectQueryBuilder({ name });
 
       expect(query).to.equal(expectedQuery);
     });
@@ -54,7 +54,7 @@ describe('Test database utils', () => {
       const name = 'team';
       const queryParams = 'name=eq.Tilbury%202';
       const expectedQuery = `SELECT * FROM ${name} WHERE name = 'Tilbury 2';`;
-      const query = selectQueryBuilder({ name, queryParams });
+      const { query, parameters } = selectQueryBuilder({ name, queryParams });
 
       expect(query).to.equal(expectedQuery);
     });
@@ -63,7 +63,7 @@ describe('Test database utils', () => {
       const name = 'users';
       const queryParams = 'email=eq.john@mail.com';
       const expectedQuery = `SELECT * FROM ${name} WHERE email = 'john@mail.com';`;
-      const query = selectQueryBuilder({ name, queryParams });
+      const { query, parameters } = selectQueryBuilder({ name, queryParams });
 
       expect(query).to.equal(expectedQuery);
     });
@@ -72,7 +72,7 @@ describe('Test database utils', () => {
       const name = 'users';
       const queryParams = 'name=eq.null';
       const expectedQuery = `SELECT * FROM ${name} WHERE name IS NULL;`;
-      const query = selectQueryBuilder({ name, queryParams });
+      const { query, parameters } = selectQueryBuilder({ name, queryParams });
 
       expect(query).to.equal(expectedQuery);
     });
@@ -81,7 +81,7 @@ describe('Test database utils', () => {
       const name = 'users';
       const queryParams = 'select=email&staffid=in.%28123,222%29';
       const expectedQuery = `SELECT email FROM ${name} WHERE staffid IN ('123', '222');`;
-      const query = selectQueryBuilder({ name, queryParams });
+      const { query, parameters } = selectQueryBuilder({ name, queryParams });
 
       expect(query).to.equal(expectedQuery);
     });
@@ -90,7 +90,7 @@ describe('Test database utils', () => {
       const name = 'users';
       const queryParams = 'select=email,name&staffid=in.%28123,222%29';
       const expectedQuery = `SELECT email, name FROM ${name} WHERE staffid IN ('123', '222');`;
-      const query = selectQueryBuilder({ name, queryParams });
+      const { query, parameters } = selectQueryBuilder({ name, queryParams });
 
       expect(query).to.equal(expectedQuery);
     });
@@ -99,7 +99,7 @@ describe('Test database utils', () => {
       const name = 'countries';
       const queryParams = 'id=eq.3,&continent=eq.Asia';
       const expectedQuery = `SELECT * FROM ${name} WHERE id = 3 AND continent = 'Asia';`;
-      const query = selectQueryBuilder({ name, queryParams });
+      const { query, parameters } = selectQueryBuilder({ name, queryParams });
 
       expect(query).to.equal(expectedQuery);
     });
@@ -108,7 +108,7 @@ describe('Test database utils', () => {
       const name = 'countries';
       const queryParams = 'select=name,id,continent&id=eq.3,&continent=eq.Asia';
       const expectedQuery = `SELECT name, id, continent FROM ${name} WHERE id = 3 AND continent = 'Asia';`;
-      const query = selectQueryBuilder({ name, queryParams });
+      const { query, parameters } = selectQueryBuilder({ name, queryParams });
 
       expect(query).to.equal(expectedQuery);
     });
@@ -117,7 +117,7 @@ describe('Test database utils', () => {
       const name = 'view_rolemembers';
       const queryParams = 'email=eq.manager@mail.com';
       const expectedQuery = `SELECT * FROM ${name} WHERE email = 'manager@mail.com';`;
-      const query = selectQueryBuilder({ name, queryParams });
+      const { query, parameters } = selectQueryBuilder({ name, queryParams });
 
       expect(query).to.equal(expectedQuery);
     });
@@ -126,7 +126,7 @@ describe('Test database utils', () => {
       const name = 'getoarrecords';
       const queryParams = 'shiftstartdatetime=gte.2019-06-20T12:00:00,&shiftstartdatetime=lt.2019-06-22T12:00:00';
       const expectedQuery = `SELECT * FROM ${name} WHERE shiftstartdatetime >= '2019-06-20T12:00:00' AND shiftstartdatetime < '2019-06-22T12:00:00';`;
-      const query = selectQueryBuilder({ name, queryParams });
+      const { query, parameters } = selectQueryBuilder({ name, queryParams });
 
       expect(query).to.equal(expectedQuery);
     });
@@ -135,7 +135,7 @@ describe('Test database utils', () => {
       const name = 'getoarrecords';
       const queryParams = 'select=firstname&firstname=eq.Julius,&shiftstartdatetime=gt.2019-06-20T12:00:00,&shiftstartdatetime=lte.2019-06-22T12:00:00';
       const expectedQuery = `SELECT firstname FROM ${name} WHERE firstname = 'Julius' AND shiftstartdatetime > '2019-06-20T12:00:00' AND shiftstartdatetime <= '2019-06-22T12:00:00';`;
-      const query = selectQueryBuilder({ name, queryParams });
+      const { query, parameters } = selectQueryBuilder({ name, queryParams });
 
       expect(query).to.equal(expectedQuery);
     });
@@ -146,7 +146,7 @@ describe('Test database utils', () => {
       const name = 'staff';
       const body = { 'name': 'John', 'age': 34, 'email': 'john@mail.com', 'roles': ['linemanager', 'systemuser'] };
       const expectedQuery = `INSERT INTO ${name} (name, age, email, roles) VALUES ('John', '34', 'john@mail.com', '["linemanager","systemuser"]');`;
-      const query = insertIntoQueryBuilder({ name, body });
+      const { query, parameters } = insertIntoQueryBuilder({ name, body });
 
       expect(query).to.equal(expectedQuery);
     });
@@ -156,7 +156,7 @@ describe('Test database utils', () => {
       const body = { 'name': 'John', 'age': 34, 'email': 'john@mail.com' };
       const expectedQuery = `INSERT INTO ${name} (name, age, email) VALUES ('John', '34', 'john@mail.com') RETURNING *;`;
       const prefer = 'return=representation';
-      const query = insertIntoQueryBuilder({ name, body, prefer });
+      const { query, parameters } = insertIntoQueryBuilder({ name, body, prefer });
 
       expect(query).to.equal(expectedQuery);
     });
@@ -168,7 +168,7 @@ describe('Test database utils', () => {
         { 'name': 'Rachel', 'age': 32, 'email': 'rachel@mail.com' },
       ];
       const expectedQuery = `INSERT INTO ${name} (name, age, email) VALUES ('John', '34', 'john@mail.com'), ('Rachel', '32', 'rachel@mail.com');`;
-      const query = insertIntoQueryBuilder({ name, body });
+      const { query, parameters } = insertIntoQueryBuilder({ name, body });
 
       expect(query).to.equal(expectedQuery);
     });
@@ -181,7 +181,7 @@ describe('Test database utils', () => {
       ];
       const expectedQuery = `INSERT INTO ${name} (name, age, email) VALUES ('John', '34', 'john@mail.com'), ('Rachel', '32', 'rachel@mail.com') RETURNING *;`;
       const prefer = 'return=representation';
-      const query = insertIntoQueryBuilder({ name, body, prefer });
+      const { query, parameters } = insertIntoQueryBuilder({ name, body, prefer });
 
       expect(query).to.equal(expectedQuery);
     });
@@ -193,7 +193,7 @@ describe('Test database utils', () => {
       const id = '2553b00e-3cb0-441d-b29d-17196491a1e5';
       const body = { 'email': 'john@mail.com', 'roles': ['linemanager', 'systemuser'] };
       const expectedQuery = `UPDATE ${name} SET email='${body.email}', roles=${JSON.stringify(body.roles)} WHERE id = '${id}';`;
-      const query = updateQueryBuilder({ body, name, id });
+      const { query, parameters } = updateQueryBuilder({ body, name, id });
 
       expect(query).to.equal(expectedQuery);
     });
@@ -204,7 +204,7 @@ describe('Test database utils', () => {
       const prefer = 'return=representation';
       const body = { 'age': 34, 'email': 'john@mail.com', 'roles': ['linemanager', 'systemuser'] };
       const expectedQuery = `UPDATE ${name} SET age='${body.age}', email='${body.email}', roles=${JSON.stringify(body.roles)} WHERE id = '${id}' RETURNING *;`;
-      const query = updateQueryBuilder({ body, name, id, prefer });
+      const { query, parameters } = updateQueryBuilder({ body, name, id, prefer });
 
       expect(query).to.equal(expectedQuery);
     });
@@ -216,7 +216,7 @@ describe('Test database utils', () => {
       const queryParams = `firstname=eq.${firstname},&id=eq.${id}`;
       const body = { 'firstname': 'John' };
       const expectedQuery = `UPDATE ${name} SET firstname='${body.firstname}' WHERE firstname = '${firstname}' AND id = '${id}';`;
-      const query = updateQueryBuilder({ body, name, queryParams });
+      const { query, parameters } = updateQueryBuilder({ body, name, queryParams });
 
       expect(query).to.equal(expectedQuery);
     });
@@ -228,7 +228,7 @@ describe('Test database utils', () => {
       const queryParams = `firstname=eq.${firstname},&id=eq.${id}`;
       const body = { 'firstname': 'John' };
       const expectedQuery = `UPDATE ${name} SET firstname='${body.firstname}' WHERE id = '${id}';`;
-      const query = updateQueryBuilder({ body, name, id, queryParams });
+      const { query, parameters } = updateQueryBuilder({ body, name, id, queryParams });
 
       expect(query).to.equal(expectedQuery);
     });
@@ -239,7 +239,7 @@ describe('Test database utils', () => {
       const name = 'roles';
       const queryParams = 'email=eq.manager@mail.com';
       const expectedQuery = `DELETE FROM ${name} WHERE email = 'manager@mail.com';`;
-      const query = deleteQueryBuilder({ name, queryParams });
+      const { query, parameters } = deleteQueryBuilder({ name, queryParams });
 
       expect(query).to.equal(expectedQuery);
     });
@@ -248,7 +248,7 @@ describe('Test database utils', () => {
       const name = 'roles';
       const queryParams = 'email=eq.manager@mail.com,&id=eq.123';
       const expectedQuery = `DELETE FROM ${name} WHERE email = 'manager@mail.com' AND id = 123;`;
-      const query = deleteQueryBuilder({ name, queryParams });
+      const { query, parameters } = deleteQueryBuilder({ name, queryParams });
 
       expect(query).to.equal(expectedQuery);
     });
@@ -259,7 +259,7 @@ describe('Test database utils', () => {
       const name = 'staffdetails';
       const body = { 'argstaffemail': 'daisy@mail.com' };
       const expectedQuery = `SELECT * FROM ${name}(argstaffemail=>'daisy@mail.com');`;
-      const query = functionQueryBuilder({ name, body });
+      const { query, parameters } = functionQueryBuilder({ name, body });
 
       expect(query).to.equal(expectedQuery);
     });
@@ -268,7 +268,7 @@ describe('Test database utils', () => {
       const name = 'staffdetails';
       const body = { 'argfirstname': 'Andy', 'argstaffid': 'af4601db-1640-4ff2-a4cc-da44bce99226' };
       const expectedQuery = `SELECT * FROM ${name}(argfirstname=>'Andy', argstaffid=>'af4601db-1640-4ff2-a4cc-da44bce99226');`;
-      const query = functionQueryBuilder({ name, body });
+      const { query, parameters } = functionQueryBuilder({ name, body });
 
       expect(query).to.equal(expectedQuery);
     });
@@ -278,7 +278,7 @@ describe('Test database utils', () => {
       const queryParams = 'select=email';
       const body = { 'argfirstname': 'Lauren', 'argstaffid': 'af4601db-1640-4ff2-a4cc-da44bce99226' };
       const expectedQuery = `SELECT email FROM ${name}(argfirstname=>'Lauren', argstaffid=>'af4601db-1640-4ff2-a4cc-da44bce99226');`;
-      const query = functionQueryBuilder({ name, body, queryParams });
+      const { query, parameters } = functionQueryBuilder({ name, body, queryParams });
 
       expect(query).to.equal(expectedQuery);
     });
@@ -288,7 +288,7 @@ describe('Test database utils', () => {
       const queryParams = 'select=email&lastname=eq.Smith';
       const body = { 'argfirstname': 'John', 'argstaffid': 'af4601db-1640-4ff2-a4cc-da44bce99226' };
       const expectedQuery = `SELECT email FROM ${name}(argfirstname=>'John', argstaffid=>'af4601db-1640-4ff2-a4cc-da44bce99226') WHERE lastname = 'Smith';`;
-      const query = functionQueryBuilder({ name, body, queryParams });
+      const { query, parameters } = functionQueryBuilder({ name, body, queryParams });
 
       expect(query).to.equal(expectedQuery);
     });
@@ -306,7 +306,7 @@ describe('Test database utils', () => {
         'limit': '5',
       };
       const expectedQuery = `SELECT name, city FROM ${name} WHERE name = 'Tilbury 1' AND city = 'London' LIMIT 5;`;
-      const query = selectQueryBuilderV2({ name, queryParams });
+      const { query, parameters } = selectQueryBuilderV2({ name, queryParams });
 
       expect(query).to.equal(expectedQuery);
     });
@@ -320,7 +320,7 @@ describe('Test database utils', () => {
         'limit': '1',
       };
       const expectedQuery = `SELECT * FROM ${name} WHERE firstname = 'Pedro' LIMIT 1;`;
-      const query = selectQueryBuilderV2({ name, queryParams });
+      const { query, parameters } = selectQueryBuilderV2({ name, queryParams });
 
       expect(query).to.equal(expectedQuery);
     });
@@ -329,7 +329,7 @@ describe('Test database utils', () => {
       const name = 'roles';
       const queryParams = { 'limit': '1' };
       const expectedQuery = `SELECT * FROM ${name} LIMIT 1;`;
-      const query = selectQueryBuilderV2({ name, queryParams });
+      const { query, parameters } = selectQueryBuilderV2({ name, queryParams });
 
       expect(query).to.equal(expectedQuery);
     });
@@ -338,7 +338,7 @@ describe('Test database utils', () => {
       const name = 'roles';
       const queryParams = { 'select': ['name,age', 'location'] };
       try {
-        const query = selectQueryBuilderV2({ name, queryParams });
+        const { query, parameters } = selectQueryBuilderV2({ name, queryParams });
       } catch (error) {
         expect(error.message).to.equal('Only one value permitted for select and limit');
       }
@@ -348,7 +348,7 @@ describe('Test database utils', () => {
       const name = 'roles';
       const queryParams = { 'limit': ['3', '77'] };
       try {
-        const query = selectQueryBuilderV2({ name, queryParams });
+        const { query, parameters } = selectQueryBuilderV2({ name, queryParams });
       } catch (error) {
         expect(error.message).to.equal('Only one value permitted for select and limit');
       }
