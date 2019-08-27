@@ -97,32 +97,19 @@ function isPositiveInteger(stringValue) {
   return number !== Infinity && String(number) === stringValue && number >= 0;
 }
 
-function queryParamsBuilderV2({ name, queryParams }) {
-  let conditions = '';
-  let limit = '';
-  let order = '';
-  let select = '';
-
+function queryParamsBuilderV2({ name, queryParams }, ast) {
   // check if select and limit are arrays
   if ((queryParams.select || queryParams.limit)
       && (Array.isArray(queryParams.select) || Array.isArray(queryParams.limit))) {
-    return '';
-  }
-
-  // check if limit is not integer
-  // check if limit is a negative integer
-  if (queryParams.limit && !isPositiveInteger(queryParams.limit)) {
-    return '';
-  }
-
-  if (queryParams.select) {
-    select = `SELECT ${queryParams.select} FROM ${name}`;
-  } else {
-    select = `SELECT * FROM ${name}`;
+    throw new TypeError('Only one value permitted for select and limit');
   }
 
   if (queryParams.limit) {
-    limit = `%20LIMIT ${queryParams.limit}`;
+    ast.limit(queryParams.limit);
+  }
+
+  if (queryParams.select) {
+    ast.addColumns(queryParams.select.split(','));
   }
 
   if (queryParams.filter) {
@@ -132,28 +119,22 @@ function queryParamsBuilderV2({ name, queryParams }) {
       let [field, filter, value] = params;
       let isNull = false;
 
-      if (filter !== 'in' && isNaN(value) && value !== 'null') {
-        value = `'${value}'`;
-      } else if (isNaN(value) && value === 'null') {
+      if (isNaN(value) && value === 'null') {
         isNull = true;
-        value = value.toUpperCase();
+        value = NULL;
       }
 
       if (filter === 'eq' && !isNull) {
         // 'continent = \'Asia\''
-        filter = '=';
+        filter = OP_EQUALS;
       } else if (filter === 'eq' && isNull) {
         // 'validfrom IS NULL'
-        filter = 'IS';
+        filter = OP_IS;
       }
 
-      conditions += conditions.includes('WHERE') ? `%20AND ${field} ${filter} ${value}` : `%20WHERE ${field} ${filter} ${value}`;
+      ast.addFilter(field, filter, value);
     });
   }
-
-  let query = `${select}${conditions}${order}${limit};`;
-  query = query.replace(/%20/g, ' ');
-  return query;
 }
 
 // version1 Creates a SELECT querystring
@@ -176,7 +157,11 @@ function functionQueryBuilder({ name, body = '', queryParams = '' }) {
 
 // version2 Creates a SELECT querystring
 function selectQueryBuilderV2({ name, queryParams = '' }) {
-  return queryParamsBuilderV2({ name, queryParams });
+  const ast = new AbstractSyntaxTree(SELECT_QUERY, name, TABLE);
+
+  queryParamsBuilderV2({ name, queryParams }, ast);
+
+  return generateCode(ast);
 }
 
 // Creates a INSERT INTO querystring

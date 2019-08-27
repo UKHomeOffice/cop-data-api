@@ -23,6 +23,7 @@ const quoteNonArrayParam = param => (!Array.isArray(param) ? `'${param}'` : para
 const generateColumns = ast => ast.columns.join(', ');
 
 const generateArgs = ast => ast.arguments.map(([name, value]) => `${name}=>'${value}'`).join(', ');
+const generateLimit = ast => (ast.rowCount ? ` LIMIT ${ast.rowCount}` : '');
 
 const generateValues = (ast) => {
   if (ast.data.length === 0) {
@@ -79,8 +80,9 @@ const generateWhere = (ast) => {
 const generateSelect = (ast) => {
   const selectClause = generateColumns(ast) || '*';
   const whereClause = generateWhere(ast);
+  const limit = generateLimit(ast);
 
-  return `SELECT ${selectClause} FROM ${ast.objectName}${whereClause};`;
+  return `SELECT ${selectClause} FROM ${ast.objectName}${whereClause}${limit};`;
 };
 
 const generateInsert = (ast) => {
@@ -109,9 +111,10 @@ const generateDelete = (ast) => {
 const generateFunctionCall = (ast) => {
   const selectClause = generateColumns(ast) || '*';
   const whereClause = generateWhere(ast);
+  const limit = generateLimit(ast);
   const args = generateArgs(ast);
 
-  return `SELECT ${selectClause} FROM ${ast.objectName}(${args})${whereClause};`;
+  return `SELECT ${selectClause} FROM ${ast.objectName}(${args})${whereClause}${limit};`;
 };
 
 const generateCode = (ast) => {

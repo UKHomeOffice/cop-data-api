@@ -390,54 +390,41 @@ describe('Test database utils', () => {
   });
 
   describe('v2 GET - querystring builder', () => {
-    xit('Should return a querystring with two columns selected filtered by name and city and a limit of 5 rows', () => {
+    it('Should return a querystring with two columns selected filtered by name and city and a limit of 5 rows', () => {
       const name = 'roles';
-      const queryParams = {
-        'select': 'name,city',
-        'filter': [
-          'name=eq.Tilbury 1',
-          'city=eq.London',
-        ],
-        'limit': '5',
-      };
-      const expectedQuery = `SELECT name,city FROM ${name} WHERE name = 'Tilbury 1' AND city = 'London' LIMIT 5;`;
-      const query = selectQueryBuilderV2({ name, queryParams });
+      const ast = new AbstractSyntaxTree(SELECT_QUERY, name, TABLE);
+      ast.addColumns(['name', 'city']);
+      ast.addFilter('name', OP_EQUALS, 'Tilbury 1');
+      ast.addFilter('city', OP_EQUALS, 'London');
+      ast.limit(5);
+      const expectedQuery = `SELECT name, city FROM ${name} WHERE name = 'Tilbury 1' AND city = 'London' LIMIT 5;`;
+
+      const query = generateCode(ast);
 
       expect(query).to.equal(expectedQuery);
     });
 
-    xit('Should return a querystring with all columns filtering by firstname and a limit of 1 row', () => {
+    it('Should return a querystring with all columns filtering by firstname and a limit of 1 row', () => {
       const name = 'roles';
-      const queryParams = {
-        'filter': [
-          'firstname=eq.Pedro',
-        ],
-        'limit': '1',
-      };
+      const ast = new AbstractSyntaxTree(SELECT_QUERY, name, TABLE);
+      ast.addFilter('firstname', OP_EQUALS, 'Pedro');
+      ast.limit(1);
       const expectedQuery = `SELECT * FROM ${name} WHERE firstname = 'Pedro' LIMIT 1;`;
-      const query = selectQueryBuilderV2({ name, queryParams });
+
+      const query = generateCode(ast);
 
       expect(query).to.equal(expectedQuery);
     });
 
-    xit('Should return a querystring with all columns and a limit of 1 row', () => {
+    it('Should return a querystring with all columns and a limit of 1 row', () => {
       const name = 'roles';
-      const queryParams = { 'limit': '1' };
+      const ast = new AbstractSyntaxTree(SELECT_QUERY, name, TABLE);
+      ast.limit(1);
       const expectedQuery = `SELECT * FROM ${name} LIMIT 1;`;
-      const query = selectQueryBuilderV2({ name, queryParams });
+
+      const query = generateCode(ast);
 
       expect(query).to.equal(expectedQuery);
-    });
-
-    xit('Should return an empty querystring if there is more than one select in the query params', () => {
-      const name = 'roles';
-      const queryParams = {
-        'limit': ['3', '77'],
-        'select': ['name,age', 'location'],
-      };
-      const query = selectQueryBuilderV2({ name, queryParams });
-
-      expect(query).to.equal('');
     });
   });
 });

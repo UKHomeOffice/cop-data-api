@@ -305,7 +305,7 @@ describe('Test database utils', () => {
         ],
         'limit': '5',
       };
-      const expectedQuery = `SELECT name,city FROM ${name} WHERE name = 'Tilbury 1' AND city = 'London' LIMIT 5;`;
+      const expectedQuery = `SELECT name, city FROM ${name} WHERE name = 'Tilbury 1' AND city = 'London' LIMIT 5;`;
       const query = selectQueryBuilderV2({ name, queryParams });
 
       expect(query).to.equal(expectedQuery);
@@ -336,13 +336,22 @@ describe('Test database utils', () => {
 
     it('Should return an empty querystring if there is more than one select in the query params', () => {
       const name = 'roles';
-      const queryParams = {
-        'limit': ['3', '77'],
-        'select': ['name,age', 'location'],
-      };
-      const query = selectQueryBuilderV2({ name, queryParams });
+      const queryParams = { 'select': ['name,age', 'location'] };
+      try {
+        const query = selectQueryBuilderV2({ name, queryParams });
+      } catch (error) {
+        expect(error.message).to.equal('Only one value permitted for select and limit');
+      }
+    });
 
-      expect(query).to.equal('');
+    it('Should return an empty querystring if there is more than one limit in the query params', () => {
+      const name = 'roles';
+      const queryParams = { 'limit': ['3', '77'] };
+      try {
+        const query = selectQueryBuilderV2({ name, queryParams });
+      } catch (error) {
+        expect(error.message).to.equal('Only one value permitted for select and limit');
+      }
     });
   });
 });

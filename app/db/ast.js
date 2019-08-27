@@ -24,6 +24,7 @@ const DELETE_QUERY = 'DELETE';
 const TABLE = 'TABLE';
 const FUNCTION = 'FUNCTION';
 
+
 class AbstractSyntaxTree {
   constructor(type, objectName, objectType) {
     if (!type || !objectName || !objectType) {
@@ -37,6 +38,7 @@ class AbstractSyntaxTree {
     this.data = [];
     this.filter = [];
     this.arguments = [];
+    this.rowCount = 0;
     this.returning = false;
   }
 
@@ -80,6 +82,13 @@ class AbstractSyntaxTree {
     if (this.type === UPDATE_QUERY || this.type === INSERT_QUERY) {
       this.returning = true;
     }
+  }
+
+  limit(limit) {
+    if (limit && limit <= 0) {
+      throw new TypeError(`Limit must be a positive integer: '${limit}'`);
+    }
+    this.rowCount = limit;
   }
 }
 /*

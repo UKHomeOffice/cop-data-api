@@ -15,21 +15,25 @@ app.get('/:name', (req, res) => {
   if (queryParams.filter && !Array.isArray(queryParams.filter)) {
     queryParams.filter = [queryParams.filter];
   }
+  try {
+    const queryString = selectQueryBuilderV2({ name, queryParams });
 
-  const queryString = selectQueryBuilderV2({ name, queryParams });
+    if (!queryString) {
+      return res.status(400).json({ 'error': 'Invalid query parameters' });
+    }
 
-  if (!queryString) {
+    const data = query(dbrole, name, queryString);
+
+    Promise.all([data])
+      .then(resultsArray => res.status(200).json(resultsArray[0]))
+      .catch((error) => {
+        logger.error(error.stack);
+        res.status(400).json({ 'error': error.message });
+      });
+  } catch (error) {
+    logger.error(`Error parsing request ${error.message}`, error);
     return res.status(400).json({ 'error': 'Invalid query parameters' });
   }
-
-  const data = query(dbrole, name, queryString);
-
-  Promise.all([data])
-    .then(resultsArray => res.status(200).json(resultsArray[0]))
-    .catch((error) => {
-      logger.error(error.stack);
-      res.status(400).json({ 'error': error.message });
-    });
 });
 
 module.exports = app;
