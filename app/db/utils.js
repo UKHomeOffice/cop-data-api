@@ -20,45 +20,14 @@ const {
 
 const { generateCode } = require('./codegen');
 
-function columnsAndRowsBuilder(data) {
-  let columns = '';
-  let values = '';
-
-  for (const key in data) {
-    if (Object.prototype.hasOwnProperty.call(data, key)) {
-      columns += columns ? ',' : '';
-      columns += key;
-      values += values ? ',' : '';
-
-      if (typeof data[key] === 'object') {
-        values += `'${JSON.stringify(data[key])}'`;
-      } else {
-        values += `'${data[key]}'`;
-      }
-    }
-  }
-  return { columns, values };
-}
-
-function insertIntoOptionsBuilder(body) {
-  let rowValues = '';
-  let columns = '';
-  let values = '';
-
+function insertIntoOptionsBuilder(body, ast) {
   if (Array.isArray(body)) {
-    body.map((data) => {
-      const dataObj = columnsAndRowsBuilder(data);
-      rowValues += rowValues ? ',' : '';
-      rowValues += dataObj.values ? `(${dataObj.values})` : '';
-      columns = `(${dataObj.columns})`;
-    });
-
-    return `${columns} VALUES ${rowValues}`;
+    ast.addColumns(Object.keys(body[0]));
+    body.forEach(row => ast.addRow(row));
+  } else {
+    ast.addColumns(Object.keys(body));
+    ast.addRow(body);
   }
-  const dataObj = columnsAndRowsBuilder(body);
-  columns = `(${dataObj.columns})`;
-
-  return `(${dataObj.columns}) VALUES (${dataObj.values})`;
 }
 
 function queryParamsBuilder({ queryParams }, ast) {
@@ -212,9 +181,14 @@ function selectQueryBuilderV2({ name, queryParams = '' }) {
 
 // Creates a INSERT INTO querystring
 function insertIntoQueryBuilder({ name, body, prefer = '' }) {
+  const ast = new AbstractSyntaxTree(INSERT_QUERY, name, TABLE);
   const returning = prefer ? ' RETURNING *' : '';
-  const options = insertIntoOptionsBuilder(body);
-  return `INSERT INTO ${name} ${options}${returning};`;
+
+  if (returning) {
+    ast.returnData();
+  }
+  insertIntoOptionsBuilder(body, ast);
+  return generateCode(ast);
 }
 
 // Creates an UPDATE querystring
