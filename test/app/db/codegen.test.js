@@ -73,11 +73,13 @@ describe('Test database utils', () => {
       const name = 'team';
       const ast = new AbstractSyntaxTree(SELECT_QUERY, name, TABLE);
       ast.addFilter('name', OP_EQUALS, 'Tilbury 2');
-      const expectedQuery = `SELECT * FROM ${name} WHERE name = 'Tilbury 2';`;
+      const expectedQuery = `SELECT * FROM ${name} WHERE name = $1;`;
+      const expectedParams = ['Tilbury 2'];
 
       const { query, parameters } = generateCode(ast);
 
       expect(query).to.equal(expectedQuery);
+      expect(parameters).to.eql(expectedParams);
     });
 
     xit('Should return a querystring for all data where email matches user email', () => {
@@ -133,11 +135,13 @@ describe('Test database utils', () => {
       const ast = new AbstractSyntaxTree(SELECT_QUERY, name, TABLE);
       ast.addFilter('id', OP_EQUALS, 3);
       ast.addFilter('continent', OP_EQUALS, 'Asia');
-      const expectedQuery = `SELECT * FROM ${name} WHERE id = 3 AND continent = 'Asia';`;
+      const expectedQuery = `SELECT * FROM ${name} WHERE id = $1 AND continent = $2;`;
+      const expectedParams = [3, 'Asia'];
 
       const { query, parameters } = generateCode(ast);
 
       expect(query).to.equal(expectedQuery);
+      expect(parameters).to.eql(expectedParams);
     });
 
     it('Should return a querystring with name, id and continent selected where id and continent match the provided values', () => {
@@ -146,11 +150,13 @@ describe('Test database utils', () => {
       ast.addColumns(['name', 'id', 'continent']);
       ast.addFilter('id', OP_EQUALS, 3);
       ast.addFilter('continent', OP_EQUALS, 'Asia');
-      const expectedQuery = `SELECT name, id, continent FROM ${name} WHERE id = 3 AND continent = 'Asia';`;
+      const expectedQuery = `SELECT name, id, continent FROM ${name} WHERE id = $1 AND continent = $2;`;
+      const expectedParams = [3, 'Asia'];
 
       const { query, parameters } = generateCode(ast);
 
       expect(query).to.equal(expectedQuery);
+      expect(parameters).to.eql(expectedParams);
     });
 
     xit('Should return a querystring witha select to a sql view with filtering parameters', () => {
@@ -167,11 +173,13 @@ describe('Test database utils', () => {
       const ast = new AbstractSyntaxTree(SELECT_QUERY, name, TABLE);
       ast.addFilter('shiftstartdatetime', OP_GTE, '2019-06-20T12:00:00');
       ast.addFilter('shiftstartdatetime', OP_LT, '2019-06-22T12:00:00');
-      const expectedQuery = `SELECT * FROM ${name} WHERE shiftstartdatetime >= '2019-06-20T12:00:00' AND shiftstartdatetime < '2019-06-22T12:00:00';`;
+      const expectedQuery = `SELECT * FROM ${name} WHERE shiftstartdatetime >= $1 AND shiftstartdatetime < $2;`;
+      const expectedParams = ['2019-06-20T12:00:00', '2019-06-22T12:00:00'];
 
       const { query, parameters } = generateCode(ast);
 
       expect(query).to.equal(expectedQuery);
+      expect(parameters).to.eql(expectedParams);
     });
 
     it('Should return a querystring with name selected where shiftstartdatetime matches the date range values', () => {
@@ -181,11 +189,13 @@ describe('Test database utils', () => {
       ast.addFilter('firstname', OP_EQUALS, 'Julius');
       ast.addFilter('shiftstartdatetime', OP_GT, '2019-06-20T12:00:00');
       ast.addFilter('shiftstartdatetime', OP_LTE, '2019-06-22T12:00:00');
-      const expectedQuery = `SELECT firstname FROM ${name} WHERE firstname = 'Julius' AND shiftstartdatetime > '2019-06-20T12:00:00' AND shiftstartdatetime <= '2019-06-22T12:00:00';`;
+      const expectedQuery = `SELECT firstname FROM ${name} WHERE firstname = $1 AND shiftstartdatetime > $2 AND shiftstartdatetime <= $3;`;
+      const expectedParams = ['Julius', '2019-06-20T12:00:00', '2019-06-22T12:00:00'];
 
       const { query, parameters } = generateCode(ast);
 
       expect(query).to.equal(expectedQuery);
+      expect(parameters).to.eql(expectedParams);
     });
   });
 
@@ -270,8 +280,8 @@ describe('Test database utils', () => {
       ast.addFilter('id', OP_EQUALS, id);
       ast.addColumns(['email', 'roles']);
       ast.addRow(body);
-      const expectedQuery = `UPDATE ${name} SET email=$1, roles=$2 WHERE id = '${id}';`;
-      const expectedParams = [body.email, JSON.stringify(body.roles)];
+      const expectedQuery = `UPDATE ${name} SET email=$1, roles=$2 WHERE id = $3;`;
+      const expectedParams = [body.email, JSON.stringify(body.roles), id];
 
       const { query, parameters } = generateCode(ast);
 
@@ -288,8 +298,8 @@ describe('Test database utils', () => {
       ast.addColumns(['age', 'email', 'roles']);
       ast.addRow(body);
       ast.returnData();
-      const expectedQuery = `UPDATE ${name} SET age=$1, email=$2, roles=$3 WHERE id = '${id}' RETURNING *;`;
-      const expectedParams = [body.age, body.email, JSON.stringify(body.roles)];
+      const expectedQuery = `UPDATE ${name} SET age=$1, email=$2, roles=$3 WHERE id = $4 RETURNING *;`;
+      const expectedParams = [body.age, body.email, JSON.stringify(body.roles), id];
 
       const { query, parameters } = generateCode(ast);
 
@@ -307,8 +317,8 @@ describe('Test database utils', () => {
       ast.addFilter('id', OP_EQUALS, id);
       ast.addColumns('firstname');
       ast.addRow(body);
-      const expectedParams = ['John'];
-      const expectedQuery = `UPDATE ${name} SET firstname=$1 WHERE firstname = '${firstname}' AND id = '${id}';`;
+      const expectedQuery = `UPDATE ${name} SET firstname=$1 WHERE firstname = $2 AND id = $3;`;
+      const expectedParams = ['John', firstname, id];
       const { query, parameters } = generateCode(ast);
 
       expect(query).to.equal(expectedQuery);
@@ -333,11 +343,13 @@ describe('Test database utils', () => {
       const name = 'roles';
       const ast = new AbstractSyntaxTree(DELETE_QUERY, name, TABLE);
       ast.addFilter('email', OP_EQUALS, 'manager@mail.com');
-      const expectedQuery = `DELETE FROM ${name} WHERE email = 'manager@mail.com';`;
+      const expectedQuery = `DELETE FROM ${name} WHERE email = $1;`;
+      const expectedParams = ['manager@mail.com'];
 
       const { query, parameters } = generateCode(ast);
 
       expect(query).to.equal(expectedQuery);
+      expect(parameters).to.eql(expectedParams);
     });
 
     it('Should return a querystring to delete a row matching the email address and id', () => {
@@ -345,11 +357,13 @@ describe('Test database utils', () => {
       const ast = new AbstractSyntaxTree(DELETE_QUERY, name, TABLE);
       ast.addFilter('email', OP_EQUALS, 'manager@mail.com');
       ast.addFilter('id', OP_EQUALS, 123);
-      const expectedQuery = `DELETE FROM ${name} WHERE email = 'manager@mail.com' AND id = 123;`;
+      const expectedQuery = `DELETE FROM ${name} WHERE email = $1 AND id = $2;`;
+      const expectedParams = ['manager@mail.com', 123];
 
       const { query, parameters } = generateCode(ast);
 
       expect(query).to.equal(expectedQuery);
+      expect(parameters).to.eql(expectedParams);
     });
   });
 
@@ -398,11 +412,13 @@ describe('Test database utils', () => {
       ast.addColumns('email');
       ast.addFilter('lastname', OP_EQUALS, 'Smith');
       ast.addArguments(body);
-      const expectedQuery = `SELECT email FROM ${name}(argfirstname=>'John', argstaffid=>'af4601db-1640-4ff2-a4cc-da44bce99226') WHERE lastname = 'Smith';`;
+      const expectedQuery = `SELECT email FROM ${name}(argfirstname=>'John', argstaffid=>'af4601db-1640-4ff2-a4cc-da44bce99226') WHERE lastname = $1;`;
+      const expectedParams = ['Smith'];
 
       const { query, parameters } = generateCode(ast);
 
       expect(query).to.equal(expectedQuery);
+      expect(parameters).to.eql(expectedParams);
     });
   });
 
@@ -414,11 +430,13 @@ describe('Test database utils', () => {
       ast.addFilter('name', OP_EQUALS, 'Tilbury 1');
       ast.addFilter('city', OP_EQUALS, 'London');
       ast.limit(5);
-      const expectedQuery = `SELECT name, city FROM ${name} WHERE name = 'Tilbury 1' AND city = 'London' LIMIT 5;`;
+      const expectedQuery = `SELECT name, city FROM ${name} WHERE name = $1 AND city = $2 LIMIT 5;`;
+      const expectedParams = ['Tilbury 1', 'London'];
 
       const { query, parameters } = generateCode(ast);
 
       expect(query).to.equal(expectedQuery);
+      expect(parameters).to.eql(expectedParams);
     });
 
     it('Should return a querystring with all columns filtering by firstname and a limit of 1 row', () => {
@@ -426,11 +444,13 @@ describe('Test database utils', () => {
       const ast = new AbstractSyntaxTree(SELECT_QUERY, name, TABLE);
       ast.addFilter('firstname', OP_EQUALS, 'Pedro');
       ast.limit(1);
-      const expectedQuery = `SELECT * FROM ${name} WHERE firstname = 'Pedro' LIMIT 1;`;
+      const expectedQuery = `SELECT * FROM ${name} WHERE firstname = $1 LIMIT 1;`;
+      const expectedParams = ['Pedro'];
 
       const { query, parameters } = generateCode(ast);
 
       expect(query).to.equal(expectedQuery);
+      expect(parameters).to.eql(expectedParams);
     });
 
     it('Should return a querystring with all columns and a limit of 1 row', () => {

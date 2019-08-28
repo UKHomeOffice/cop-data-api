@@ -19,8 +19,6 @@ const generateTuple = (tuple, ast) => `(${tuple.map(arrayToString)
   .map(value => `$${ast.nextParameter(value)}`)
   .join(', ')})`;
 
-const quoteStringParam = param => (isNaN(param) ? `'${param}'` : param);
-
 const generateColumns = ast => ast.columns.join(', ');
 
 const generateArgs = ast => ast.arguments.map(([name, value]) => `${name}=>'${value}'`).join(', ');
@@ -53,19 +51,19 @@ const generateWhere = (ast) => {
   const filters = ast.filter.map((filter) => {
     switch (filter.operator) {
       case OP_EQUALS:
-        return `${filter.fieldName} = ${quoteStringParam(filter.operand)}`;
+        return `${filter.fieldName} = $${ast.nextParameter(filter.operand)}`;
       case OP_GT:
-        return `${filter.fieldName} > ${quoteStringParam(filter.operand)}`;
+        return `${filter.fieldName} > $${ast.nextParameter(filter.operand)}`;
       case OP_GTE:
-        return `${filter.fieldName} >= ${quoteStringParam(filter.operand)}`;
+        return `${filter.fieldName} >= $${ast.nextParameter(filter.operand)}`;
       case OP_IN:
         return `${filter.fieldName} IN ${generateTuple(filter.operand, ast)}`;
       case OP_IS:
         return `${filter.fieldName} IS ${filter.operand}`;
       case OP_LT:
-        return `${filter.fieldName} < ${quoteStringParam(filter.operand)}`;
+        return `${filter.fieldName} < $${ast.nextParameter(filter.operand)}`;
       case OP_LTE:
-        return `${filter.fieldName} <= ${quoteStringParam(filter.operand)}`;
+        return `${filter.fieldName} <= $${ast.nextParameter(filter.operand)}`;
       default:
         throw new TypeError(`Unimplmented operator ${filter.operator}`);
     }

@@ -30,6 +30,14 @@ function insertIntoOptionsBuilder(body, ast) {
   }
 }
 
+function scalarFilter(ast, field, operator, operand) {
+  operand = operand.replace(',', '');
+  if (!isNaN(operand)) {
+    operand = Number(operand);
+  }
+  ast.addFilter(field, operator, operand);
+}
+
 function queryParamsBuilder({ queryParams }, ast) {
   queryParams = queryParams.split('&');
   queryParams.map((params) => {
@@ -44,7 +52,7 @@ function queryParamsBuilder({ queryParams }, ast) {
       ast.addColumns(paramValue.split(','));
     } else {
       const field = paramName;
-      let [filter = '', value = ''] = paramValue.split(/\.(.+)/);
+      let [filter = '', value = ''] = paramValue.split(/\.(.+),*$/);
 
       if (value === 'null') {
         if (filter !== 'eq') {
@@ -57,24 +65,19 @@ function queryParamsBuilder({ queryParams }, ast) {
 
       switch (filter) {
         case 'gt':
-          value = value.replace(',', '');
-          ast.addFilter(field, OP_GT, value);
+          scalarFilter(ast, field, OP_GT, value);
           break;
         case 'gte':
-          value = value.replace(',', '');
-          ast.addFilter(field, OP_GTE, value);
+          scalarFilter(ast, field, OP_GTE, value);
           break;
         case 'lt':
-          value = value.replace(',', '');
-          ast.addFilter(field, OP_LT, value);
+          scalarFilter(ast, field, OP_LT, value);
           break;
         case 'lte':
-          value = value.replace(',', '');
-          ast.addFilter(field, OP_LTE, value);
+          scalarFilter(ast, field, OP_LTE, value);
           break;
         case 'eq':
-          value = value.replace(',', '');
-          ast.addFilter(field, OP_EQUALS, value);
+          scalarFilter(ast, field, OP_EQUALS, value);
           break;
         case 'in':
           value = value.replace('(', '').replace(')', '');
