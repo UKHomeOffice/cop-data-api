@@ -105,11 +105,13 @@ describe('Test database utils', () => {
       const ast = new AbstractSyntaxTree(SELECT_QUERY, name, TABLE);
       ast.addColumns('email');
       ast.addFilter('staffid', OP_IN, ['123', '222']);
-      const expectedQuery = `SELECT email FROM ${name} WHERE staffid IN ('123', '222');`;
+      const expectedQuery = `SELECT email FROM ${name} WHERE staffid IN ($1, $2);`;
+      const expectedParams = ['123', '222'];
 
       const { query, parameters } = generateCode(ast);
 
       expect(query).to.equal(expectedQuery);
+      expect(parameters).to.eql(expectedParams);
     });
 
     it('Should return a querystring with two columns selected filtering by an array', () => {
@@ -117,11 +119,13 @@ describe('Test database utils', () => {
       const ast = new AbstractSyntaxTree(SELECT_QUERY, name, TABLE);
       ast.addColumns(['email', 'name']);
       ast.addFilter('staffid', OP_IN, ['123', '222']);
-      const expectedQuery = `SELECT email, name FROM ${name} WHERE staffid IN ('123', '222');`;
+      const expectedQuery = `SELECT email, name FROM ${name} WHERE staffid IN ($1, $2);`;
+      const expectedParams = ['123', '222'];
 
       const { query, parameters } = generateCode(ast);
 
       expect(query).to.equal(expectedQuery);
+      expect(parameters).to.eql(expectedParams);
     });
 
     it('Should return a querystring for all data where id and continent match the provided values', () => {
@@ -192,11 +196,13 @@ describe('Test database utils', () => {
       const ast = new AbstractSyntaxTree(INSERT_QUERY, name, TABLE);
       ast.addColumns(['name', 'age', 'email', 'roles']);
       ast.addRow(body);
-      const expectedQuery = `INSERT INTO ${name} (name, age, email, roles) VALUES ('John', '34', 'john@mail.com', '["linemanager","systemuser"]');`;
+      const expectedQuery = `INSERT INTO ${name} (name, age, email, roles) VALUES ($1, $2, $3, $4);`;
+      const expectedParams = ['John', 34, 'john@mail.com', '["linemanager","systemuser"]'];
 
       const { query, parameters } = generateCode(ast);
 
       expect(query).to.equal(expectedQuery);
+      expect(parameters).to.eql(expectedParams);
     });
 
     it('Should return a querystring with option to return all inserted data', () => {
@@ -206,12 +212,13 @@ describe('Test database utils', () => {
       ast.addColumns(['name', 'age', 'email']);
       ast.addRow(body);
       ast.returnData();
-
-      const expectedQuery = `INSERT INTO ${name} (name, age, email) VALUES ('John', '34', 'john@mail.com') RETURNING *;`;
+      const expectedQuery = `INSERT INTO ${name} (name, age, email) VALUES ($1, $2, $3) RETURNING *;`;
+      const expectedParams = ['John', 34, 'john@mail.com'];
 
       const { query, parameters } = generateCode(ast);
 
       expect(query).to.equal(expectedQuery);
+      expect(parameters).to.eql(expectedParams);
     });
 
     it('Should return a querystring with option to insert multiple rows, without returning the data inserted', () => {
@@ -224,11 +231,13 @@ describe('Test database utils', () => {
       ast.addColumns(['name', 'age', 'email']);
       ast.addRow(body[0]);
       ast.addRow(body[1]);
-      const expectedQuery = `INSERT INTO ${name} (name, age, email) VALUES ('John', '34', 'john@mail.com'), ('Rachel', '32', 'rachel@mail.com');`;
+      const expectedQuery = `INSERT INTO ${name} (name, age, email) VALUES ($1, $2, $3), ($4, $5, $6);`;
+      const expectedParams = ['John', 34, 'john@mail.com', 'Rachel', 32, 'rachel@mail.com'];
 
       const { query, parameters } = generateCode(ast);
 
       expect(query).to.equal(expectedQuery);
+      expect(parameters).to.eql(expectedParams);
     });
 
     it('Should return a querystring with option to insert multiple rows, returning the data inserted', () => {
@@ -242,11 +251,13 @@ describe('Test database utils', () => {
       ast.addRow(body[0]);
       ast.addRow(body[1]);
       ast.returnData();
-      const expectedQuery = `INSERT INTO ${name} (name, age, email) VALUES ('John', '34', 'john@mail.com'), ('Rachel', '32', 'rachel@mail.com') RETURNING *;`;
+      const expectedQuery = `INSERT INTO ${name} (name, age, email) VALUES ($1, $2, $3), ($4, $5, $6) RETURNING *;`;
+      const expectedParams = ['John', 34, 'john@mail.com', 'Rachel', 32, 'rachel@mail.com'];
 
       const { query, parameters } = generateCode(ast);
 
       expect(query).to.equal(expectedQuery);
+      expect(parameters).to.eql(expectedParams);
     });
   });
 

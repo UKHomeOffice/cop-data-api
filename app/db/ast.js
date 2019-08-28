@@ -94,6 +94,12 @@ class AbstractSyntaxTree {
     }
     this.rowCount = limit;
   }
+
+  nextParameter(value) {
+    this.parameters.push(value);
+    this.parameterCount = this.parameterCount + 1;
+    return this.parameterCount;
+  }
 }
 /*
  * Filter operators

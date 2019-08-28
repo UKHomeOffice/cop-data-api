@@ -15,7 +15,9 @@ const {
 
 const arrayToString = array => (Array.isArray(array) ? JSON.stringify(array) : array);
 
-const generateTuple = tuple => `('${tuple.map(arrayToString).join("', '")}')`;
+const generateTuple = (tuple, ast) => `(${tuple.map(arrayToString)
+  .map(value => `$${ast.nextParameter(value)}`)
+  .join(', ')})`;
 
 const quoteStringParam = param => (isNaN(param) ? `'${param}'` : param);
 const quoteNonArrayParam = param => (!Array.isArray(param) ? `'${param}'` : param);
@@ -29,7 +31,7 @@ const generateValues = (ast) => {
   if (ast.data.length === 0) {
     throw new TypeError('Must have at least one data row for insert');
   }
-  const values = ast.data.map(generateTuple);
+  const values = ast.data.map(row => generateTuple(row, ast));
 
   return `VALUES ${values.join(', ')}`;
 };
@@ -59,7 +61,7 @@ const generateWhere = (ast) => {
       case OP_GTE:
         return `${filter.fieldName} >= ${quoteStringParam(filter.operand)}`;
       case OP_IN:
-        return `${filter.fieldName} IN ${generateTuple((filter.operand))}`;
+        return `${filter.fieldName} IN ${generateTuple(filter.operand, ast)}`;
       case OP_IS:
         return `${filter.fieldName} IS ${filter.operand}`;
       case OP_LT:
