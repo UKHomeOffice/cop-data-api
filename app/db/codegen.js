@@ -21,7 +21,7 @@ const generateTuple = (tuple, ast) => `(${tuple.map(arrayToString)
 
 const generateColumns = ast => ast.columns.join(', ');
 
-const generateArgs = ast => ast.arguments.map(([name, value]) => `${name}=>'${value}'`).join(', ');
+const generateArgs = ast => ast.arguments.map(([name, value]) => `${name}=>$${ast.nextParameter(value)}`).join(', ');
 const generateLimit = ast => (ast.rowCount ? ` LIMIT ${ast.rowCount}` : '');
 
 const generateValues = (ast) => {
@@ -128,9 +128,9 @@ const generateDelete = (ast) => {
 
 const generateFunctionCall = (ast) => {
   const selectClause = generateColumns(ast) || '*';
+  const args = generateArgs(ast);
   const whereClause = generateWhere(ast);
   const limit = generateLimit(ast);
-  const args = generateArgs(ast);
 
   const query = `SELECT ${selectClause} FROM ${ast.objectName}(${args})${whereClause}${limit};`;
 

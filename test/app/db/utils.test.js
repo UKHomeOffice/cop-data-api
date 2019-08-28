@@ -294,37 +294,43 @@ describe('Test database utils', () => {
     it('Should return a querystring for a function view', () => {
       const name = 'staffdetails';
       const body = { 'argstaffemail': 'daisy@mail.com' };
-      const expectedQuery = `SELECT * FROM ${name}(argstaffemail=>'daisy@mail.com');`;
+      const expectedQuery = `SELECT * FROM ${name}(argstaffemail=>$1);`;
+      const expectedParams = ['daisy@mail.com'];
       const { query, parameters } = functionQueryBuilder({ name, body });
 
       expect(query).to.equal(expectedQuery);
+      expect(parameters).to.eql(expectedParams);
     });
 
     it('Should return a querystring for a function view with multiple arguments', () => {
       const name = 'staffdetails';
       const body = { 'argfirstname': 'Andy', 'argstaffid': 'af4601db-1640-4ff2-a4cc-da44bce99226' };
-      const expectedQuery = `SELECT * FROM ${name}(argfirstname=>'Andy', argstaffid=>'af4601db-1640-4ff2-a4cc-da44bce99226');`;
+      const expectedQuery = `SELECT * FROM ${name}(argfirstname=>$1, argstaffid=>$2);`;
+      const expectedParams = ['Andy', 'af4601db-1640-4ff2-a4cc-da44bce99226'];
       const { query, parameters } = functionQueryBuilder({ name, body });
 
       expect(query).to.equal(expectedQuery);
+      expect(parameters).to.eql(expectedParams);
     });
 
     it('Should return a querystring for a function view with multiple arguments and selected columns', () => {
       const name = 'staffdetails';
       const queryParams = 'select=email';
       const body = { 'argfirstname': 'Lauren', 'argstaffid': 'af4601db-1640-4ff2-a4cc-da44bce99226' };
-      const expectedQuery = `SELECT email FROM ${name}(argfirstname=>'Lauren', argstaffid=>'af4601db-1640-4ff2-a4cc-da44bce99226');`;
+      const expectedQuery = `SELECT email FROM ${name}(argfirstname=>$1, argstaffid=>$2);`;
+      const expectedParams = ['Lauren', 'af4601db-1640-4ff2-a4cc-da44bce99226'];
       const { query, parameters } = functionQueryBuilder({ name, body, queryParams });
 
       expect(query).to.equal(expectedQuery);
+      expect(parameters).to.eql(expectedParams);
     });
 
     it('Should return a querystring for a function view with multiple arguments selected columns and filtering parameters', () => {
       const name = 'staffdetails';
       const queryParams = 'select=email&lastname=eq.Smith';
       const body = { 'argfirstname': 'John', 'argstaffid': 'af4601db-1640-4ff2-a4cc-da44bce99226' };
-      const expectedQuery = `SELECT email FROM ${name}(argfirstname=>'John', argstaffid=>'af4601db-1640-4ff2-a4cc-da44bce99226') WHERE lastname = $1;`;
-      const expectedParams = ['Smith'];
+      const expectedQuery = `SELECT email FROM ${name}(argfirstname=>$1, argstaffid=>$2) WHERE lastname = $3;`;
+      const expectedParams = ['John', 'af4601db-1640-4ff2-a4cc-da44bce99226', 'Smith'];
       const { query, parameters } = functionQueryBuilder({ name, body, queryParams });
 
       expect(query).to.equal(expectedQuery);
