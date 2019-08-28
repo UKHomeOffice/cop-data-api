@@ -215,6 +215,21 @@ describe('Test database utils', () => {
       expect(parameters).to.eql(expectedParams);
     });
 
+    it('Should return a querystring to insert values into columns with null', () => {
+      const name = 'staff';
+      const body = { 'name': 'John', 'age': 34, 'email': null, 'roles': ['linemanager', 'systemuser'] };
+      const ast = new AbstractSyntaxTree(INSERT_QUERY, name, TABLE);
+      ast.addColumns(['name', 'age', 'email', 'roles']);
+      ast.addRow(body);
+      const expectedQuery = `INSERT INTO ${name} (name, age, email, roles) VALUES ($1, $2, $3, $4);`;
+      const expectedParams = ['John', 34, null, '["linemanager","systemuser"]'];
+
+      const { query, parameters } = generateCode(ast);
+
+      expect(query).to.equal(expectedQuery);
+      expect(parameters).to.eql(expectedParams);
+    });
+
     it('Should return a querystring with option to return all inserted data', () => {
       const name = 'staff';
       const body = { 'name': 'John', 'age': 34, 'email': 'john@mail.com' };
@@ -243,6 +258,25 @@ describe('Test database utils', () => {
       ast.addRow(body[1]);
       const expectedQuery = `INSERT INTO ${name} (name, age, email) VALUES ($1, $2, $3), ($4, $5, $6);`;
       const expectedParams = ['John', 34, 'john@mail.com', 'Rachel', 32, 'rachel@mail.com'];
+
+      const { query, parameters } = generateCode(ast);
+
+      expect(query).to.equal(expectedQuery);
+      expect(parameters).to.eql(expectedParams);
+    });
+
+    it('Should return a querystring with option to insert multiple rows, with column missing', () => {
+      const name = 'staff';
+      const body = [
+        { 'name': 'John', 'age': 34, 'email': 'john@mail.com' },
+        { 'age': 32, 'email': 'rachel@mail.com' },
+      ];
+      const ast = new AbstractSyntaxTree(INSERT_QUERY, name, TABLE);
+      ast.addColumns(['name', 'age', 'email']);
+      ast.addRow(body[0]);
+      ast.addRow(body[1]);
+      const expectedQuery = `INSERT INTO ${name} (name, age, email) VALUES ($1, $2, $3), ($4, $5, $6);`;
+      const expectedParams = ['John', 34, 'john@mail.com', null, 32, 'rachel@mail.com'];
 
       const { query, parameters } = generateCode(ast);
 
@@ -301,6 +335,24 @@ describe('Test database utils', () => {
       const expectedQuery = `UPDATE ${name} SET age=$1, email=$2, roles=$3 WHERE id = $4 RETURNING *;`;
       const expectedParams = [body.age, body.email, JSON.stringify(body.roles), id];
 
+      const { query, parameters } = generateCode(ast);
+
+      expect(query).to.equal(expectedQuery);
+      expect(parameters).to.eql(expectedParams);
+    });
+
+    it('Should return a querystring to update existing data with null', () => {
+      const name = 'identity';
+      const id = '2553b00e-3cb0-441d-b29d-17196491a1e5';
+      const firstname = 'Pedro';
+      const body = { 'firstname': null };
+      const ast = new AbstractSyntaxTree(UPDATE_QUERY, name, TABLE);
+      ast.addFilter('firstname', OP_EQUALS, firstname);
+      ast.addFilter('id', OP_EQUALS, id);
+      ast.addColumns('firstname');
+      ast.addRow(body);
+      const expectedQuery = `UPDATE ${name} SET firstname=$1 WHERE firstname = $2 AND id = $3;`;
+      const expectedParams = [null, firstname, id];
       const { query, parameters } = generateCode(ast);
 
       expect(query).to.equal(expectedQuery);
@@ -390,6 +442,21 @@ describe('Test database utils', () => {
       const expectedParams = ['Andy', 'af4601db-1640-4ff2-a4cc-da44bce99226'];
       const expectedQuery = `SELECT * FROM ${name}(argfirstname=>$1, argstaffid=>$2);`;
 
+      const { query, parameters } = generateCode(ast);
+
+      expect(query).to.equal(expectedQuery);
+      expect(parameters).to.eql(expectedParams);
+    });
+
+    it('Should return a querystring for a function view with null value', () => {
+      const name = 'staffdetails';
+      const queryParams = 'select=email';
+      const body = { 'argfirstname': 'Lauren', 'argstaffid': null };
+      const ast = new AbstractSyntaxTree(SELECT_QUERY, name, FUNCTION);
+      ast.addColumns('email');
+      ast.addArguments(body);
+      const expectedQuery = `SELECT email FROM ${name}(argfirstname=>$1, argstaffid=>$2);`;
+      const expectedParams = ['Lauren', null];
       const { query, parameters } = generateCode(ast);
 
       expect(query).to.equal(expectedQuery);

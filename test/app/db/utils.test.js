@@ -170,6 +170,17 @@ describe('Test database utils', () => {
       expect(parameters).to.eql(expectedParams);
     });
 
+    it('Should return a querystring to insert values into columns with nulls', () => {
+      const name = 'staff';
+      const body = { 'name': 'John', 'age': 34, 'email': null, 'roles': ['linemanager', 'systemuser'] };
+      const expectedQuery = `INSERT INTO ${name} (name, age, email, roles) VALUES ($1, $2, $3, $4);`;
+      const expectedParams = ['John', 34, null, '["linemanager","systemuser"]'];
+      const { query, parameters } = insertIntoQueryBuilder({ name, body });
+
+      expect(query).to.equal(expectedQuery);
+      expect(parameters).to.eql(expectedParams);
+    });
+
     it('Should return a querystring with option to return all inserted data', () => {
       const name = 'staff';
       const body = { 'name': 'John', 'age': 34, 'email': 'john@mail.com' };
@@ -220,6 +231,19 @@ describe('Test database utils', () => {
       const expectedQuery = `UPDATE ${name} SET email=$1, roles=$2 WHERE id = $3;`;
       const expectedParams = [body.email, JSON.stringify(body.roles), id];
       const { query, parameters } = updateQueryBuilder({ body, name, id });
+
+      expect(query).to.equal(expectedQuery);
+      expect(parameters).to.eql(expectedParams);
+    });
+
+    it('Should return a querystring to update existing data mathing an id, with nulls', () => {
+      const name = 'identity';
+      const id = '2553b00e-3cb0-441d-b29d-17196491a1e5';
+      const prefer = 'return=representation';
+      const body = { 'age': 34, 'email': null, 'roles': ['linemanager', 'systemuser'] };
+      const expectedQuery = `UPDATE ${name} SET age=$1, email=$2, roles=$3 WHERE id = $4 RETURNING *;`;
+      const expectedParams = [body.age, body.email, JSON.stringify(body.roles), id];
+      const { query, parameters } = updateQueryBuilder({ body, name, id, prefer });
 
       expect(query).to.equal(expectedQuery);
       expect(parameters).to.eql(expectedParams);
@@ -307,6 +331,17 @@ describe('Test database utils', () => {
       const body = { 'argfirstname': 'Andy', 'argstaffid': 'af4601db-1640-4ff2-a4cc-da44bce99226' };
       const expectedQuery = `SELECT * FROM ${name}(argfirstname=>$1, argstaffid=>$2);`;
       const expectedParams = ['Andy', 'af4601db-1640-4ff2-a4cc-da44bce99226'];
+      const { query, parameters } = functionQueryBuilder({ name, body });
+
+      expect(query).to.equal(expectedQuery);
+      expect(parameters).to.eql(expectedParams);
+    });
+
+    it('Should return a querystring for a function view with null argument', () => {
+      const name = 'staffdetails';
+      const body = { 'argfirstname': null, 'argstaffid': 'af4601db-1640-4ff2-a4cc-da44bce99226' };
+      const expectedQuery = `SELECT * FROM ${name}(argfirstname=>$1, argstaffid=>$2);`;
+      const expectedParams = [null, 'af4601db-1640-4ff2-a4cc-da44bce99226'];
       const { query, parameters } = functionQueryBuilder({ name, body });
 
       expect(query).to.equal(expectedQuery);
