@@ -204,10 +204,12 @@ describe('Test database utils', () => {
       const name = 'identity';
       const id = '2553b00e-3cb0-441d-b29d-17196491a1e5';
       const body = { 'email': 'john@mail.com', 'roles': ['linemanager', 'systemuser'] };
-      const expectedQuery = `UPDATE ${name} SET email='${body.email}', roles=${JSON.stringify(body.roles)} WHERE id = '${id}';`;
+      const expectedQuery = `UPDATE ${name} SET email=$1, roles=$2 WHERE id = '${id}';`;
+      const expectedParams = [body.email, JSON.stringify(body.roles)];
       const { query, parameters } = updateQueryBuilder({ body, name, id });
 
       expect(query).to.equal(expectedQuery);
+      expect(parameters).to.eql(expectedParams);
     });
 
     it('Should return a querystring to update existing data mathing an id, with option to return all updated data', () => {
@@ -215,10 +217,12 @@ describe('Test database utils', () => {
       const id = '2553b00e-3cb0-441d-b29d-17196491a1e5';
       const prefer = 'return=representation';
       const body = { 'age': 34, 'email': 'john@mail.com', 'roles': ['linemanager', 'systemuser'] };
-      const expectedQuery = `UPDATE ${name} SET age='${body.age}', email='${body.email}', roles=${JSON.stringify(body.roles)} WHERE id = '${id}' RETURNING *;`;
+      const expectedQuery = `UPDATE ${name} SET age=$1, email=$2, roles=$3 WHERE id = '${id}' RETURNING *;`;
+      const expectedParams = [body.age, body.email, JSON.stringify(body.roles)];
       const { query, parameters } = updateQueryBuilder({ body, name, id, prefer });
 
       expect(query).to.equal(expectedQuery);
+      expect(parameters).to.eql(expectedParams);
     });
 
     it('Should return a querystring to update existing data matching query parameters', () => {
@@ -227,10 +231,12 @@ describe('Test database utils', () => {
       const firstname = 'Pedro';
       const queryParams = `firstname=eq.${firstname},&id=eq.${id}`;
       const body = { 'firstname': 'John' };
-      const expectedQuery = `UPDATE ${name} SET firstname='${body.firstname}' WHERE firstname = '${firstname}' AND id = '${id}';`;
+      const expectedParams = ['John'];
+      const expectedQuery = `UPDATE ${name} SET firstname=$1 WHERE firstname = '${firstname}' AND id = '${id}';`;
       const { query, parameters } = updateQueryBuilder({ body, name, queryParams });
 
       expect(query).to.equal(expectedQuery);
+      expect(parameters).to.eql(expectedParams);
     });
 
     it('Should return a querystring to update existing data matching an id only, even if query parameters are provided', () => {
@@ -239,10 +245,11 @@ describe('Test database utils', () => {
       const firstname = 'Pedro';
       const queryParams = `firstname=eq.${firstname},&id=eq.${id}`;
       const body = { 'firstname': 'John' };
-      const expectedQuery = `UPDATE ${name} SET firstname='${body.firstname}' WHERE id = '${id}';`;
+      const expectedQuery = `UPDATE ${name} SET firstname=$1 WHERE id = '${id}';`;
+      const expectedParams = ['John'];
       const { query, parameters } = updateQueryBuilder({ body, name, id, queryParams });
-
       expect(query).to.equal(expectedQuery);
+      expect(parameters).to.eql(expectedParams);
     });
   });
 

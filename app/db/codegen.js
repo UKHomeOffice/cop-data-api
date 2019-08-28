@@ -20,7 +20,6 @@ const generateTuple = (tuple, ast) => `(${tuple.map(arrayToString)
   .join(', ')})`;
 
 const quoteStringParam = param => (isNaN(param) ? `'${param}'` : param);
-const quoteNonArrayParam = param => (!Array.isArray(param) ? `'${param}'` : param);
 
 const generateColumns = ast => ast.columns.join(', ');
 
@@ -45,9 +44,8 @@ const generateFieldsToUpdate = (ast) => {
   }
 
   const data = ast.data[0];
-  return data.map(quoteNonArrayParam)
-    .map((e, i) => [ast.columns[i], arrayToString(e)])
-    .map(([name, value]) => `${name}=${value}`)
+  return data.map((e, i) => [ast.columns[i], arrayToString(e)])
+    .map(([name, value]) => `${name}=$${ast.nextParameter(value)}`)
     .join(', ');
 };
 

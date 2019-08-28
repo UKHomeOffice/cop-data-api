@@ -270,11 +270,13 @@ describe('Test database utils', () => {
       ast.addFilter('id', OP_EQUALS, id);
       ast.addColumns(['email', 'roles']);
       ast.addRow(body);
-      const expectedQuery = `UPDATE ${name} SET email='${body.email}', roles=${JSON.stringify(body.roles)} WHERE id = '${id}';`;
+      const expectedQuery = `UPDATE ${name} SET email=$1, roles=$2 WHERE id = '${id}';`;
+      const expectedParams = [body.email, JSON.stringify(body.roles)];
 
       const { query, parameters } = generateCode(ast);
 
       expect(query).to.equal(expectedQuery);
+      expect(parameters).to.eql(expectedParams);
     });
 
     it('Should return a querystring to update existing data mathing an id, with option to return all updated data', () => {
@@ -286,11 +288,13 @@ describe('Test database utils', () => {
       ast.addColumns(['age', 'email', 'roles']);
       ast.addRow(body);
       ast.returnData();
-      const expectedQuery = `UPDATE ${name} SET age='${body.age}', email='${body.email}', roles=${JSON.stringify(body.roles)} WHERE id = '${id}' RETURNING *;`;
+      const expectedQuery = `UPDATE ${name} SET age=$1, email=$2, roles=$3 WHERE id = '${id}' RETURNING *;`;
+      const expectedParams = [body.age, body.email, JSON.stringify(body.roles)];
 
       const { query, parameters } = generateCode(ast);
 
       expect(query).to.equal(expectedQuery);
+      expect(parameters).to.eql(expectedParams);
     });
 
     it('Should return a querystring to update existing data matching query parameters', () => {
@@ -303,10 +307,12 @@ describe('Test database utils', () => {
       ast.addFilter('id', OP_EQUALS, id);
       ast.addColumns('firstname');
       ast.addRow(body);
-      const expectedQuery = `UPDATE ${name} SET firstname='${body.firstname}' WHERE firstname = '${firstname}' AND id = '${id}';`;
+      const expectedParams = ['John'];
+      const expectedQuery = `UPDATE ${name} SET firstname=$1 WHERE firstname = '${firstname}' AND id = '${id}';`;
       const { query, parameters } = generateCode(ast);
 
       expect(query).to.equal(expectedQuery);
+      expect(parameters).to.eql(expectedParams);
     });
 
     xit('Should return a querystring to update existing data matching an id only, even if query parameters are provided', () => {
