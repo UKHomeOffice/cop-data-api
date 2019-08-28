@@ -207,7 +207,7 @@ describe('Test database utils', () => {
       ast.addColumns(['name', 'age', 'email', 'roles']);
       ast.addRow(body);
       const expectedQuery = `INSERT INTO ${name} (name, age, email, roles) VALUES ($1, $2, $3, $4);`;
-      const expectedParams = ['John', 34, 'john@mail.com', '["linemanager","systemuser"]'];
+      const expectedParams = ['John', 34, 'john@mail.com', ["linemanager","systemuser"]];
 
       const { query, parameters } = generateCode(ast);
 
@@ -222,7 +222,7 @@ describe('Test database utils', () => {
       ast.addColumns(['name', 'age', 'email', 'roles']);
       ast.addRow(body);
       const expectedQuery = `INSERT INTO ${name} (name, age, email, roles) VALUES ($1, $2, $3, $4);`;
-      const expectedParams = ['John', 34, null, '["linemanager","systemuser"]'];
+      const expectedParams = ['John', 34, null, ["linemanager","systemuser"]];
 
       const { query, parameters } = generateCode(ast);
 
@@ -315,7 +315,7 @@ describe('Test database utils', () => {
       ast.addColumns(['email', 'roles']);
       ast.addRow(body);
       const expectedQuery = `UPDATE ${name} SET email=$1, roles=$2 WHERE id = $3;`;
-      const expectedParams = [body.email, JSON.stringify(body.roles), id];
+      const expectedParams = [body.email, body.roles, id];
 
       const { query, parameters } = generateCode(ast);
 
@@ -333,7 +333,7 @@ describe('Test database utils', () => {
       ast.addRow(body);
       ast.returnData();
       const expectedQuery = `UPDATE ${name} SET age=$1, email=$2, roles=$3 WHERE id = $4 RETURNING *;`;
-      const expectedParams = [body.age, body.email, JSON.stringify(body.roles), id];
+      const expectedParams = [body.age, body.email, body.roles, id];
 
       const { query, parameters } = generateCode(ast);
 

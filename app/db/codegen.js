@@ -13,11 +13,7 @@ const {
   TABLE,
 } = require('./ast');
 
-const arrayToString = array => (Array.isArray(array) ? JSON.stringify(array) : array);
-
-const generateTuple = (tuple, ast) => `(${tuple.map(arrayToString)
-  .map(value => `$${ast.nextParameter(value)}`)
-  .join(', ')})`;
+const generateTuple = (tuple, ast) => `(${tuple.map(value => `$${ast.nextParameter(value)}`).join(', ')})`;
 
 const generateColumns = ast => ast.columns.join(', ');
 
@@ -42,7 +38,7 @@ const generateFieldsToUpdate = (ast) => {
   }
 
   const data = ast.data[0];
-  return data.map((e, i) => [ast.columns[i], arrayToString(e)])
+  return data.map((e, i) => [ast.columns[i], e])
     .map(([name, value]) => `${name}=$${ast.nextParameter(value)}`)
     .join(', ');
 };

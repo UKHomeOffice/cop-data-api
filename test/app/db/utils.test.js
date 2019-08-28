@@ -163,7 +163,7 @@ describe('Test database utils', () => {
       const name = 'staff';
       const body = { 'name': 'John', 'age': 34, 'email': 'john@mail.com', 'roles': ['linemanager', 'systemuser'] };
       const expectedQuery = `INSERT INTO ${name} (name, age, email, roles) VALUES ($1, $2, $3, $4);`;
-      const expectedParams = ['John', 34, 'john@mail.com', '["linemanager","systemuser"]'];
+      const expectedParams = ['John', 34, 'john@mail.com', ["linemanager","systemuser"]];
       const { query, parameters } = insertIntoQueryBuilder({ name, body });
 
       expect(query).to.equal(expectedQuery);
@@ -174,7 +174,7 @@ describe('Test database utils', () => {
       const name = 'staff';
       const body = { 'name': 'John', 'age': 34, 'email': null, 'roles': ['linemanager', 'systemuser'] };
       const expectedQuery = `INSERT INTO ${name} (name, age, email, roles) VALUES ($1, $2, $3, $4);`;
-      const expectedParams = ['John', 34, null, '["linemanager","systemuser"]'];
+      const expectedParams = ['John', 34, null, ["linemanager","systemuser"]];
       const { query, parameters } = insertIntoQueryBuilder({ name, body });
 
       expect(query).to.equal(expectedQuery);
@@ -229,7 +229,7 @@ describe('Test database utils', () => {
       const id = '2553b00e-3cb0-441d-b29d-17196491a1e5';
       const body = { 'email': 'john@mail.com', 'roles': ['linemanager', 'systemuser'] };
       const expectedQuery = `UPDATE ${name} SET email=$1, roles=$2 WHERE id = $3;`;
-      const expectedParams = [body.email, JSON.stringify(body.roles), id];
+      const expectedParams = [body.email, body.roles, id];
       const { query, parameters } = updateQueryBuilder({ body, name, id });
 
       expect(query).to.equal(expectedQuery);
@@ -242,7 +242,7 @@ describe('Test database utils', () => {
       const prefer = 'return=representation';
       const body = { 'age': 34, 'email': null, 'roles': ['linemanager', 'systemuser'] };
       const expectedQuery = `UPDATE ${name} SET age=$1, email=$2, roles=$3 WHERE id = $4 RETURNING *;`;
-      const expectedParams = [body.age, body.email, JSON.stringify(body.roles), id];
+      const expectedParams = [body.age, body.email, body.roles, id];
       const { query, parameters } = updateQueryBuilder({ body, name, id, prefer });
 
       expect(query).to.equal(expectedQuery);
@@ -255,7 +255,7 @@ describe('Test database utils', () => {
       const prefer = 'return=representation';
       const body = { 'age': 34, 'email': 'john@mail.com', 'roles': ['linemanager', 'systemuser'] };
       const expectedQuery = `UPDATE ${name} SET age=$1, email=$2, roles=$3 WHERE id = $4 RETURNING *;`;
-      const expectedParams = [body.age, body.email, JSON.stringify(body.roles), id];
+      const expectedParams = [body.age, body.email, body.roles, id];
       const { query, parameters } = updateQueryBuilder({ body, name, id, prefer });
 
       expect(query).to.equal(expectedQuery);
