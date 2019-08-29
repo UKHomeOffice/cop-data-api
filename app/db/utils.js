@@ -43,6 +43,8 @@ function columnsAndRowsBuilder(data) {
       }
     }
   }
+  // ensure ["val1", "val2"] becomes ['val1', 'val2']
+  values = values.replace(/"/g, "'");
   return { columns, values };
 }
 
