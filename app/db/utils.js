@@ -28,7 +28,7 @@ function columnsAndRowsBuilder(data) {
       if (data[key] === null) { // null values
         values += JSON.stringify(data[key]).toUpperCase();
       } else if (typeof data[key] === 'object') { // objects as values
-        values += `'${JSON.stringify(data[key])}'`;
+        values += `${JSON.stringify(data[key])}`;
       } else { // strings && number values
         values += `'${data[key]}'`;
       }
@@ -230,9 +230,11 @@ function updateQueryBuilder({ name, body, id = '', prefer = '', queryParams = ''
     if (Object.prototype.hasOwnProperty.call(body, key)) {
       values += values ? ',' : '';
 
-      if (typeof body[key] === 'object') {
+      if (body[key] === null) { // null values
+        values += `${key}=` + JSON.stringify(body[key]).toUpperCase();
+      } else if (typeof body[key] === 'object') { // objects as values
         values += `${key}=${JSON.stringify(body[key])}`;
-      } else {
+      } else { // strings && number values
         values += `${key}='${body[key]}'`;
       }
     }

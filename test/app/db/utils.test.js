@@ -142,7 +142,7 @@ describe('Test database utils', () => {
     it('Should return a querystring to insert values into columns', () => {
       const name = 'staff';
       const body = { 'name': 'John', 'age': 34, 'email': 'john@mail.com', 'roles': ['linemanager', 'systemuser'] };
-      const expectedQuery = `INSERT INTO ${name} (name,age,email,roles) VALUES ('John','34','john@mail.com','["linemanager","systemuser"]');`;
+      const expectedQuery = `INSERT INTO ${name} (name,age,email,roles) VALUES ('John','34','john@mail.com',["linemanager","systemuser"]);`;
       const query = insertIntoQueryBuilder({ name, body });
 
       expect(query).to.equal(expectedQuery);
@@ -223,9 +223,10 @@ describe('Test database utils', () => {
       const name = 'identity';
       const id = '2553b00e-3cb0-441d-b29d-17196491a1e5';
       const firstname = 'Pedro';
-      const queryParams = `firstname=eq.${firstname},&id=eq.${id}`;
-      const body = { 'firstname': 'John' };
-      const expectedQuery = `UPDATE ${name} SET firstname='${body.firstname}' WHERE id = '${id}';`;
+      const lastname = 'Miguel';
+      const queryParams = `firstname=eq.${firstname},&lastname=eq.${lastname},&id=eq.${id}`;
+      const body = { 'firstname': 'John', 'lastname': null };
+      const expectedQuery = `UPDATE ${name} SET firstname='${body.firstname}',lastname=NULL WHERE id = '${id}';`;
       const query = updateQueryBuilder({ body, name, id, queryParams });
 
       expect(query).to.equal(expectedQuery);
