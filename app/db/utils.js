@@ -14,7 +14,7 @@ function viewFunctionArgsBuilder(body = '') {
           value = JSON.stringify(body[key]).toUpperCase();
           args += `${key}=>${value}`;
         } else if (typeof body[key] === 'object') { // objects as values
-          args += `${key}=>${JSON.stringify(body[key])}`;
+          args += `${key}=>'${JSON.stringify(body[key])}'`;
         } else { // strings && number values
           args += `${key}=>'${body[key]}'`;
         }
@@ -37,14 +37,12 @@ function columnsAndRowsBuilder(data) {
       if (data[key] === null) { // null values
         values += JSON.stringify(data[key]).toUpperCase();
       } else if (typeof data[key] === 'object') { // objects as values
-        values += `${JSON.stringify(data[key])}`;
+        values += `'${JSON.stringify(data[key])}'`;
       } else { // strings && number values
         values += `'${data[key]}'`;
       }
     }
   }
-  // ensure ["val1", "val2"] becomes ['val1', 'val2']
-  values = values.replace(/"/g, "'");
   return { columns, values };
 }
 
