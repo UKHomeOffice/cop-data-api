@@ -25,9 +25,11 @@ function columnsAndRowsBuilder(data) {
       columns += key;
       values += values ? ',' : '';
 
-      if (typeof data[key] === 'object') {
+      if (data[key] === null) { // null values
+        values += JSON.stringify(data[key]).toUpperCase();
+      } else if (typeof data[key] === 'object') { // objects as values
         values += `'${JSON.stringify(data[key])}'`;
-      } else {
+      } else { // strings && number values
         values += `'${data[key]}'`;
       }
     }

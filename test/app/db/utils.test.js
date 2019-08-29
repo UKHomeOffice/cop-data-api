@@ -175,8 +175,9 @@ describe('Test database utils', () => {
       const body = [
         { 'name': 'John', 'age': 34, 'email': 'john@mail.com' },
         { 'name': 'Rachel', 'age': 32, 'email': 'rachel@mail.com' },
+        { 'name': 'Wendy', 'age': 29, 'email': null },
       ];
-      const expectedQuery = `INSERT INTO ${name} (name,age,email) VALUES ('John','34','john@mail.com'),('Rachel','32','rachel@mail.com') RETURNING *;`;
+      const expectedQuery = `INSERT INTO ${name} (name,age,email) VALUES ('John','34','john@mail.com'),('Rachel','32','rachel@mail.com'),('Wendy','29',NULL) RETURNING *;`;
       const prefer = 'return=representation';
       const query = insertIntoQueryBuilder({ name, body, prefer });
 
