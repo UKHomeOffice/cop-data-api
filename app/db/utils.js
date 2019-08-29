@@ -3,12 +3,21 @@ const logger = require('../config/logger')(__filename);
 
 function viewFunctionArgsBuilder(body = '') {
   let args = '';
+  let value = '';
 
   if (body) {
     for (const key in body) {
       if (Object.prototype.hasOwnProperty.call(body, key)) {
         args += args ? ',' : '';
-        args += `${key}=>'${body[key]}'`;
+
+        if (body[key] === null) { // null values
+          value = JSON.stringify(body[key]).toUpperCase();
+          args += `${key}=>${value}`;
+        } else if (typeof body[key] === 'object') { // objects as values
+          args += `${key}=>${JSON.stringify(body[key])}`;
+        } else { // strings && number values
+          args += `${key}=>'${body[key]}'`;
+        }
       }
     }
   }
@@ -223,6 +232,7 @@ function insertIntoQueryBuilder({ name, body, prefer = '' }) {
 
 // Creates an UPDATE querystring
 function updateQueryBuilder({ name, body, id = '', prefer = '', queryParams = '' }) {
+  let value = '';
   let values = '';
   const returning = prefer ? ' RETURNING *' : '';
 
@@ -231,7 +241,8 @@ function updateQueryBuilder({ name, body, id = '', prefer = '', queryParams = ''
       values += values ? ',' : '';
 
       if (body[key] === null) { // null values
-        values += `${key}=` + JSON.stringify(body[key]).toUpperCase();
+        value = JSON.stringify(body[key]).toUpperCase();
+        values += `${key}=${value}`;
       } else if (typeof body[key] === 'object') { // objects as values
         values += `${key}=${JSON.stringify(body[key])}`;
       } else { // strings && number values
