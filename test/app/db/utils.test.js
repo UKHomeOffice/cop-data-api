@@ -141,7 +141,14 @@ describe('Test database utils', () => {
   describe('v1 POST - querystring builder', () => {
     it('Should return a querystring to insert values into columns', () => {
       const name = 'staff';
-      const body = { 'name': 'John', 'age': 34, 'email': 'john@mail.com', 'roles': ['linemanager', 'systemuser'] };
+      const body = [
+        {
+          'name': 'John',
+          'age': 34,
+          'email': 'john@mail.com',
+          'roles': ['linemanager', 'systemuser'],
+        },
+      ];
       const expectedQuery = `INSERT INTO ${name} (name,age,email,roles) VALUES ('John','34','john@mail.com','["linemanager","systemuser"]');`;
       const query = insertIntoQueryBuilder({ name, body });
 
@@ -175,8 +182,9 @@ describe('Test database utils', () => {
       const body = [
         { 'name': 'John', 'age': 34, 'email': 'john@mail.com' },
         { 'name': 'Rachel', 'age': 32, 'email': 'rachel@mail.com' },
+        { 'name': 'Wendy', 'age': 29, 'email': null },
       ];
-      const expectedQuery = `INSERT INTO ${name} (name,age,email) VALUES ('John','34','john@mail.com'),('Rachel','32','rachel@mail.com') RETURNING *;`;
+      const expectedQuery = `INSERT INTO ${name} (name,age,email) VALUES ('John','34','john@mail.com'),('Rachel','32','rachel@mail.com'),('Wendy','29',NULL) RETURNING *;`;
       const prefer = 'return=representation';
       const query = insertIntoQueryBuilder({ name, body, prefer });
 
@@ -222,9 +230,10 @@ describe('Test database utils', () => {
       const name = 'identity';
       const id = '2553b00e-3cb0-441d-b29d-17196491a1e5';
       const firstname = 'Pedro';
-      const queryParams = `firstname=eq.${firstname},&id=eq.${id}`;
-      const body = { 'firstname': 'John' };
-      const expectedQuery = `UPDATE ${name} SET firstname='${body.firstname}' WHERE id = '${id}';`;
+      const lastname = 'Miguel';
+      const queryParams = `firstname=eq.${firstname},&lastname=eq.${lastname},&id=eq.${id}`;
+      const body = { 'firstname': 'John', 'lastname': null };
+      const expectedQuery = `UPDATE ${name} SET firstname='${body.firstname}',lastname=NULL WHERE id = '${id}';`;
       const query = updateQueryBuilder({ body, name, id, queryParams });
 
       expect(query).to.equal(expectedQuery);
@@ -283,8 +292,8 @@ describe('Test database utils', () => {
     it('Should return a querystring for a function view with multiple arguments selected columns and filtering parameters', () => {
       const name = 'staffdetails';
       const queryParams = 'select=email&lastname=eq.Smith';
-      const body = { 'argfirstname': 'John', 'argstaffid': 'af4601db-1640-4ff2-a4cc-da44bce99226' };
-      const expectedQuery = `SELECT email FROM ${name}(argfirstname=>'John',argstaffid=>'af4601db-1640-4ff2-a4cc-da44bce99226') WHERE lastname = 'Smith';`;
+      const body = { 'argfirstname': 'John', 'arglastname': null, 'argstaffid': 'af4601db-1640-4ff2-a4cc-da44bce99226' };
+      const expectedQuery = `SELECT email FROM ${name}(argfirstname=>'John',arglastname=>NULL,argstaffid=>'af4601db-1640-4ff2-a4cc-da44bce99226') WHERE lastname = 'Smith';`;
       const query = selectQueryBuilder({ name, body, queryParams });
 
       expect(query).to.equal(expectedQuery);
