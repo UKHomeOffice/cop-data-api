@@ -350,5 +350,33 @@ describe('Test database utils', () => {
 
       expect(query).to.equal('');
     });
+
+    it('Should return a querystring with a column selected ordered by column ascending', () => {
+      const name = 'team';
+      const queryParams = {
+        'limit': '3',
+        'select': 'name',
+        'sort': 'name.asc',
+      };
+      const expectedQueryFilter = `SELECT name FROM ${name} ORDER BY name ASC LIMIT 3;`;
+      const query = selectQueryBuilderV2({ name, queryParams });
+
+      expect(query).to.equal(expectedQueryFilter);
+    });
+
+    it('Should return a querystring with all columns selected, filtered by name, sorted by name asc, size desc, and a limit of 3 rows', () => {
+      const name = 'team';
+      const queryParams = {
+        'limit': '3',
+        'filter': [
+          'name=eq.Blue%20Team',
+        ],
+        'sort': 'name.asc,size.desc',
+      };
+      const expectedQueryFilter = `SELECT * FROM ${name} WHERE name = 'Blue Team' ORDER BY name ASC, size DESC LIMIT 3;`;
+      const query = selectQueryBuilderV2({ name, queryParams });
+
+      expect(query).to.equal(expectedQueryFilter);
+    });
   });
 });
