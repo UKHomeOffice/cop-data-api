@@ -172,6 +172,18 @@ function queryParamsBuilderV2({ name, queryParams }) {
     limit = `%20LIMIT ${queryParams.limit}`;
   }
 
+  if (queryParams.sort) {
+    // 'name.asc,age.desc' -> ['name.asc', 'age.desc']
+    let sortParams = queryParams.sort.split(',');
+    sortParams.map((params) => {
+      // 'name|asc' -> ['name', 'asc']
+      params = params.replace('.', '|').split('|');
+      let [field, filter] = params;
+      filter = filter.toUpperCase();
+      order += order.includes('ORDER BY') ? `,%20${field} ${filter}` : `%20ORDER BY ${field} ${filter}`;
+    });
+  }
+
   if (queryParams.filter) {
     queryParams.filter.map((params) => {
       // 'id=eq.3' -> ['id', 'eq' '3']
