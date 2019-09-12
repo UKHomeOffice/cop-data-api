@@ -5,7 +5,8 @@ const pool = require('./index');
 const query = (role, name, queryString) => new Promise((resolve, reject) => {
   pool.query(`SET ROLE ${role};`)
     .then(() => {
-      logger.info(`Running query ${queryString}`);
+      logger.info('Running query');
+      logger.debug(`Running query ${queryString}`);
       return pool.query(`${queryString}`);
     })
     .then(data => resolve(data.rows))
@@ -25,7 +26,7 @@ const query2 = (role, name, queryString, values) => new Promise((resolve, reject
         text: queryString,
         values: values,
       };
-      logger.info('Running query')
+      logger.info('Running query');
       logger.debug(`Running query: ${queryString}, values: ${values}`);
       return pool.query(query);
     })

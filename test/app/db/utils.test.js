@@ -3,7 +3,7 @@ const { expect } = require('chai');
 // local imports
 const {
   deleteQueryBuilder,
-  insertIntoQueryBuilder,
+  insertQueryBuilder,
   selectQueryBuilder,
   selectQueryBuilderV2,
   updateQueryBuilder,
@@ -149,20 +149,26 @@ describe('Test database utils', () => {
           'roles': ['linemanager', 'systemuser'],
         },
       ];
-      const expectedQuery = `INSERT INTO ${name} (name,age,email,roles) VALUES ('John','34','john@mail.com','["linemanager","systemuser"]');`;
-      const query = insertIntoQueryBuilder({ name, body });
+      const expectedQueryObject = {
+        queryString: `INSERT INTO ${name} (name, age, email, roles) VALUES ($1, $2, $3, $4)`,
+        values: ['John', 34, 'john@mail.com', `'${JSON.stringify(["linemanager", "systemuser"])}'`],
+      }
+      const query = insertQueryBuilder({ name, body });
 
-      expect(query).to.equal(expectedQuery);
+      expect(query).to.deep.equal(expectedQueryObject);
     });
 
     it('Should return a querystring with option to return all inserted data', () => {
       const name = 'staff';
       const body = { 'name': 'John', 'age': 34, 'email': 'john@mail.com' };
-      const expectedQuery = `INSERT INTO ${name} (name,age,email) VALUES ('John','34','john@mail.com') RETURNING *;`;
+      const expectedQueryObject = {
+        queryString: `INSERT INTO ${name} (name, age, email) VALUES ($1, $2, $3) RETURNING *`,
+        values: ['John', 34, 'john@mail.com'],
+      }
       const prefer = 'return=representation';
-      const query = insertIntoQueryBuilder({ name, body, prefer });
+      const query = insertQueryBuilder({ name, body, prefer });
 
-      expect(query).to.equal(expectedQuery);
+      expect(query).to.deep.equal(expectedQueryObject);
     });
 
     it('Should return a querystring with option to insert multiple rows, without returning the data inserted', () => {
@@ -171,10 +177,13 @@ describe('Test database utils', () => {
         { 'name': 'John', 'age': 34, 'email': 'john@mail.com' },
         { 'name': 'Rachel', 'age': 32, 'email': 'rachel@mail.com' },
       ];
-      const expectedQuery = `INSERT INTO ${name} (name,age,email) VALUES ('John','34','john@mail.com'),('Rachel','32','rachel@mail.com');`;
-      const query = insertIntoQueryBuilder({ name, body });
+      const expectedQueryObject = {
+        queryString: `INSERT INTO ${name} (name, age, email) VALUES ($1, $2, $3),($4, $5, $6)`,
+        values: ['John', 34, 'john@mail.com', 'Rachel', 32, 'rachel@mail.com'],
+      }
+      const query = insertQueryBuilder({ name, body });
 
-      expect(query).to.equal(expectedQuery);
+      expect(query).to.deep.equal(expectedQueryObject);
     });
 
     it('Should return a querystring with option to insert multiple rows, returning the data inserted', () => {
@@ -184,11 +193,14 @@ describe('Test database utils', () => {
         { 'name': 'Rachel', 'age': 32, 'email': 'rachel@mail.com' },
         { 'name': 'Wendy', 'age': 29, 'email': null },
       ];
-      const expectedQuery = `INSERT INTO ${name} (name,age,email) VALUES ('John','34','john@mail.com'),('Rachel','32','rachel@mail.com'),('Wendy','29',NULL) RETURNING *;`;
+      const expectedQueryObject = {
+        queryString: `INSERT INTO ${name} (name, age, email) VALUES ($1, $2, $3),($4, $5, $6),($7, $8, NULL) RETURNING *`,
+        values: ['John', 34, 'john@mail.com', 'Rachel', 32, 'rachel@mail.com', 'Wendy', 29],
+      }
       const prefer = 'return=representation';
-      const query = insertIntoQueryBuilder({ name, body, prefer });
+      const query = insertQueryBuilder({ name, body, prefer });
 
-      expect(query).to.equal(expectedQuery);
+      expect(query).to.deep.equal(expectedQueryObject);
     });
   });
 

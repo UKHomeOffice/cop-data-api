@@ -24,47 +24,31 @@ function viewFunctionArgsBuilder(body = '') {
   return args ? `(${args})` : args;
 }
 
-function columnsAndRowsBuilder(data) {
+function columnsAndRowsBuilder(data, index) {
   let columns = '';
-  let values = '';
+  let params = '';
+  let values = [];
 
   for (const key in data) {
     if (Object.prototype.hasOwnProperty.call(data, key)) {
-      columns += columns ? ',' : '';
+      columns += columns ? ', ' : '';
       columns += key;
-      values += values ? ',' : '';
+      params += params ? ', ' : '';
 
       if (data[key] === null) { // null values
-        values += JSON.stringify(data[key]).toUpperCase();
+        params += JSON.stringify(data[key]).toUpperCase();
       } else if (typeof data[key] === 'object') { // objects as values
-        values += `'${JSON.stringify(data[key])}'`;
+        values.push(`'${JSON.stringify(data[key])}'`);
+        params += `$${index}`;
+        index = index + 1;
       } else { // strings && number values
-        values += `'${data[key]}'`;
+        values.push(data[key]);
+        params += `$${index}`;
+        index = index + 1;
       }
     }
   }
-  return { columns, values };
-}
-
-function insertIntoOptionsBuilder(body) {
-  let rowValues = '';
-  let columns = '';
-  let values = '';
-
-  if (Array.isArray(body)) {
-    body.map((data) => {
-      const dataObj = columnsAndRowsBuilder(data);
-      rowValues += rowValues ? ',' : '';
-      rowValues += dataObj.values ? `(${dataObj.values})` : '';
-      columns = `(${dataObj.columns})`;
-    });
-
-    return `${columns} VALUES ${rowValues}`;
-  }
-  const dataObj = columnsAndRowsBuilder(body);
-  columns = `(${dataObj.columns})`;
-
-  return `(${dataObj.columns}) VALUES (${dataObj.values})`;
+  return { columns, params, values, index };
 }
 
 function queryParamsBuilder({ queryParams, body = '', name = '' }) {
@@ -246,10 +230,33 @@ function selectQueryBuilder({ name, body = '', queryParams = '' }) {
 }
 
 // Creates a INSERT INTO querystring
-function insertIntoQueryBuilder({ name, body, prefer = '' }) {
+function insertQueryBuilder({ name, body, prefer = '' }) {
+  let columns = '';
+  let index = 1;
+  let rowValues = '';
+  let values = [];
   const returning = prefer ? ' RETURNING *' : '';
-  const options = insertIntoOptionsBuilder(body);
-  return `INSERT INTO ${name} ${options}${returning};`;
+
+  if (Array.isArray(body)) {
+    body.map((data) => {
+      const dataObject = columnsAndRowsBuilder(data, index);
+      columns = `(${dataObject.columns})`;
+      index = dataObject.index;
+      rowValues += rowValues ? ',' : '';
+      rowValues += dataObject.params ? `(${dataObject.params})` : '';
+      values = values.concat(dataObject.values);
+    });
+  } else {
+    const dataObject = columnsAndRowsBuilder(body, index);
+    columns = `(${dataObject.columns})`;
+    rowValues = `(${dataObject.params})`;
+    values = values.concat(dataObject.values);
+  }
+
+  return {
+    queryString: `INSERT INTO ${name} ${columns} VALUES ${rowValues}${returning}`,
+    values,
+  }
 }
 
 // Creates an UPDATE querystring
@@ -285,7 +292,7 @@ function deleteQueryBuilder({ name, queryParams }) {
 
 module.exports = {
   deleteQueryBuilder,
-  insertIntoQueryBuilder,
+  insertQueryBuilder,
   selectQueryBuilder,
   selectQueryBuilderV2,
   updateQueryBuilder,
