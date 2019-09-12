@@ -311,10 +311,13 @@ describe('Test database utils', () => {
         ],
         'limit': '5',
       };
-      const expectedQuery = `SELECT name,city FROM ${name} WHERE name = 'Tilbury 1' AND city = 'London' LIMIT 5;`;
+      const expectedQueryObject = {
+        queryString: `SELECT name,city FROM ${name} WHERE name = $1 AND city = $2 LIMIT 5`,
+        values: ['Tilbury 1', 'London']
+      }
       const query = selectQueryBuilderV2({ name, queryParams });
 
-      expect(query).to.equal(expectedQuery);
+      expect(query).to.deep.equal(expectedQueryObject);
     });
 
     it('Should return a querystring with all columns filtering by firstname and a limit of 1 row', () => {
@@ -325,19 +328,25 @@ describe('Test database utils', () => {
         ],
         'limit': '1',
       };
-      const expectedQuery = `SELECT * FROM ${name} WHERE firstname = 'Pedro' LIMIT 1;`;
+      const expectedQueryObject = {
+        queryString: `SELECT * FROM ${name} WHERE firstname = $1 LIMIT 1`,
+        values: ['Pedro'],
+      }
       const query = selectQueryBuilderV2({ name, queryParams });
 
-      expect(query).to.equal(expectedQuery);
+      expect(query).to.deep.equal(expectedQueryObject);
     });
 
     it('Should return a querystring with all columns and a limit of 1 row', () => {
       const name = 'roles';
       const queryParams = { 'limit': '1' };
-      const expectedQuery = `SELECT * FROM ${name} LIMIT 1;`;
+      const expectedQueryObject = {
+        queryString: `SELECT * FROM ${name} LIMIT 1`,
+        values: [],
+      }
       const query = selectQueryBuilderV2({ name, queryParams });
 
-      expect(query).to.equal(expectedQuery);
+      expect(query).to.deep.equal(expectedQueryObject);
     });
 
     it('Should return an empty querystring if there is more than one select in the query params', () => {
@@ -346,9 +355,13 @@ describe('Test database utils', () => {
         'limit': ['3', '77'],
         'select': ['name,age', 'location'],
       };
+      const expectedQueryObject = {
+        queryString: '',
+        values: [],
+      }
       const query = selectQueryBuilderV2({ name, queryParams });
 
-      expect(query).to.equal('');
+      expect(query).to.deep.equal(expectedQueryObject);
     });
 
     it('Should return a querystring with a column selected ordered by column ascending', () => {
@@ -358,10 +371,13 @@ describe('Test database utils', () => {
         'select': 'name',
         'sort': 'name.asc',
       };
-      const expectedQueryFilter = `SELECT name FROM ${name} ORDER BY name ASC LIMIT 3;`;
+      const expectedQueryObject = {
+        queryString: `SELECT name FROM ${name} ORDER BY name ASC LIMIT 3`,
+        values: [],
+      }
       const query = selectQueryBuilderV2({ name, queryParams });
 
-      expect(query).to.equal(expectedQueryFilter);
+      expect(query).to.deep.equal(expectedQueryObject);
     });
 
     it('Should return a querystring with all columns selected, filtered by name, sorted by name asc, size desc, and a limit of 3 rows', () => {
@@ -369,14 +385,17 @@ describe('Test database utils', () => {
       const queryParams = {
         'limit': '3',
         'filter': [
-          'name=eq.Blue%20Team',
+          'name=eq.Blue Team',
         ],
         'sort': 'name.asc,size.desc',
       };
-      const expectedQueryFilter = `SELECT * FROM ${name} WHERE name = 'Blue Team' ORDER BY name ASC, size DESC LIMIT 3;`;
+      const expectedQueryObject = {
+        queryString: `SELECT * FROM ${name} WHERE name = $1 ORDER BY name ASC, size DESC LIMIT 3`,
+        values: ['Blue Team'],
+      }
       const query = selectQueryBuilderV2({ name, queryParams });
 
-      expect(query).to.equal(expectedQueryFilter);
+      expect(query).to.deep.equal(expectedQueryObject);
     });
   });
 });

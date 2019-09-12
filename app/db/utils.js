@@ -144,22 +144,26 @@ function isPositiveInteger(stringValue) {
   return number !== Infinity && String(number) === stringValue && number >= 0;
 }
 
-function queryParamsBuilderV2({ name, queryParams }) {
+// version2 Creates a SELECT querystring
+function selectQueryBuilderV2({ name, queryParams }) {
   let conditions = '';
+  let index = 1;
   let limit = '';
   let order = '';
+  let queryString = '';
   let select = '';
+  let values = [];
 
   // check if select and limit are arrays
   if ((queryParams.select || queryParams.limit)
       && (Array.isArray(queryParams.select) || Array.isArray(queryParams.limit))) {
-    return '';
+    return { queryString, values };
   }
 
   // check if limit is not integer
   // check if limit is a negative integer
   if (queryParams.limit && !isPositiveInteger(queryParams.limit)) {
-    return '';
+    return { queryString, values };
   }
 
   if (queryParams.select) {
@@ -169,7 +173,7 @@ function queryParamsBuilderV2({ name, queryParams }) {
   }
 
   if (queryParams.limit) {
-    limit = `%20LIMIT ${queryParams.limit}`;
+    limit = ` LIMIT ${queryParams.limit}`;
   }
 
   if (queryParams.sort) {
@@ -180,7 +184,8 @@ function queryParamsBuilderV2({ name, queryParams }) {
       params = params.replace('.', '|').split('|');
       let [field, filter] = params;
       filter = filter.toUpperCase();
-      order += order.includes('ORDER BY') ? `,%20${field} ${filter}` : `%20ORDER BY ${field} ${filter}`;
+      // unfortunately parameters are not supported in `ORDER BY`, `IS`, `IS NOT`, `GROUP`
+      order += order.includes('ORDER BY') ? `, ${field} ${filter}` : ` ORDER BY ${field} ${filter}`;
     });
   }
 
@@ -191,9 +196,7 @@ function queryParamsBuilderV2({ name, queryParams }) {
       let [field, filter, value] = params;
       let isNull = false;
 
-      if (filter !== 'in' && isNaN(value) && value !== 'null') {
-        value = `'${value}'`;
-      } else if (isNaN(value) && value === 'null') {
+      if (isNaN(value) && value === 'null') {
         isNull = true;
         value = value.toUpperCase();
       }
@@ -204,15 +207,27 @@ function queryParamsBuilderV2({ name, queryParams }) {
       } else if (filter === 'eq' && isNull) {
         // 'validfrom IS NULL'
         filter = 'IS';
+      } else if (filter === 'neq' && !isNull) {
+        // 'continent != \'Asia\''
+        filter = '!=';
+      } else if (filter === 'neq' && isNull) {
+        // 'validfrom IS NOT NULL'
+        filter = 'IS NOT';
       }
 
-      conditions += conditions.includes('WHERE') ? `%20AND ${field} ${filter} ${value}` : `%20WHERE ${field} ${filter} ${value}`;
+      // unfortunately parameters are not supported in `ORDER BY`, `IS`, `IS NOT`, `GROUP`
+      if (!isNull) {
+        values.push(value);
+        value = `$${index}`;
+        index = index + 1;
+      }
+
+      conditions += conditions.includes('WHERE') ? ` AND ${field} ${filter} ${value}` : ` WHERE ${field} ${filter} ${value}`;
     });
   }
 
-  let query = `${select}${conditions}${order}${limit};`;
-  query = query.replace(/%20/g, ' ');
-  return query;
+  queryString = `${select}${conditions}${order}${limit}`;
+  return { queryString, values };
 }
 
 // version1 Creates a SELECT querystring
@@ -228,11 +243,6 @@ function selectQueryBuilder({ name, body = '', queryParams = '' }) {
 
   const { query, options } = queryParamsBuilder({ name, queryParams, body });
   return options ? `SELECT * FROM ${name} WHERE ${options};` : query;
-}
-
-// version2 Creates a SELECT querystring
-function selectQueryBuilderV2({ name, queryParams = '' }) {
-  return queryParamsBuilderV2({ name, queryParams });
 }
 
 // Creates a INSERT INTO querystring
