@@ -150,9 +150,9 @@ describe('Test database utils', () => {
         },
       ];
       const expectedQueryObject = {
-        queryString: `INSERT INTO ${name} (name, age, email, roles) VALUES ($1, $2, $3, $4)`,
-        values: ['John', 34, 'john@mail.com', `'${JSON.stringify(["linemanager", "systemuser"])}'`],
-      }
+        'queryString': `INSERT INTO ${name} (name, age, email, roles) VALUES ($1, $2, $3, $4)`,
+        'values': ['John', 34, 'john@mail.com', `'${JSON.stringify(['linemanager', 'systemuser'])}'`],
+      };
       const query = insertQueryBuilder({ name, body });
 
       expect(query).to.deep.equal(expectedQueryObject);
@@ -162,9 +162,9 @@ describe('Test database utils', () => {
       const name = 'staff';
       const body = { 'name': 'John', 'age': 34, 'email': 'john@mail.com' };
       const expectedQueryObject = {
-        queryString: `INSERT INTO ${name} (name, age, email) VALUES ($1, $2, $3) RETURNING *`,
-        values: ['John', 34, 'john@mail.com'],
-      }
+        'queryString': `INSERT INTO ${name} (name, age, email) VALUES ($1, $2, $3) RETURNING *`,
+        'values': ['John', 34, 'john@mail.com'],
+      };
       const prefer = 'return=representation';
       const query = insertQueryBuilder({ name, body, prefer });
 
@@ -178,9 +178,9 @@ describe('Test database utils', () => {
         { 'name': 'Rachel', 'age': 32, 'email': 'rachel@mail.com' },
       ];
       const expectedQueryObject = {
-        queryString: `INSERT INTO ${name} (name, age, email) VALUES ($1, $2, $3),($4, $5, $6)`,
-        values: ['John', 34, 'john@mail.com', 'Rachel', 32, 'rachel@mail.com'],
-      }
+        'queryString': `INSERT INTO ${name} (name, age, email) VALUES ($1, $2, $3),($4, $5, $6)`,
+        'values': ['John', 34, 'john@mail.com', 'Rachel', 32, 'rachel@mail.com'],
+      };
       const query = insertQueryBuilder({ name, body });
 
       expect(query).to.deep.equal(expectedQueryObject);
@@ -194,9 +194,9 @@ describe('Test database utils', () => {
         { 'name': 'Wendy', 'age': 29, 'email': null },
       ];
       const expectedQueryObject = {
-        queryString: `INSERT INTO ${name} (name, age, email) VALUES ($1, $2, $3),($4, $5, $6),($7, $8, NULL) RETURNING *`,
-        values: ['John', 34, 'john@mail.com', 'Rachel', 32, 'rachel@mail.com', 'Wendy', 29],
-      }
+        'queryString': `INSERT INTO ${name} (name, age, email) VALUES ($1, $2, $3),($4, $5, $6),($7, $8, NULL) RETURNING *`,
+        'values': ['John', 34, 'john@mail.com', 'Rachel', 32, 'rachel@mail.com', 'Wendy', 29],
+      };
       const prefer = 'return=representation';
       const query = insertQueryBuilder({ name, body, prefer });
 
@@ -324,9 +324,9 @@ describe('Test database utils', () => {
         'limit': '5',
       };
       const expectedQueryObject = {
-        queryString: `SELECT name,city FROM ${name} WHERE name = $1 AND city = $2 LIMIT 5`,
-        values: ['Tilbury 1', 'London']
-      }
+        'queryString': `SELECT name,city FROM ${name} WHERE name = $1 AND city = $2 LIMIT 5`,
+        'values': ['Tilbury 1', 'London'],
+      };
       const query = selectQueryBuilderV2({ name, queryParams });
 
       expect(query).to.deep.equal(expectedQueryObject);
@@ -341,9 +341,9 @@ describe('Test database utils', () => {
         'limit': '1',
       };
       const expectedQueryObject = {
-        queryString: `SELECT * FROM ${name} WHERE firstname = $1 LIMIT 1`,
-        values: ['Pedro'],
-      }
+        'queryString': `SELECT * FROM ${name} WHERE firstname = $1 LIMIT 1`,
+        'values': ['Pedro'],
+      };
       const query = selectQueryBuilderV2({ name, queryParams });
 
       expect(query).to.deep.equal(expectedQueryObject);
@@ -353,9 +353,9 @@ describe('Test database utils', () => {
       const name = 'roles';
       const queryParams = { 'limit': '1' };
       const expectedQueryObject = {
-        queryString: `SELECT * FROM ${name} LIMIT 1`,
-        values: [],
-      }
+        'queryString': `SELECT * FROM ${name} LIMIT 1`,
+        'values': [],
+      };
       const query = selectQueryBuilderV2({ name, queryParams });
 
       expect(query).to.deep.equal(expectedQueryObject);
@@ -368,9 +368,9 @@ describe('Test database utils', () => {
         'select': ['name,age', 'location'],
       };
       const expectedQueryObject = {
-        queryString: '',
-        values: [],
-      }
+        'queryString': '',
+        'values': [],
+      };
       const query = selectQueryBuilderV2({ name, queryParams });
 
       expect(query).to.deep.equal(expectedQueryObject);
@@ -384,9 +384,9 @@ describe('Test database utils', () => {
         'sort': 'name.asc',
       };
       const expectedQueryObject = {
-        queryString: `SELECT name FROM ${name} ORDER BY name ASC LIMIT 3`,
-        values: [],
-      }
+        'queryString': `SELECT name FROM ${name} ORDER BY name ASC LIMIT 3`,
+        'values': [],
+      };
       const query = selectQueryBuilderV2({ name, queryParams });
 
       expect(query).to.deep.equal(expectedQueryObject);
@@ -402,9 +402,9 @@ describe('Test database utils', () => {
         'sort': 'name.asc,size.desc',
       };
       const expectedQueryObject = {
-        queryString: `SELECT * FROM ${name} WHERE name = $1 ORDER BY name ASC, size DESC LIMIT 3`,
-        values: ['Blue Team'],
-      }
+        'queryString': `SELECT * FROM ${name} WHERE name = $1 ORDER BY name ASC, size DESC LIMIT 3`,
+        'values': ['Blue Team'],
+      };
       const query = selectQueryBuilderV2({ name, queryParams });
 
       expect(query).to.deep.equal(expectedQueryObject);

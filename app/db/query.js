@@ -22,13 +22,13 @@ const query = (role, name, queryString) => new Promise((resolve, reject) => {
 const query2 = (role, name, queryString, values) => new Promise((resolve, reject) => {
   pool.query(`SET ROLE ${role};`)
     .then(() => {
-      const query = {
-        text: queryString,
-        values: values,
+      const queryObject = {
+        'text': queryString,
+        values,
       };
       logger.info('Running query');
       logger.debug(`Running query: ${queryString}, values: ${values}`);
-      return pool.query(query);
+      return pool.query(queryObject);
     })
     .then(data => resolve(data.rows))
     .catch((error) => {

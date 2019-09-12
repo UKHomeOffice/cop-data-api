@@ -254,9 +254,9 @@ function insertQueryBuilder({ name, body, prefer = '' }) {
   }
 
   return {
-    queryString: `INSERT INTO ${name} ${columns} VALUES ${rowValues}${returning}`,
+    'queryString': `INSERT INTO ${name} ${columns} VALUES ${rowValues}${returning}`,
     values,
-  }
+  };
 }
 
 // Creates an UPDATE querystring
