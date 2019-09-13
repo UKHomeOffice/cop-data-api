@@ -151,7 +151,7 @@ describe('Test database utils', () => {
       ];
       const expectedQueryObject = {
         'queryString': `INSERT INTO ${name} (name, age, email, roles) VALUES ($1, $2, $3, $4)`,
-        'values': ['John', 34, 'john@mail.com', `'${JSON.stringify(['linemanager', 'systemuser'])}'`],
+        'values': ['John', 34, 'john@mail.com', `${JSON.stringify(['linemanager', 'systemuser'])}`],
       };
       const query = insertQueryBuilder({ name, body });
 

@@ -35,10 +35,13 @@ function columnsAndRowsBuilder(data, index) {
       columns += key;
       params += params ? ', ' : '';
 
+      // params = $1, $2
+      // columns name, age
+      // values ['Yuri', 34]
       if (data[key] === null) { // null values
         params += JSON.stringify(data[key]).toUpperCase();
       } else if (typeof data[key] === 'object') { // objects as values
-        values.push(`'${JSON.stringify(data[key])}'`);
+        values.push(`${JSON.stringify(data[key])}`);
         params += `$${index}`;
         index = index + 1;
       } else { // strings && number values
