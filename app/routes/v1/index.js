@@ -40,7 +40,7 @@ app.post('/:name', (req, res) => {
   const { name } = req.params;
   const { prefer } = req.headers;
 
-  logger.debug(`Data received: ${body}`);
+  logger.debug(`Data received: ${JSON.stringify(body)}`);
 
   if (Object.entries(body).length === 0) {
     return res.status(400).json({ 'error': 'Invalid post request' });
@@ -63,6 +63,8 @@ app.patch('/:name/:id?', (req, res) => {
   const { id, name } = req.params;
   const { prefer } = req.headers;
   const queryParams = req.url.split('?')[1];
+
+  logger.debug(`Data received: ${JSON.stringify(body)}`);
 
   if (Object.entries(body).length === 0 && (!id || !queryParams)) {
     return res.status(400).json({ 'error': 'Invalid patch request' });
@@ -107,7 +109,7 @@ app.post('/rpc/:name', (req, res) => {
   const { name } = req.params;
   const queryParams = req.url.split('?')[1];
 
-  logger.debug(`Data received: ${body}`);
+  logger.debug(`Data received: ${JSON.stringify(body)}`);
   logger.debug(`Query parameters received: ${queryParams}`);
   const queryString = selectQueryBuilder({ name, queryParams, body });
 

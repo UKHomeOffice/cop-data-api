@@ -12,6 +12,8 @@ app.get('/:name', (req, res) => {
   const { name } = req.params;
   const { dbrole } = res.locals.user;
 
+  logger.debug(`Query parameters received: ${queryParams}`);
+
   if (queryParams.filter && !Array.isArray(queryParams.filter)) {
     queryParams.filter = [queryParams.filter];
   }
