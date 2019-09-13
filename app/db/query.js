@@ -5,7 +5,8 @@ const pool = require('./index');
 const query = (role, name, queryString) => new Promise((resolve, reject) => {
   pool.query(`SET ROLE ${role};`)
     .then(() => {
-      logger.info(`Running query ${queryString}`);
+      logger.info('Running query');
+      logger.debug(`Running query ${queryString}`);
       return pool.query(`${queryString}`);
     })
     .then(data => resolve(data.rows))
@@ -18,4 +19,25 @@ const query = (role, name, queryString) => new Promise((resolve, reject) => {
     });
 });
 
-module.exports = query;
+const query2 = (role, name, queryString, values) => new Promise((resolve, reject) => {
+  pool.query(`SET ROLE ${role};`)
+    .then(() => {
+      const queryObject = {
+        'text': queryString,
+        values,
+      };
+      logger.info('Running query');
+      logger.debug(`Running query: ${queryString}, values: ${values}`);
+      return pool.query(queryObject);
+    })
+    .then(data => resolve(data.rows))
+    .catch((error) => {
+      const errorMsg = `Unable to run query in table ${name}`;
+      logger.error(errorMsg);
+      logger.error(error.stack);
+      error.message = errorMsg;
+      reject(new Error(errorMsg));
+    });
+});
+
+module.exports = { query, query2 };

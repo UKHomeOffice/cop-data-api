@@ -3,7 +3,7 @@ const { expect } = require('chai');
 // local imports
 const {
   deleteQueryBuilder,
-  insertIntoQueryBuilder,
+  insertQueryBuilder,
   selectQueryBuilder,
   selectQueryBuilderV2,
   updateQueryBuilder,
@@ -149,20 +149,26 @@ describe('Test database utils', () => {
           'roles': ['linemanager', 'systemuser'],
         },
       ];
-      const expectedQuery = `INSERT INTO ${name} (name,age,email,roles) VALUES ('John','34','john@mail.com','["linemanager","systemuser"]');`;
-      const query = insertIntoQueryBuilder({ name, body });
+      const expectedQueryObject = {
+        'queryString': `INSERT INTO ${name} (name, age, email, roles) VALUES ($1, $2, $3, $4)`,
+        'values': ['John', 34, 'john@mail.com', `'${JSON.stringify(['linemanager', 'systemuser'])}'`],
+      };
+      const query = insertQueryBuilder({ name, body });
 
-      expect(query).to.equal(expectedQuery);
+      expect(query).to.deep.equal(expectedQueryObject);
     });
 
     it('Should return a querystring with option to return all inserted data', () => {
       const name = 'staff';
       const body = { 'name': 'John', 'age': 34, 'email': 'john@mail.com' };
-      const expectedQuery = `INSERT INTO ${name} (name,age,email) VALUES ('John','34','john@mail.com') RETURNING *;`;
+      const expectedQueryObject = {
+        'queryString': `INSERT INTO ${name} (name, age, email) VALUES ($1, $2, $3) RETURNING *`,
+        'values': ['John', 34, 'john@mail.com'],
+      };
       const prefer = 'return=representation';
-      const query = insertIntoQueryBuilder({ name, body, prefer });
+      const query = insertQueryBuilder({ name, body, prefer });
 
-      expect(query).to.equal(expectedQuery);
+      expect(query).to.deep.equal(expectedQueryObject);
     });
 
     it('Should return a querystring with option to insert multiple rows, without returning the data inserted', () => {
@@ -171,10 +177,13 @@ describe('Test database utils', () => {
         { 'name': 'John', 'age': 34, 'email': 'john@mail.com' },
         { 'name': 'Rachel', 'age': 32, 'email': 'rachel@mail.com' },
       ];
-      const expectedQuery = `INSERT INTO ${name} (name,age,email) VALUES ('John','34','john@mail.com'),('Rachel','32','rachel@mail.com');`;
-      const query = insertIntoQueryBuilder({ name, body });
+      const expectedQueryObject = {
+        'queryString': `INSERT INTO ${name} (name, age, email) VALUES ($1, $2, $3),($4, $5, $6)`,
+        'values': ['John', 34, 'john@mail.com', 'Rachel', 32, 'rachel@mail.com'],
+      };
+      const query = insertQueryBuilder({ name, body });
 
-      expect(query).to.equal(expectedQuery);
+      expect(query).to.deep.equal(expectedQueryObject);
     });
 
     it('Should return a querystring with option to insert multiple rows, returning the data inserted', () => {
@@ -184,11 +193,14 @@ describe('Test database utils', () => {
         { 'name': 'Rachel', 'age': 32, 'email': 'rachel@mail.com' },
         { 'name': 'Wendy', 'age': 29, 'email': null },
       ];
-      const expectedQuery = `INSERT INTO ${name} (name,age,email) VALUES ('John','34','john@mail.com'),('Rachel','32','rachel@mail.com'),('Wendy','29',NULL) RETURNING *;`;
+      const expectedQueryObject = {
+        'queryString': `INSERT INTO ${name} (name, age, email) VALUES ($1, $2, $3),($4, $5, $6),($7, $8, NULL) RETURNING *`,
+        'values': ['John', 34, 'john@mail.com', 'Rachel', 32, 'rachel@mail.com', 'Wendy', 29],
+      };
       const prefer = 'return=representation';
-      const query = insertIntoQueryBuilder({ name, body, prefer });
+      const query = insertQueryBuilder({ name, body, prefer });
 
-      expect(query).to.equal(expectedQuery);
+      expect(query).to.deep.equal(expectedQueryObject);
     });
   });
 
@@ -311,10 +323,13 @@ describe('Test database utils', () => {
         ],
         'limit': '5',
       };
-      const expectedQuery = `SELECT name,city FROM ${name} WHERE name = 'Tilbury 1' AND city = 'London' LIMIT 5;`;
+      const expectedQueryObject = {
+        'queryString': `SELECT name,city FROM ${name} WHERE name = $1 AND city = $2 LIMIT 5`,
+        'values': ['Tilbury 1', 'London'],
+      };
       const query = selectQueryBuilderV2({ name, queryParams });
 
-      expect(query).to.equal(expectedQuery);
+      expect(query).to.deep.equal(expectedQueryObject);
     });
 
     it('Should return a querystring with all columns filtering by firstname and a limit of 1 row', () => {
@@ -325,19 +340,25 @@ describe('Test database utils', () => {
         ],
         'limit': '1',
       };
-      const expectedQuery = `SELECT * FROM ${name} WHERE firstname = 'Pedro' LIMIT 1;`;
+      const expectedQueryObject = {
+        'queryString': `SELECT * FROM ${name} WHERE firstname = $1 LIMIT 1`,
+        'values': ['Pedro'],
+      };
       const query = selectQueryBuilderV2({ name, queryParams });
 
-      expect(query).to.equal(expectedQuery);
+      expect(query).to.deep.equal(expectedQueryObject);
     });
 
     it('Should return a querystring with all columns and a limit of 1 row', () => {
       const name = 'roles';
       const queryParams = { 'limit': '1' };
-      const expectedQuery = `SELECT * FROM ${name} LIMIT 1;`;
+      const expectedQueryObject = {
+        'queryString': `SELECT * FROM ${name} LIMIT 1`,
+        'values': [],
+      };
       const query = selectQueryBuilderV2({ name, queryParams });
 
-      expect(query).to.equal(expectedQuery);
+      expect(query).to.deep.equal(expectedQueryObject);
     });
 
     it('Should return an empty querystring if there is more than one select in the query params', () => {
@@ -346,9 +367,13 @@ describe('Test database utils', () => {
         'limit': ['3', '77'],
         'select': ['name,age', 'location'],
       };
+      const expectedQueryObject = {
+        'queryString': '',
+        'values': [],
+      };
       const query = selectQueryBuilderV2({ name, queryParams });
 
-      expect(query).to.equal('');
+      expect(query).to.deep.equal(expectedQueryObject);
     });
 
     it('Should return a querystring with a column selected ordered by column ascending', () => {
@@ -358,10 +383,13 @@ describe('Test database utils', () => {
         'select': 'name',
         'sort': 'name.asc',
       };
-      const expectedQueryFilter = `SELECT name FROM ${name} ORDER BY name ASC LIMIT 3;`;
+      const expectedQueryObject = {
+        'queryString': `SELECT name FROM ${name} ORDER BY name ASC LIMIT 3`,
+        'values': [],
+      };
       const query = selectQueryBuilderV2({ name, queryParams });
 
-      expect(query).to.equal(expectedQueryFilter);
+      expect(query).to.deep.equal(expectedQueryObject);
     });
 
     it('Should return a querystring with all columns selected, filtered by name, sorted by name asc, size desc, and a limit of 3 rows', () => {
@@ -369,14 +397,17 @@ describe('Test database utils', () => {
       const queryParams = {
         'limit': '3',
         'filter': [
-          'name=eq.Blue%20Team',
+          'name=eq.Blue Team',
         ],
         'sort': 'name.asc,size.desc',
       };
-      const expectedQueryFilter = `SELECT * FROM ${name} WHERE name = 'Blue Team' ORDER BY name ASC, size DESC LIMIT 3;`;
+      const expectedQueryObject = {
+        'queryString': `SELECT * FROM ${name} WHERE name = $1 ORDER BY name ASC, size DESC LIMIT 3`,
+        'values': ['Blue Team'],
+      };
       const query = selectQueryBuilderV2({ name, queryParams });
 
-      expect(query).to.equal(expectedQueryFilter);
+      expect(query).to.deep.equal(expectedQueryObject);
     });
   });
 });

@@ -2,10 +2,10 @@ const express = require('express');
 
 // local imports
 const logger = require('../../config/logger')(__filename);
-const query = require('../../db/query');
+const { query, query2 } = require('../../db/query');
 const {
   deleteQueryBuilder,
-  insertIntoQueryBuilder,
+  insertQueryBuilder,
   selectQueryBuilder,
   updateQueryBuilder,
 } = require('../../db/utils');
@@ -42,8 +42,8 @@ app.post('/:name', (req, res) => {
     return res.status(400).json({ 'error': 'Invalid post request' });
   }
 
-  const queryString = insertIntoQueryBuilder({ name, body, prefer });
-  const data = query(dbrole, name, queryString);
+  const { queryString, values } = insertQueryBuilder({ name, body, prefer });
+  const data = query2(dbrole, name, queryString, values);
 
   Promise.all([data])
     .then(resultsArray => res.status(200).json(resultsArray[0]))

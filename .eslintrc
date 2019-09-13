@@ -14,6 +14,7 @@
     "prefer-destructuring": "off",
     "object-curly-newline": ["error", { "multiline": true }],
     "no-loop-func": "off",
+    "operator-assignment": "off",
   },
   "extends": "airbnb/base",
   "env": {
