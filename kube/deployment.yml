@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
       - name: api
-        image: "{{.API_COP_IMAGE}}:{{.DRONE_COMMIT_SHA}}"
+        image: "{{.API_COP_IMAGE}}:{{.API_COP_TAG}}"
         imagePullPolicy: Always
         securityContext:
           runAsNonRoot: true
@@ -99,3 +99,10 @@ spec:
         ports:
           - name: https
             containerPort: 10443
+        volumeMounts:
+          - name: certs
+            mountPath: /certs
+      volumes:
+      - name: certs
+        secret:
+          secretName: "{{.API_COP_NAME}}-pod-tls"
