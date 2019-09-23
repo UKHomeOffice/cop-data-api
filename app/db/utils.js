@@ -1,27 +1,63 @@
 // local imports
 const logger = require('../config/logger')(__filename);
 
-function viewFunctionArgsBuilder(body = '') {
+function argsBuilderFunctionStatement(body, index = 1) {
   let args = '';
-  let value = '';
+  let values = [];
 
   if (body) {
     for (const key in body) {
       if (Object.prototype.hasOwnProperty.call(body, key)) {
-        args += args ? ',' : '';
+        args += args ? ', ' : '';
 
         if (body[key] === null) { // null values
-          value = JSON.stringify(body[key]).toUpperCase();
-          args += `${key}=>${value}`;
+          // args => name=>NULL
+          args += `${key}=>${JSON.stringify(body[key]).toUpperCase()}`;
         } else if (typeof body[key] === 'object') { // objects as values
-          args += `${key}=>'${JSON.stringify(body[key])}'`;
+          // values => ['Yuri', '34']
+          values.push(`${JSON.stringify(body[key])}`);
+          args += `${key}=>$${index}`;
+          index += 1;
         } else { // strings && number values
-          args += `${key}=>'${body[key]}'`;
+          values.push(body[key]);
+          // args => name=>$1, address=>$2
+          args += `${key}=>$${index}`;
+          index = index + 1;
         }
       }
     }
   }
-  return args ? `(${args})` : args;
+  args = args ? `(${args})` : args;
+  return { args, values, index };
+}
+
+function argsBuilderUpdateStatement(body, index = 1) {
+  let args = '';
+  let values = [];
+
+  if (body) {
+    for (const key in body) {
+      if (Object.prototype.hasOwnProperty.call(body, key)) {
+        args += args ? ', ' : '';
+
+        if (body[key] === null) { // null values
+          // args => name=NULL
+          args += `${key}=${JSON.stringify(body[key]).toUpperCase()}`;
+        } else if (typeof body[key] === 'object') { // objects as values
+          // values => ['Yuri', 34]
+          values.push(`${JSON.stringify(body[key])}`);
+          args += `${key}=$${index}`;
+          index = index + 1;
+        } else { // strings && number values
+          values.push(body[key]);
+          // args => name=$1, address=$2
+          args += `${key}=$${index}`;
+          index = index + 1;
+        }
+      }
+    }
+  }
+  return { args, values, index };
 }
 
 function columnsAndRowsBuilder(data, index) {
@@ -32,20 +68,20 @@ function columnsAndRowsBuilder(data, index) {
   for (const key in data) {
     if (Object.prototype.hasOwnProperty.call(data, key)) {
       columns += columns ? ', ' : '';
+      // columns => name, age
       columns += key;
       params += params ? ', ' : '';
 
-      // params = $1, $2
-      // columns name, age
-      // values ['Yuri', 34]
       if (data[key] === null) { // null values
         params += JSON.stringify(data[key]).toUpperCase();
       } else if (typeof data[key] === 'object') { // objects as values
+        // values => ['Yuri', 34]
         values.push(`${JSON.stringify(data[key])}`);
         params += `$${index}`;
         index = index + 1;
       } else { // strings && number values
         values.push(data[key]);
+        // params => $1, $2
         params += `$${index}`;
         index = index + 1;
       }
@@ -54,26 +90,45 @@ function columnsAndRowsBuilder(data, index) {
   return { columns, params, values, index };
 }
 
-function queryParamsBuilder({ queryParams, body = '', name = '' }) {
+function queryParamsBuilder({ queryParams, method, body = '', name = '' }) {
+  let args = '';
+  let values = [];
+  let error = false;
+  let index = 1;
   let options = '';
+  let params = '';
   let query = '';
+
+
+  if (method === 'VIEW_FUNCTION') {
+    const obj = argsBuilderFunctionStatement(body, index);
+    args = obj.args;
+    values = values.concat(obj.values);
+    index = obj.index ? obj.index : index;
+  } else if (method === 'UPDATE') {
+    const obj = argsBuilderUpdateStatement(body, index);
+    args = obj.args;
+    values = values.concat(obj.values);
+    index = obj.index ? obj.index : index;
+  }
 
   queryParams = queryParams.replace(/,&/g, ';%20AND%20');
   queryParams = queryParams.replace(/&/g, ';&');
   queryParams = queryParams.split(';');
-  queryParams.map((params) => {
-    const args = viewFunctionArgsBuilder(body);
-    params = params.replace('=', ' ').replace('.', ' ').split(' ');
-    let [field = '', filter = '', value = ''] = params;
+  queryParams.map((paramsString) => {
+    paramsString = paramsString.replace('=', ' ');
+    paramsString = paramsString.replace('.', ' ');
+    paramsString = paramsString.split(' ');
+    let [field = '', filter = '', value = ''] = paramsString;
     let isNull = false;
+    let placeholders = '';
 
     if (!filter) {
-      return '';
+      error = true;
+      return;
     }
 
-    if (filter !== 'in' && isNaN(value) && value !== 'null') {
-      value = `'${value}'`;
-    } else if (isNaN(value) && value === 'null') {
+    if (isNaN(value) && value === 'null') {
       isNull = true;
       value = value.toUpperCase();
     }
@@ -94,12 +149,25 @@ function queryParamsBuilder({ queryParams, body = '', name = '' }) {
       filter = 'IS';
     } else {
       filter = 'IN';
-      value = value.replace('%28', '').replace('%29', '').replace(/%20/g, ' ');
 
-      let values = value.split(',');
-      value = values.map(val => val.trim());
-      value = `'${value.join("', '")}'`;
-      value = `(${value})`;
+      // receives value '%28122,222%29'
+      let items = value.replace('%28', '');
+      items = items.replace('%29', '');
+      items = items.replace(/%20/g, ' ');
+      items = items.split(',');
+
+      // assign items ['122', '222'] to value
+      value = items.map(val => val.trim());
+
+      // convert items ['122', '222'] to
+      // indexed placeholders ($1, $2)
+      placeholders = items.map((val) => {
+        val = `$${index}`;
+        index = index + 1;
+        return val;
+      });
+      placeholders = `${placeholders.join(', ')}`;
+      placeholders = `(${placeholders})`;
     }
 
     if (!value) {
@@ -108,7 +176,14 @@ function queryParamsBuilder({ queryParams, body = '', name = '' }) {
       filter = filter.replace(/ /g, ', ');
       query = `${field} ${filter} FROM ${name}${args}`;
     } else if (query) {
+      values = values.concat(value);
+      value = placeholders || `$${index}`;
       query += query.includes('WHERE') ? `${field} ${filter} ${value}` : `%20WHERE ${field} ${filter} ${value}`;
+      index = index + 1;
+    } else if (value && !isNull) {
+      values.push(value);
+      options += `${field} ${filter} $${index}`;
+      index = index + 1;
     } else {
       options += `${field} ${filter} ${value}`;
     }
@@ -116,15 +191,20 @@ function queryParamsBuilder({ queryParams, body = '', name = '' }) {
 
   query = query.replace(/%20/g, ' ');
   query = query.replace('&', '');
-  query = query ? `${query};` : query;
+  query = query ? `${query}` : query;
   options = options.replace(/%20/g, ' ');
-  return { query, options };
+  values = values.map(val => String(val).replace(/%20/g, ' '));
+
+  if (error) {
+    query = '';
+  }
+  return { query, args, options, values };
 }
 
 // isPositiveInteger is a function that takes a number
 // as a string and checks if that number is a positive integer
 //
-// params stringValue: a string
+// params stringValue: a String
 // returns:            a Boolean
 function isPositiveInteger(stringValue) {
   const number = Math.floor(Number(stringValue));
@@ -219,20 +299,59 @@ function selectQueryBuilderV2({ name, queryParams }) {
 
 // version1 Creates a SELECT querystring
 function selectQueryBuilder({ name, body = '', queryParams = '' }) {
+  let queryString = '';
+
   if (!body && !queryParams) {
-    return `SELECT * FROM ${name};`;
+    return {
+      'queryString': `SELECT * FROM ${name}`,
+      'values': [],
+    };
   }
+
 
   if (body && !queryParams) {
-    const args = viewFunctionArgsBuilder(body);
-    return `SELECT * FROM ${name}${args};`;
+    const { args, values } = argsBuilderFunctionStatement(body);
+
+    queryString = `SELECT * FROM ${name}${args}`;
+    return { queryString, values };
   }
 
-  const { query, options } = queryParamsBuilder({ name, queryParams, body });
-  return options ? `SELECT * FROM ${name} WHERE ${options};` : query;
+  const method = 'VIEW_FUNCTION';
+  const { query, options, values } = queryParamsBuilder({ name, method, queryParams, body });
+  queryString = options ? `SELECT * FROM ${name} WHERE ${options}` : query;
+  return { queryString, values };
 }
 
 // Creates a INSERT INTO querystring
+// insertQueryBuilder is a function that given array of objects
+// or a single object, it manipulates its data in order to be used as
+// a parameterized query, for example:
+//
+// * Array of Objects:
+//    [
+//      { 'name': 'John', 'age': 34, 'email': 'john@mail.com' },
+//      { 'name': 'Rachel', 'age': 32, 'email': 'rachel@mail.com' },
+//    ]
+//
+//    Parameterized query data:
+//
+//    columns: (name, age, email)
+//    rowValues: ($1, $2, $3),($4, $5, $6)
+//    values: ['John', 34, 'john@mail.com', 'Rachel', 32, 'rachel@mail.com']
+//
+// * Object
+//    { 'name': 'John', 'age': 34, 'email': 'john@mail.com' }
+//
+//    Parameterized query data:
+//
+//    columns: (name, age, email)
+//    rowValues: ($1, $2, $3)
+//    values: ['John', 34, 'john@mail.com']
+//
+// params name:   a String
+// params body:   an Array or Object
+// params prefer: a String
+// returns:       an Object
 function insertQueryBuilder({ name, body, prefer = '' }) {
   let columns = '';
   let index = 1;
@@ -255,42 +374,28 @@ function insertQueryBuilder({ name, body, prefer = '' }) {
     rowValues = `(${dataObject.params})`;
     values = values.concat(dataObject.values);
   }
-
-  return {
-    'queryString': `INSERT INTO ${name} ${columns} VALUES ${rowValues}${returning}`,
-    values,
-  };
+  const queryString = `INSERT INTO ${name} ${columns} VALUES ${rowValues}${returning}`;
+  return { queryString, values };
 }
 
 // Creates an UPDATE querystring
 function updateQueryBuilder({ name, body, id = '', prefer = '', queryParams = '' }) {
-  let value = '';
-  let values = '';
-  const returning = prefer ? ' RETURNING *' : '';
+  if (!Array.isArray(body)) {
+    queryParams = id ? `id=eq.${id}` : queryParams;
 
-  for (const key in body) {
-    if (Object.prototype.hasOwnProperty.call(body, key)) {
-      values += values ? ',' : '';
-
-      if (body[key] === null) { // null values
-        value = JSON.stringify(body[key]).toUpperCase();
-        values += `${key}=${value}`;
-      } else if (typeof body[key] === 'object') { // objects as values
-        values += `${key}=${JSON.stringify(body[key])}`;
-      } else { // strings && number values
-        values += `${key}='${body[key]}'`;
-      }
-    }
+    const method = 'UPDATE';
+    const returning = prefer ? ' RETURNING *' : '';
+    const { args, options, values } = queryParamsBuilder({ queryParams, method, body });
+    const queryString = `UPDATE ${name} SET ${args} WHERE ${options}${returning}`;
+    return { queryString, values };
   }
-  queryParams = id ? `id=eq.${id}` : queryParams;
-  const { options } = queryParamsBuilder({ queryParams });
-  return values ? `UPDATE ${name} SET ${values} WHERE ${options}${returning};` : '';
 }
 
 // Creates a DELETE querystring
 function deleteQueryBuilder({ name, queryParams }) {
-  const { options } = queryParamsBuilder({ queryParams });
-  return `DELETE FROM ${name} WHERE ${options};`;
+  const { options, values } = queryParamsBuilder({ queryParams });
+  const queryString = `DELETE FROM ${name} WHERE ${options}`;
+  return { queryString, values };
 }
 
 module.exports = {

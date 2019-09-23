@@ -18,7 +18,7 @@ describe('Test routes', () => {
       'name': 'John',
       'email': 'john@mail.com',
       'exp': expiryTime,
-      'refdbrole': 'readonly',
+      'dbrole': 'readonly',
       'iss': config.iss,
       'aud': ['operational-data-api', 'api-cop'],
     };
