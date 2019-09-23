@@ -2,7 +2,7 @@
 const logger = require('../config/logger')(__filename);
 const pool = require('./index');
 
-const query2 = (role, name, queryString, values) => new Promise((resolve, reject) => {
+const query = (role, name, queryString, values) => new Promise((resolve, reject) => {
   pool.query(`SET ROLE ${role};`)
     .then(() => {
       const queryObject = {
@@ -23,4 +23,4 @@ const query2 = (role, name, queryString, values) => new Promise((resolve, reject
     });
 });
 
-module.exports = query2;
+module.exports = query;

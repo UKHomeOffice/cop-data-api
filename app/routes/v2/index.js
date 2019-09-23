@@ -2,7 +2,7 @@ const express = require('express');
 
 // local imports
 const logger = require('../../config/logger')(__filename);
-const query2 = require('../../db/query');
+const query = require('../../db/query');
 const { selectQueryBuilderV2 } = require('../../db/utils');
 
 const app = express();
@@ -24,7 +24,7 @@ app.get('/:name', (req, res) => {
     return res.status(400).json({ 'error': 'Invalid query parameters' });
   }
 
-  const data = query2(dbrole, name, queryString, values);
+  const data = query(dbrole, name, queryString, values);
 
   Promise.all([data])
     .then(resultsArray => res.status(200).json(resultsArray[0]))
