@@ -1,11 +1,9 @@
 // local imports
 const logger = require('../config/logger')(__filename);
 
-function argsBuilderFunctionStatement(body, index) {
+function argsBuilderFunctionStatement(body, index = 1) {
   let args = '';
   let values = [];
-  // default to 1 if index is not passed
-  index = index ? index : 1;
 
   if (body) {
     for (const key in body) {
@@ -33,11 +31,9 @@ function argsBuilderFunctionStatement(body, index) {
   return { args, values, index };
 }
 
-function argsBuilderUpdateStatement(body, index) {
+function argsBuilderUpdateStatement(body, index = 1) {
   let args = '';
   let values = [];
-  // default to 1 if index is not passed
-  index = index ? index : 1;
 
   if (body) {
     for (const key in body) {
@@ -119,9 +115,11 @@ function queryParamsBuilder({ queryParams, method, body = '', name = '' }) {
   queryParams = queryParams.replace(/,&/g, ';%20AND%20');
   queryParams = queryParams.replace(/&/g, ';&');
   queryParams = queryParams.split(';');
-  queryParams.map((params) => {
-    params = params.replace('=', ' ').replace('.', ' ').split(' ');
-    let [field = '', filter = '', value = ''] = params;
+  queryParams.map((paramsString) => {
+    paramsString = paramsString.replace('=', ' ');
+    paramsString = paramsString.replace('.', ' ');
+    paramsString = paramsString.split(' ');
+    let [field = '', filter = '', value = ''] = paramsString;
     let isNull = false;
     let placeholders = '';
 
@@ -153,8 +151,8 @@ function queryParamsBuilder({ queryParams, method, body = '', name = '' }) {
       filter = 'IN';
 
       // receives value '%28122,222%29'
-      let items = value.replace('%28', '')
-      items = items.replace('%29', '')
+      let items = value.replace('%28', '');
+      items = items.replace('%29', '');
       items = items.replace(/%20/g, ' ');
       items = items.split(',');
 
@@ -163,12 +161,12 @@ function queryParamsBuilder({ queryParams, method, body = '', name = '' }) {
 
       // convert items ['122', '222'] to
       // indexed placeholders ($1, $2)
-      placeholders = items.map(val => {
+      placeholders = items.map((val) => {
         val = `$${index}`;
         index = index + 1;
         return val;
-      })
-      placeholders = `${placeholders.join(", ")}`;
+      });
+      placeholders = `${placeholders.join(', ')}`;
       placeholders = `(${placeholders})`;
     }
 
@@ -179,7 +177,7 @@ function queryParamsBuilder({ queryParams, method, body = '', name = '' }) {
       query = `${field} ${filter} FROM ${name}${args}`;
     } else if (query) {
       values = values.concat(value);
-      value = placeholders ? placeholders : `$${index}`;
+      value = placeholders || `$${index}`;
       query += query.includes('WHERE') ? `${field} ${filter} ${value}` : `%20WHERE ${field} ${filter} ${value}`;
       index = index + 1;
     } else if (value && !isNull) {
@@ -198,7 +196,7 @@ function queryParamsBuilder({ queryParams, method, body = '', name = '' }) {
   values = values.map(val => String(val).replace(/%20/g, ' '));
 
   if (error) {
-    query = ''
+    query = '';
   }
   return { query, args, options, values };
 }
@@ -383,7 +381,7 @@ function insertQueryBuilder({ name, body, prefer = '' }) {
 // Creates an UPDATE querystring
 function updateQueryBuilder({ name, body, id = '', prefer = '', queryParams = '' }) {
   if (!Array.isArray(body)) {
-    queryParams = id ? `id=eq.${id}`: queryParams;
+    queryParams = id ? `id=eq.${id}` : queryParams;
 
     const method = 'UPDATE';
     const returning = prefer ? ' RETURNING *' : '';

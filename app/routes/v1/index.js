@@ -17,7 +17,7 @@ app.get('/:name', (req, res) => {
   const { dbrole } = res.locals.user;
   const queryParams = req.url.split('?')[1];
 
-  logger.debug(`Query parameters received: ${queryParams ? queryParams : 'None'}`);
+  logger.debug(`Query parameters received: ${queryParams || 'None'}`);
   const { queryString, values } = selectQueryBuilder({ name, queryParams });
 
   if (!queryString) {
@@ -86,7 +86,7 @@ app.delete('/:name', (req, res) => {
   const { dbrole } = res.locals.user;
   const queryParams = req.url.split('?')[1];
 
-  logger.debug(`Query parameters received: ${queryParams ? queryParams : 'None'}`);
+  logger.debug(`Query parameters received: ${queryParams || 'None'}`);
 
   if (!queryParams) {
     return res.status(400).json({ 'error': 'Invalid query parameters' });
@@ -110,7 +110,7 @@ app.post('/rpc/:name', (req, res) => {
   const queryParams = req.url.split('?')[1];
 
   logger.debug(`Body received: ${JSON.stringify(body)}`);
-  logger.debug(`Query parameters received: ${queryParams ? queryParams : 'None'}`);
+  logger.debug(`Query parameters received: ${queryParams || 'None'}`);
   const { queryString, values } = selectQueryBuilder({ name, queryParams, body });
 
   if (!queryString) {

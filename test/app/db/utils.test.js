@@ -277,7 +277,7 @@ describe('Test database utils', () => {
 
     it('Should return a querystring to update existing data matching query parameters', () => {
       const name = 'identity';
-      const queryParams = `firstname=eq.Pedro,&id=eq.2553b00e-3cb0-441d-b29d-17196491a1e5`;
+      const queryParams = 'firstname=eq.Pedro,&id=eq.2553b00e-3cb0-441d-b29d-17196491a1e5';
       const body = { 'firstname': 'John' };
       const expectedQueryObject = {
         'queryString': `UPDATE ${name} SET firstname=$1 WHERE firstname = $2 AND id = $3`,
@@ -322,7 +322,6 @@ describe('Test database utils', () => {
     it('Should return a querystring to delete a row matching the email address and id', () => {
       const name = 'roles';
       const queryParams = 'email=eq.manager@mail.com,&id=eq.123';
-      const expectedQuery = `;`;
       const expectedQueryObject = {
         'queryString': `DELETE FROM ${name} WHERE email = $1 AND id = $2`,
         'values': ['manager@mail.com', '123'],
