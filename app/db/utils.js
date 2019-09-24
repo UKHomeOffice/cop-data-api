@@ -127,8 +127,9 @@ function queryParamsBuilder({ queryParams, index, name = '', body = '', args = '
       text += text.includes('WHERE') ? `${field} ${filter} ${value}` : ` WHERE ${field} ${filter} ${value}`;
       index += 1;
     } else if (value && !isNull) {
-      values.push(value);
-      filters += `${field} ${filter} $${index}`;
+      values = values.concat(value);
+      value = indexes || `$${index}`;
+      filters += `${field} ${filter} ${value}`;
       index += 1;
     } else {
       filters += `${field} ${filter} ${value}`;
