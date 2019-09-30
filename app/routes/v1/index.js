@@ -3,28 +3,24 @@ const express = require('express');
 // local imports
 const logger = require('../../config/logger')(__filename);
 const query = require('../../db/query');
-const {
-  deleteQueryBuilder,
-  insertQueryBuilder,
-  selectQueryBuilder,
-  updateQueryBuilder,
-} = require('../../db/utils');
+const { parameterizedQueryBuilder } = require('../../db/utils');
 
 const app = express();
 
 app.get('/:name', (req, res) => {
+  const method = 'get';
+  const queryParams = req.url.split('?')[1];
   const { name } = req.params;
   const { dbrole } = res.locals.user;
-  const queryParams = req.url.split('?')[1];
 
   logger.debug(`Query parameters received: ${queryParams || 'None'}`);
-  const { queryString, values } = selectQueryBuilder({ name, queryParams });
+  const { text, values } = parameterizedQueryBuilder({ name, method, queryParams });
 
-  if (!queryString) {
+  if (!text) {
     return res.status(400).json({ 'error': 'Invalid query parameters' });
   }
 
-  const data = query(dbrole, name, queryString, values);
+  const data = query(dbrole, name, text, values);
 
   Promise.all([data])
     .then(resultsArray => res.status(200).json(resultsArray[0]))
@@ -35,6 +31,7 @@ app.get('/:name', (req, res) => {
 });
 
 app.post('/:name', (req, res) => {
+  const method = 'post';
   const { body } = req;
   const { dbrole } = res.locals.user;
   const { name } = req.params;
@@ -46,8 +43,8 @@ app.post('/:name', (req, res) => {
     return res.status(400).json({ 'error': 'Invalid post request' });
   }
 
-  const { queryString, values } = insertQueryBuilder({ name, body, prefer });
-  const data = query(dbrole, name, queryString, values);
+  const { text, values } = parameterizedQueryBuilder({ name, method, body, prefer });
+  const data = query(dbrole, name, text, values);
 
   Promise.all([data])
     .then(resultsArray => res.status(200).json(resultsArray[0]))
@@ -58,11 +55,13 @@ app.post('/:name', (req, res) => {
 });
 
 app.patch('/:name/:id?', (req, res) => {
+  const method = 'update';
   const { body } = req;
   const { dbrole } = res.locals.user;
   const { id, name } = req.params;
   const { prefer } = req.headers;
-  const queryParams = req.url.split('?')[1];
+  let queryParams = req.url.split('?')[1];
+  queryParams = id ? `id=eq.${id}` : queryParams;
 
   logger.debug(`Body received: ${JSON.stringify(body)}`);
 
@@ -70,8 +69,8 @@ app.patch('/:name/:id?', (req, res) => {
     return res.status(400).json({ 'error': 'Invalid patch request' });
   }
 
-  const { queryString, values } = updateQueryBuilder({ name, body, id, queryParams, prefer });
-  const data = query(dbrole, name, queryString, values);
+  const { text, values } = parameterizedQueryBuilder({ name, method, body, queryParams, prefer });
+  const data = query(dbrole, name, text, values);
 
   Promise.all([data])
     .then(resultsArray => res.status(200).json(resultsArray[0]))
@@ -82,9 +81,10 @@ app.patch('/:name/:id?', (req, res) => {
 });
 
 app.delete('/:name', (req, res) => {
+  const method = 'delete';
+  const queryParams = req.url.split('?')[1];
   const { name } = req.params;
   const { dbrole } = res.locals.user;
-  const queryParams = req.url.split('?')[1];
 
   logger.debug(`Query parameters received: ${queryParams || 'None'}`);
 
@@ -92,8 +92,8 @@ app.delete('/:name', (req, res) => {
     return res.status(400).json({ 'error': 'Invalid query parameters' });
   }
 
-  const { queryString, values } = deleteQueryBuilder({ name, queryParams });
-  const data = query(dbrole, name, queryString, values);
+  const { text, values } = parameterizedQueryBuilder({ name, method, queryParams });
+  const data = query(dbrole, name, text, values);
 
   Promise.all([data])
     .then(resultsArray => res.status(200).json(resultsArray[0]))
@@ -104,20 +104,21 @@ app.delete('/:name', (req, res) => {
 });
 
 app.post('/rpc/:name', (req, res) => {
+  const method = 'post-rpc';
+  const queryParams = req.url.split('?')[1];
   const { body } = req;
   const { dbrole } = res.locals.user;
   const { name } = req.params;
-  const queryParams = req.url.split('?')[1];
 
   logger.debug(`Body received: ${JSON.stringify(body)}`);
   logger.debug(`Query parameters received: ${queryParams || 'None'}`);
-  const { queryString, values } = selectQueryBuilder({ name, queryParams, body });
+  const { text, values } = parameterizedQueryBuilder({ name, method, body, queryParams });
 
-  if (!queryString) {
+  if (!text) {
     return res.status(400).json({ 'error': 'Invalid query parameters' });
   }
 
-  const data = query(dbrole, name, queryString, values);
+  const data = query(dbrole, name, text, values);
   Promise.all([data])
     .then(resultsArray => res.status(200).json(resultsArray[0]))
     .catch((error) => {
