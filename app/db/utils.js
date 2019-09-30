@@ -229,6 +229,7 @@ function selectQueryBuilderV2({ name, queryParams }) {
   let index = 1;
   let limit = '';
   let order = '';
+  let placeholders = '';
   let queryString = '';
   let select = '';
   let values = [];
@@ -252,7 +253,9 @@ function selectQueryBuilderV2({ name, queryParams }) {
   }
 
   if (queryParams.limit) {
-    limit = ` LIMIT ${queryParams.limit}`;
+    limit = ` LIMIT $${index}`;
+    values.push(queryParams.limit);
+    index += 1;
   }
 
   if (queryParams.sort) {
@@ -283,25 +286,49 @@ function selectQueryBuilderV2({ name, queryParams }) {
       if (filter === 'eq' && !isNull) {
         // 'continent = \'Asia\''
         filter = '=';
+        values.push(value);
+        placeholders = `$${index}`;
+        index += 1;
       } else if (filter === 'eq' && isNull) {
         // 'validfrom IS NULL'
         filter = 'IS';
+        // 'IS NULL' is treated as dynamic columns and
+        // therefore prepared statements are not allowed
+        // hence adding the value in place of the index.
+        placeholders = value;
+        index += 1;
       } else if (filter === 'neq' && !isNull) {
         // 'continent != \'Asia\''
         filter = '!=';
+        values.push(value);
+        placeholders = `$${index}`;
+        index += 1;
       } else if (filter === 'neq' && isNull) {
         // 'validfrom IS NOT NULL'
         filter = 'IS NOT';
+        // 'IS NOT NULL' is treated as dynamic columns and
+        // therefore prepared statements are not allowed
+        // hence adding the value in place of the index.
+        placeholders = value;
+        index += 1;
+      } else {
+        filter = 'IN';
+        value = value.replace('(', '');
+        value = value.replace(')', '');
+        value = value.replace(/%20/g, ' ');
+        value = value.split(',');
+        values = values.concat(value.map(val => val.trim()));
+        placeholders = value.map((val) => {
+          val = `$${index}`;
+          index += 1;
+          return val;
+        });
+
+        placeholders = `${placeholders.join(', ')}`;
+        placeholders = `(${placeholders})`;
       }
 
-      // unfortunately parameters are not supported in `ORDER BY`, `IS`, `IS NOT`, `GROUP`
-      if (!isNull) {
-        values.push(value);
-        value = `$${index}`;
-        index = index + 1;
-      }
-
-      conditions += conditions.includes('WHERE') ? ` AND ${field} ${filter} ${value}` : ` WHERE ${field} ${filter} ${value}`;
+      conditions += conditions.includes('WHERE') ? ` AND ${field} ${filter} ${placeholders}` : ` WHERE ${field} ${filter} ${placeholders}`;
     });
   }
 

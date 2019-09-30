@@ -420,8 +420,8 @@ describe('Test database utils', () => {
         'limit': '5',
       };
       const expectedQueryObject = {
-        'queryString': `SELECT name,city FROM ${name} WHERE name = $1 AND city = $2 LIMIT 5`,
-        'values': ['Tilbury 1', 'London'],
+        'queryString': `SELECT name,city FROM ${name} WHERE name = $2 AND city = $3 LIMIT $1`,
+        'values': ['5', 'Tilbury 1', 'London'],
       };
       const query = selectQueryBuilderV2({ name, queryParams });
 
@@ -437,8 +437,8 @@ describe('Test database utils', () => {
         'limit': '1',
       };
       const expectedQueryObject = {
-        'queryString': `SELECT * FROM ${name} WHERE firstname = $1 LIMIT 1`,
-        'values': ['Pedro'],
+        'queryString': `SELECT * FROM ${name} WHERE firstname = $2 LIMIT $1`,
+        'values': ['1', 'Pedro'],
       };
       const query = selectQueryBuilderV2({ name, queryParams });
 
@@ -449,8 +449,8 @@ describe('Test database utils', () => {
       const name = 'roles';
       const queryParams = { 'limit': '1' };
       const expectedQueryObject = {
-        'queryString': `SELECT * FROM ${name} LIMIT 1`,
-        'values': [],
+        'queryString': `SELECT * FROM ${name} LIMIT $1`,
+        'values': ['1'],
       };
       const query = selectQueryBuilderV2({ name, queryParams });
 
@@ -480,10 +480,11 @@ describe('Test database utils', () => {
         'sort': 'name.asc',
       };
       const expectedQueryObject = {
-        'queryString': `SELECT name FROM ${name} ORDER BY name ASC LIMIT 3`,
-        'values': [],
+        'queryString': `SELECT name FROM ${name} ORDER BY name ASC LIMIT $1`,
+        'values': ['3'],
       };
       const query = selectQueryBuilderV2({ name, queryParams });
+      console.log(query)
 
       expect(query).to.deep.equal(expectedQueryObject);
     });
@@ -498,12 +499,57 @@ describe('Test database utils', () => {
         'sort': 'name.asc,size.desc',
       };
       const expectedQueryObject = {
-        'queryString': `SELECT * FROM ${name} WHERE name = $1 ORDER BY name ASC, size DESC LIMIT 3`,
-        'values': ['Blue Team'],
+        'queryString': `SELECT * FROM ${name} WHERE name = $2 ORDER BY name ASC, size DESC LIMIT $1`,
+        'values': ['3', 'Blue Team'],
       };
       const query = selectQueryBuilderV2({ name, queryParams });
 
       expect(query).to.deep.equal(expectedQueryObject);
+    });
+
+    it('Should return a querystring with all columns selected filtered by any value provided', () => {
+      const name = 'country';
+      const queryParams = {
+        'filter': [
+          'region=in.(EU)',
+        ],
+      };
+      const expectedQueryFilter = `SELECT * FROM ${name} WHERE region IN ('EU');`;
+      const expectedQueryObject = {
+        'queryString': `SELECT * FROM ${name} WHERE region IN ($1)`,
+        'values': ['EU'],
+      };
+      const queryFilter = selectQueryBuilderV2({ name, queryParams });
+
+      expect(queryFilter).to.be.an('object');
+      expect(queryFilter).to.deep.equal(expectedQueryObject);
+    });
+
+    it('Should return a querystring with all columns selected filtered by value equal to, and any value in tuple', () => {
+      const name = 'country';
+      const queryParams = {
+        'filter': [
+          'name=eq.Portugal',
+          'region=in.(EU, AS)',
+        ],
+      };
+      const expectedQueryObject = {
+        'queryString': `SELECT * FROM ${name} WHERE name = $1 AND region IN ($2, $3)`,
+        'values': ['Portugal', 'EU', 'AS'],
+      };
+      const queryFilter = selectQueryBuilderV2({ name, queryParams });
+
+      expect(queryFilter).to.be.an('object');
+      expect(queryFilter).to.deep.equal(expectedQueryObject);
+    });
+
+    it('Should return an empty querystring if limit is a string', () => {
+      const name = 'roles';
+      const queryParams = { 'limit': '-13' };
+      const queryFilter = selectQueryBuilderV2({ name, queryParams });
+
+      expect(queryFilter).to.be.an('object');
+      expect(queryFilter.queryString).to.equal('');
     });
   });
 });
