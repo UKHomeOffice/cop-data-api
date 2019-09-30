@@ -484,7 +484,6 @@ describe('Test database utils', () => {
         'values': ['3'],
       };
       const query = selectQueryBuilderV2({ name, queryParams });
-      console.log(query)
 
       expect(query).to.deep.equal(expectedQueryObject);
     });
