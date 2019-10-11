@@ -60,10 +60,7 @@ spec:
         - name: DB_COP_OPERATION_AUTHENTICATOR_USERNAME
           value: "{{.DB_COP_OPERATION_AUTHENTICATOR_USERNAME}}"
         - name: DB_COP_OPERATION_AUTHENTICATOR_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: operational-data-api-secret
-              key: dbPassword
+          value: "{{.DB_COP_OPERATION_AUTHENTICATOR_PASSWORD}}"
         - name: API_COP_LOG_LEVEL
           value: "{{.API_COP_LOG_LEVEL}}"
         - name: API_COP_PORT
