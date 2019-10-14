@@ -133,7 +133,11 @@ pipeline:
         target: NGINX_TAG
     commands:
       - export API_COP_TAG=$${DRONE_COMMIT_SHA}
-      - kd --insecure-skip-tls-verify -f kube/cert.yml -f kube/deployment.yml -f kube/service.yml -f kube/ingress.yml -f kube/network-policy.yml
+      - kd --insecure-skip-tls-verify -f kube/cert.yml --debug-templates
+      - kd --insecure-skip-tls-verify -f kube/deployment.yml --debug-templates
+      - kd --insecure-skip-tls-verify -f kube/service.yml --debug-templates
+      - kd --insecure-skip-tls-verify -f kube/ingress.yml  --debug-templates
+      - kd --insecure-skip-tls-verify -f kube/network-policy.yml --debug-templates
     when:
       branch: master
       event: push
