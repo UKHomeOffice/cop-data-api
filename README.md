@@ -173,7 +173,8 @@ env_keycloak_realm|cop-dev, cop-staging, cop
 env_keycloak_url|sso-dev.notprod.homeoffice.gov.uk/auth, sso.digital.homeoffice.gov.uk/auth
 env_kube_server|https://kube-api-notprod.notprod.acp.homeoffice.gov.uk, https://kube-api-prod.prod.acp.homeoffice.gov.uk
 env_kube_token|xxx
-env_log_level|debug/info
+log_level_debug|debug
+log_level_info|info
 nginx_image|quay.io/ukhomeofficedigital/nginx-proxy
 nginx_tag|latest
 production_drone_aws_access_key_id|https://console.aws.amazon.com/iam/home?region=eu-west-2#/users/bf-it-prod-drone?section=security_credentials
