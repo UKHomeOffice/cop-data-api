@@ -144,3 +144,42 @@ Return only the entity data where user name matches 'John'
 ```bash
 mode=dataOnly&filter=name=eq.John
 ```
+
+# Drone secrets
+
+Name|Example value
+---|---
+dev_drone_aws_access_key_id|https://console.aws.amazon.com/iam/home?region=eu-west-2#/users/bf-it-devtest-drone?section=security_credentials
+dev_drone_aws_secret_access_key|https://console.aws.amazon.com/iam/home?region=eu-west-2#/users/bf-it-devtest-drone?section=security_credentials
+docker_password|xxx (Global for all repositories and environments)
+docker_username|docker (Global for all repositories and environments)
+drone_public_token|Drone token (Global for all github repositories and environments)
+env_api_cop_image|quay.io/ukhomeofficedigital/cop-data-api
+env_api_cop_keycloak_client_id|keycloak client name
+env_api_cop_name|operational-data-api
+env_api_cop_port|5000
+env_api_cop_protocol|https://
+env_api_cop_url|operational-data-api.dev.cop.homeoffice.gov.uk, operational-data-api.staging.cop.homeoffice.gov.uk, operational-data-api.cop.homeoffice.gov.uk
+env_db_cop_hostname|xxx.yyy.zzz
+env_db_cop_operation_authenticator_password|xxx
+env_db_cop_operation_authenticator_username|xxx
+env_db_cop_operation_dbname|xxx
+env_db_cop_operation_schema|xxx
+env_db_cop_options|?ssl=true
+env_db_cop_port|5432
+env_db_cop_protocol|postgres://
+env_keycloak_protocol|https://
+env_keycloak_realm|cop-dev, cop-staging, cop
+env_keycloak_url|sso-dev.notprod.homeoffice.gov.uk/auth, sso.digital.homeoffice.gov.uk/auth
+env_kube_server|https://kube-api-notprod.notprod.acp.homeoffice.gov.uk, https://kube-api-prod.prod.acp.homeoffice.gov.uk
+env_kube_token|xxx
+env_log_level|debug/info
+nginx_image|quay.io/ukhomeofficedigital/nginx-proxy
+nginx_tag|latest
+production_drone_aws_access_key_id|https://console.aws.amazon.com/iam/home?region=eu-west-2#/users/bf-it-prod-drone?section=security_credentials
+production_drone_aws_secret_access_key|https://console.aws.amazon.com/iam/home?region=eu-west-2#/users/bf-it-prod-drone?section=security_credentials
+quay_password|xxx (Global for all repositories and environments)
+quay_username|docker (Global for all repositories and environments)
+slack_webhook|https://hooks.slack.com/services/xxx/yyy/zzz (Global for all repositories and environments)
+staging_drone_aws_access_key_id|https://console.aws.amazon.com/iam/home?region=eu-west-2#/users/bf-it-prod-drone?section=security_credentials
+staging_drone_aws_secret_access_key|https://console.aws.amazon.com/iam/home?region=eu-west-2#/users/bf-it-prod-drone?section=security_credentials
