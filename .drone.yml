@@ -86,7 +86,7 @@ pipeline:
   deploy_to_dev:
     image: quay.io/ukhomeofficedigital/kd
     secrets:
-      - source: DEV_API_COP_IMAGE
+      - source: API_COP_IMAGE
         target: API_COP_IMAGE
       - source: DEV_API_COP_KEYCLOAK_CLIENT_ID
         target: API_COP_KEYCLOAK_CLIENT_ID
@@ -94,7 +94,7 @@ pipeline:
         target: API_COP_LOG_LEVEL
       - source: DEV_API_COP_NAME
         target: API_COP_NAME
-      - source: DEV_API_COP_PORT
+      - source: API_COP_PORT
         target: API_COP_PORT
       - source: PROTOCOL_HTTPS
         target: API_COP_PROTOCOL
@@ -112,7 +112,7 @@ pipeline:
         target: DB_COP_OPERATION_SCHEMA
       - source: DEV_DB_COP_OPTIONS
         target: DB_COP_OPTIONS
-      - source: DEV_DB_COP_PORT
+      - source: DB_COP_PORT
         target: DB_COP_PORT
       - source: PROTOCOL_POSTGRES
         target: DB_COP_PROTOCOL
@@ -142,7 +142,7 @@ pipeline:
   deploy_to_staging:
     image: quay.io/ukhomeofficedigital/kd
     secrets:
-      - source: STAGING_API_COP_IMAGE
+      - source: API_COP_IMAGE
         target: API_COP_IMAGE
       - source: STAGING_API_COP_KEYCLOAK_CLIENT_ID
         target: API_COP_KEYCLOAK_CLIENT_ID
@@ -150,7 +150,7 @@ pipeline:
         target: API_COP_LOG_LEVEL
       - source: STAGING_API_COP_NAME
         target: API_COP_NAME
-      - source: STAGING_API_COP_PORT
+      - source: API_COP_PORT
         target: API_COP_PORT
       - source: PROTOCOL_HTTPS
         target: API_COP_PROTOCOL
@@ -168,7 +168,7 @@ pipeline:
         target: DB_COP_OPERATION_SCHEMA
       - source: STAGING_DB_COP_OPTIONS
         target: DB_COP_OPTIONS
-      - source: STAGING_DB_COP_PORT
+      - source: DB_COP_PORT
         target: DB_COP_PORT
       - source: PROTOCOL_POSTGRES
         target: DB_COP_PROTOCOL
@@ -199,7 +199,7 @@ pipeline:
   deploy_to_production:
     image: quay.io/ukhomeofficedigital/kd
     secrets:
-      - source: PRODUCTION_API_COP_IMAGE
+      - source: API_COP_IMAGE
         target: API_COP_IMAGE
       - source: PRODUCTION_API_COP_KEYCLOAK_CLIENT_ID
         target: API_COP_KEYCLOAK_CLIENT_ID
@@ -207,7 +207,7 @@ pipeline:
         target: API_COP_LOG_LEVEL
       - source: PRODUCTION_API_COP_NAME
         target: API_COP_NAME
-      - source: PRODUCTION_API_COP_PORT
+      - source: API_COP_PORT
         target: API_COP_PORT
       - source: PROTOCOL_HTTPS
         target: API_COP_PROTOCOL
@@ -225,7 +225,7 @@ pipeline:
         target: DB_COP_OPERATION_SCHEMA
       - source: PRODUCTION_DB_COP_OPTIONS
         target: DB_COP_OPTIONS
-      - source: PRODUCTION_DB_COP_PORT
+      - source: DB_COP_PORT
         target: DB_COP_PORT
       - source: PROTOCOL_POSTGRES
         target: DB_COP_PROTOCOL
