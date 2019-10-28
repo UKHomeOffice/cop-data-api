@@ -4,7 +4,6 @@ kind: Deployment
 metadata:
   name: {{.API_COP_NAME}}
 spec:
-  selector: {{.API_COP_NAME}}
   replicas: 3
   strategy:
     type: RollingUpdate
@@ -12,6 +11,9 @@ spec:
       maxUnavailable: 33%
       maxSurge: 1
   revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      name: {{.API_COP_NAME}}
   template:
     metadata:
       labels:
