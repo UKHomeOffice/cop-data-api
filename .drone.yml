@@ -15,6 +15,7 @@ pipeline:
     tolerate: low
     fail_on_detection: false
     when:
+      branch: master
       event: push
 
   unit_tests:
