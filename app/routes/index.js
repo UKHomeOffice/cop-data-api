@@ -61,7 +61,7 @@ app.use((req, res, next) => {
 app.use('/v1', v1);
 app.use('/v2', v2);
 app.get('/_health', (req, res) => {
-  logger.verbose('API is Alive & Kicking!');
+  logger.silly('API is Alive & Kicking!');
   return res.status(200).json({ 'status': 'UP' });
 });
 
