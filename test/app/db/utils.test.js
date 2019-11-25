@@ -552,6 +552,84 @@ describe('Test database utils', () => {
     });
   });
 
+  describe('v2 PATCH - querystring builder', () => {
+    it('should return a queryString to update existing data matching an id', () => {
+      const name = 'identity';
+      const queryParams = {
+        'update': true,
+        'filter': [
+          'id=eq.2553b00e-3cb0-441d-b29d-17196491a1e5',
+        ],
+      };
+      const body = { 'email': 'john@mail.com', 'roles': ['linemanager', 'systemuser'] };
+      const expectedQueryObject = {
+        'queryString': `UPDATE ${name} SET email=$1, roles=$2 WHERE id = $3`,
+        'values': ['john@mail.com', `${JSON.stringify(['linemanager', 'systemuser'])}`, '2553b00e-3cb0-441d-b29d-17196491a1e5'],
+      };
+      const query = selectQueryBuilderV2({ body, name, queryParams });
+
+      expect(query).to.deep.equal(expectedQueryObject);
+    });
+
+    it('Should return a querystring to update existing data mathing an id, with option to return all updated data', () => {
+      const name = 'identity';
+      const queryParams = {
+        'update': true,
+        'filter': [
+          'id=eq.2553b00e-3cb0-441d-b29d-17196491a1e5',
+        ],
+      };
+      const prefer = 'return=representation';
+      const body = { 'age': 34, 'email': 'john@mail.com', 'roles': ['linemanager', 'systemuser'] };
+      const expectedQueryObject = {
+        'queryString': `UPDATE ${name} SET age=$1, email=$2, roles=$3 WHERE id = $4 RETURNING *`,
+        'values': [34, 'john@mail.com', `${JSON.stringify(['linemanager', 'systemuser'])}`, '2553b00e-3cb0-441d-b29d-17196491a1e5'],
+      };
+      const query = selectQueryBuilderV2({ body, name, prefer, queryParams });
+
+      expect(query).to.deep.equal(expectedQueryObject);
+    });
+
+    it('Should return a querystring to update existing data matching query parameters', () => {
+      const name = 'identity';
+      const queryParams = {
+        'update': true,
+        'filter': [
+          'firstname=eq.Pedro',
+          'id=eq.2553b00e-3cb0-441d-b29d-17196491a1e5',
+        ],
+      };
+      const body = { 'firstname': 'John' };
+      const expectedQueryObject = {
+        'queryString': `UPDATE ${name} SET firstname=$1 WHERE firstname = $2 AND id = $3`,
+        'values': ['John', 'Pedro', '2553b00e-3cb0-441d-b29d-17196491a1e5'],
+      };
+      const query = selectQueryBuilderV2({ body, name, queryParams });
+
+      expect(query).to.deep.equal(expectedQueryObject);
+    });
+
+    it('Should return a querystring to update existing data matching the query parameters are provided', () => {
+      const name = 'identity';
+      const queryParams = {
+        'update': true,
+        'filter': [
+          'firstname=eq.Pedro',
+          'lastname=eq.Miguel',
+          'id=eq.2553b00e-3cb0-441d-b29d-17196491a1e5',
+        ],
+      };
+      const body = { 'firstname': 'John', 'lastname': null };
+      const expectedQueryObject = {
+        'queryString': 'UPDATE identity SET firstname=$1, lastname=NULL WHERE firstname = $2 AND lastname = $3 AND id = $4',
+        'values': ['John', 'Pedro', 'Miguel', '2553b00e-3cb0-441d-b29d-17196491a1e5'],
+      };
+      const query = selectQueryBuilderV2({ body, name, queryParams });
+
+      expect(query).to.deep.equal(expectedQueryObject);
+    });
+  });
+
   describe('v2 DELETE - querystring builder', () => {
     it('should return a querystring to delete all rows in a database table', () => {
       const name = 'staff';
