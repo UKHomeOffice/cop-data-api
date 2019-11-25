@@ -223,8 +223,7 @@ function isPositiveInteger(stringValue) {
   return number !== Infinity && String(number) === stringValue && number >= 0;
 }
 
-// version2 Creates a SELECT querystring
-function selectQueryBuilderV2({ body, name, prefer, queryParams }) {
+function queryBuilder({ body, name, prefer, queryParams }) {
   const returning = prefer ? ' RETURNING *' : '';
   let args = '';
   let conditions = '';
@@ -349,5 +348,5 @@ function selectQueryBuilderV2({ body, name, prefer, queryParams }) {
 
 module.exports = {
   parameterizedQueryBuilder,
-  selectQueryBuilderV2,
+  queryBuilder,
 };

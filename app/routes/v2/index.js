@@ -3,7 +3,7 @@ const express = require('express');
 // local imports
 const logger = require('../../config/logger')(__filename);
 const query = require('../../db/query');
-const { selectQueryBuilderV2 } = require('../../db/utils');
+const { queryBuilder } = require('../../db/utils');
 
 const app = express();
 
@@ -18,7 +18,7 @@ app.get('/:name', (req, res) => {
     queryParams.filter = [queryParams.filter];
   }
 
-  const { queryString, values } = selectQueryBuilderV2({ name, queryParams });
+  const { queryString, values } = queryBuilder({ name, queryParams });
 
   if (!queryString) {
     return res.status(400).json({ 'error': 'Invalid query parameters' });
@@ -53,7 +53,7 @@ app.patch('/:name/:id?', (req, res) => {
     queryParams.filter = [queryParams.filter];
   }
 
-  const { queryString, values } = selectQueryBuilderV2({ body, name, prefer, queryParams });
+  const { queryString, values } = queryBuilder({ body, name, prefer, queryParams });
   const data = query(dbrole, name, queryString, values);
 
   Promise.all([data])
@@ -76,7 +76,7 @@ app.delete('/:name', (req, res) => {
     queryParams.filter = [queryParams.filter];
   }
 
-  const { queryString, values } = selectQueryBuilderV2({ name, queryParams });
+  const { queryString, values } = queryBuilder({ name, queryParams });
 
   if (!queryString) {
     return res.status(400).json({ 'error': 'Invalid query parameters' });
