@@ -231,7 +231,7 @@ function selectQueryBuilderV2({ name, queryParams }) {
   let order = '';
   let placeholders = '';
   let queryString = '';
-  let select = '';
+  let method = '';
   let values = [];
 
   // check if select and limit are arrays
@@ -247,9 +247,11 @@ function selectQueryBuilderV2({ name, queryParams }) {
   }
 
   if (queryParams.select) {
-    select = `SELECT ${queryParams.select} FROM ${name}`;
+    method = `SELECT ${queryParams.select} FROM ${name}`;
+  } else if (queryParams.delete) {
+    method = `DELETE FROM ${name}`;
   } else {
-    select = `SELECT * FROM ${name}`;
+    method = `SELECT * FROM ${name}`;
   }
 
   if (queryParams.limit) {
@@ -332,7 +334,7 @@ function selectQueryBuilderV2({ name, queryParams }) {
     });
   }
 
-  queryString = `${select}${conditions}${order}${limit}`;
+  queryString = `${method}${conditions}${order}${limit}`;
   return { queryString, values };
 }
 
