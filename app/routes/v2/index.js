@@ -40,7 +40,7 @@ app.patch('/:name/:id?', (req, res) => {
   const { prefer } = req.headers;
   const { id, name } = req.params;
   let queryParams = req.query;
-  queryParams = queryParams ? queryParams : { 'filter': `id=eq.${id}` };
+  queryParams = id ? { 'filter': `id=eq.${id}` } : queryParams;
   queryParams.update = true;
 
   logger.debug(`Body received: ${JSON.stringify(body)}`);

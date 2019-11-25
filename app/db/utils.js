@@ -254,7 +254,7 @@ function queryBuilder({ body, name, prefer, queryParams }) {
     method = `DELETE FROM ${name}`;
   } else if (queryParams.update) {
     method = `UPDATE ${name} SET `;
-    newData = argsBuilder({ body, assignment: '=', index})
+    newData = argsBuilder({ body, 'assignment': '=', index });
     index = newData.index;
     args = newData.args;
     values = values.concat(newData.values);
