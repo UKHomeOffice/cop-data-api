@@ -224,10 +224,13 @@ function isPositiveInteger(stringValue) {
 }
 
 // version2 Creates a SELECT querystring
-function selectQueryBuilderV2({ name, queryParams }) {
+function selectQueryBuilderV2({ body, name, prefer, queryParams }) {
+  const returning = prefer ? ' RETURNING *' : '';
+  let args = '';
   let conditions = '';
   let index = 1;
   let limit = '';
+  let newData = '';
   let order = '';
   let placeholders = '';
   let queryString = '';
@@ -250,6 +253,12 @@ function selectQueryBuilderV2({ name, queryParams }) {
     method = `SELECT ${queryParams.select} FROM ${name}`;
   } else if (queryParams.delete) {
     method = `DELETE FROM ${name}`;
+  } else if (queryParams.update) {
+    method = `UPDATE ${name} SET `;
+    newData = argsBuilder({ body, assignment: '=', index})
+    index = newData.index;
+    args = newData.args;
+    values = values.concat(newData.values);
   } else {
     method = `SELECT * FROM ${name}`;
   }
@@ -334,7 +343,7 @@ function selectQueryBuilderV2({ name, queryParams }) {
     });
   }
 
-  queryString = `${method}${conditions}${order}${limit}`;
+  queryString = `${method}${args}${conditions}${order}${limit}${returning}`;
   return { queryString, values };
 }
 
