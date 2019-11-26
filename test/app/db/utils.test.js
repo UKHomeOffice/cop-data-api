@@ -408,7 +408,7 @@ describe('Test database utils', () => {
     });
   });
 
-  describe('v2 GET - querystring builder', () => {
+  describe('v2 SELECT - querystring builder', () => {
     it('Should return a querystring with two columns selected filtered by name and city and a limit of 5 rows', () => {
       const name = 'roles';
       const queryParams = {
@@ -549,6 +549,55 @@ describe('Test database utils', () => {
 
       expect(queryFilter).to.be.an('object');
       expect(queryFilter.queryString).to.equal('');
+    });
+  });
+
+  describe('v2 DELETE - querystring builder', () => {
+    it('should return a querystring to delete all rows in a database table', () => {
+      const name = 'staff';
+      const queryParams = { 'delete': true };
+      const expectedQueryObject = {
+        'queryString': `DELETE FROM ${name}`,
+        'values': [],
+      };
+      const query = selectQueryBuilderV2({ name, queryParams });
+
+      expect(query).to.deep.equal(expectedQueryObject);
+    });
+
+    it('should return a querystring to delete a row matching the id', () => {
+      const name = 'staff';
+      const queryParams = {
+        'delete': true,
+        'filter': [
+          'id=eq.123',
+        ],
+      };
+      const expectedQueryObject = {
+        'queryString': `DELETE FROM ${name} WHERE id = $1`,
+        'values': ['123'],
+      };
+      const query = selectQueryBuilderV2({ name, queryParams });
+
+      expect(query).to.deep.equal(expectedQueryObject);
+    });
+
+    it('should return a querystring to delete a row matching the email address and id', () => {
+      const name = 'staff';
+      const queryParams = {
+        'delete': true,
+        'filter': [
+          'email=eq.manager@mail.com',
+          'id=eq.123',
+        ],
+      };
+      const expectedQueryObject = {
+        'queryString': `DELETE FROM ${name} WHERE email = $1 AND id = $2`,
+        'values': ['manager@mail.com', '123'],
+      };
+      const query = selectQueryBuilderV2({ name, queryParams });
+
+      expect(query).to.deep.equal(expectedQueryObject);
     });
   });
 });
