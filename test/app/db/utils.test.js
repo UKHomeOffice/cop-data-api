@@ -3,7 +3,7 @@ const { expect } = require('chai');
 // local imports
 const {
   parameterizedQueryBuilder,
-  selectQueryBuilderV2,
+  queryBuilder,
 } = require('../../../app/db/utils');
 
 describe('Test database utils', () => {
@@ -423,7 +423,7 @@ describe('Test database utils', () => {
         'queryString': `SELECT name,city FROM ${name} WHERE name = $2 AND city = $3 LIMIT $1`,
         'values': ['5', 'Tilbury 1', 'London'],
       };
-      const query = selectQueryBuilderV2({ name, queryParams });
+      const query = queryBuilder({ name, queryParams });
 
       expect(query).to.deep.equal(expectedQueryObject);
     });
@@ -440,7 +440,7 @@ describe('Test database utils', () => {
         'queryString': `SELECT * FROM ${name} WHERE firstname = $2 LIMIT $1`,
         'values': ['1', 'Pedro'],
       };
-      const query = selectQueryBuilderV2({ name, queryParams });
+      const query = queryBuilder({ name, queryParams });
 
       expect(query).to.deep.equal(expectedQueryObject);
     });
@@ -452,7 +452,7 @@ describe('Test database utils', () => {
         'queryString': `SELECT * FROM ${name} LIMIT $1`,
         'values': ['1'],
       };
-      const query = selectQueryBuilderV2({ name, queryParams });
+      const query = queryBuilder({ name, queryParams });
 
       expect(query).to.deep.equal(expectedQueryObject);
     });
@@ -467,7 +467,7 @@ describe('Test database utils', () => {
         'queryString': '',
         'values': [],
       };
-      const query = selectQueryBuilderV2({ name, queryParams });
+      const query = queryBuilder({ name, queryParams });
 
       expect(query).to.deep.equal(expectedQueryObject);
     });
@@ -483,7 +483,7 @@ describe('Test database utils', () => {
         'queryString': `SELECT name FROM ${name} ORDER BY name ASC LIMIT $1`,
         'values': ['3'],
       };
-      const query = selectQueryBuilderV2({ name, queryParams });
+      const query = queryBuilder({ name, queryParams });
 
       expect(query).to.deep.equal(expectedQueryObject);
     });
@@ -501,7 +501,7 @@ describe('Test database utils', () => {
         'queryString': `SELECT * FROM ${name} WHERE name = $2 ORDER BY name ASC, size DESC LIMIT $1`,
         'values': ['3', 'Blue Team'],
       };
-      const query = selectQueryBuilderV2({ name, queryParams });
+      const query = queryBuilder({ name, queryParams });
 
       expect(query).to.deep.equal(expectedQueryObject);
     });
@@ -518,7 +518,7 @@ describe('Test database utils', () => {
         'queryString': `SELECT * FROM ${name} WHERE region IN ($1)`,
         'values': ['EU'],
       };
-      const queryFilter = selectQueryBuilderV2({ name, queryParams });
+      const queryFilter = queryBuilder({ name, queryParams });
 
       expect(queryFilter).to.be.an('object');
       expect(queryFilter).to.deep.equal(expectedQueryObject);
@@ -536,7 +536,7 @@ describe('Test database utils', () => {
         'queryString': `SELECT * FROM ${name} WHERE name = $1 AND region IN ($2, $3)`,
         'values': ['Portugal', 'EU', 'AS'],
       };
-      const queryFilter = selectQueryBuilderV2({ name, queryParams });
+      const queryFilter = queryBuilder({ name, queryParams });
 
       expect(queryFilter).to.be.an('object');
       expect(queryFilter).to.deep.equal(expectedQueryObject);
@@ -545,10 +545,88 @@ describe('Test database utils', () => {
     it('Should return an empty querystring if limit is a string', () => {
       const name = 'roles';
       const queryParams = { 'limit': '-13' };
-      const queryFilter = selectQueryBuilderV2({ name, queryParams });
+      const queryFilter = queryBuilder({ name, queryParams });
 
       expect(queryFilter).to.be.an('object');
       expect(queryFilter.queryString).to.equal('');
+    });
+  });
+
+  describe('v2 PATCH - querystring builder', () => {
+    it('should return a queryString to update existing data matching an id', () => {
+      const name = 'identity';
+      const queryParams = {
+        'update': true,
+        'filter': [
+          'id=eq.2553b00e-3cb0-441d-b29d-17196491a1e5',
+        ],
+      };
+      const body = { 'email': 'john@mail.com', 'roles': ['linemanager', 'systemuser'] };
+      const expectedQueryObject = {
+        'queryString': `UPDATE ${name} SET email=$1, roles=$2 WHERE id = $3`,
+        'values': ['john@mail.com', `${JSON.stringify(['linemanager', 'systemuser'])}`, '2553b00e-3cb0-441d-b29d-17196491a1e5'],
+      };
+      const query = queryBuilder({ body, name, queryParams });
+
+      expect(query).to.deep.equal(expectedQueryObject);
+    });
+
+    it('Should return a querystring to update existing data mathing an id, with option to return all updated data', () => {
+      const name = 'identity';
+      const queryParams = {
+        'update': true,
+        'filter': [
+          'id=eq.2553b00e-3cb0-441d-b29d-17196491a1e5',
+        ],
+      };
+      const prefer = 'return=representation';
+      const body = { 'age': 34, 'email': 'john@mail.com', 'roles': ['linemanager', 'systemuser'] };
+      const expectedQueryObject = {
+        'queryString': `UPDATE ${name} SET age=$1, email=$2, roles=$3 WHERE id = $4 RETURNING *`,
+        'values': [34, 'john@mail.com', `${JSON.stringify(['linemanager', 'systemuser'])}`, '2553b00e-3cb0-441d-b29d-17196491a1e5'],
+      };
+      const query = queryBuilder({ body, name, prefer, queryParams });
+
+      expect(query).to.deep.equal(expectedQueryObject);
+    });
+
+    it('Should return a querystring to update existing data matching query parameters', () => {
+      const name = 'identity';
+      const queryParams = {
+        'update': true,
+        'filter': [
+          'firstname=eq.Pedro',
+          'id=eq.2553b00e-3cb0-441d-b29d-17196491a1e5',
+        ],
+      };
+      const body = { 'firstname': 'John' };
+      const expectedQueryObject = {
+        'queryString': `UPDATE ${name} SET firstname=$1 WHERE firstname = $2 AND id = $3`,
+        'values': ['John', 'Pedro', '2553b00e-3cb0-441d-b29d-17196491a1e5'],
+      };
+      const query = queryBuilder({ body, name, queryParams });
+
+      expect(query).to.deep.equal(expectedQueryObject);
+    });
+
+    it('Should return a querystring to update existing data matching the query parameters are provided', () => {
+      const name = 'identity';
+      const queryParams = {
+        'update': true,
+        'filter': [
+          'firstname=eq.Pedro',
+          'lastname=eq.Miguel',
+          'id=eq.2553b00e-3cb0-441d-b29d-17196491a1e5',
+        ],
+      };
+      const body = { 'firstname': 'John', 'lastname': null };
+      const expectedQueryObject = {
+        'queryString': 'UPDATE identity SET firstname=$1, lastname=NULL WHERE firstname = $2 AND lastname = $3 AND id = $4',
+        'values': ['John', 'Pedro', 'Miguel', '2553b00e-3cb0-441d-b29d-17196491a1e5'],
+      };
+      const query = queryBuilder({ body, name, queryParams });
+
+      expect(query).to.deep.equal(expectedQueryObject);
     });
   });
 
@@ -560,7 +638,7 @@ describe('Test database utils', () => {
         'queryString': `DELETE FROM ${name}`,
         'values': [],
       };
-      const query = selectQueryBuilderV2({ name, queryParams });
+      const query = queryBuilder({ name, queryParams });
 
       expect(query).to.deep.equal(expectedQueryObject);
     });
@@ -577,7 +655,7 @@ describe('Test database utils', () => {
         'queryString': `DELETE FROM ${name} WHERE id = $1`,
         'values': ['123'],
       };
-      const query = selectQueryBuilderV2({ name, queryParams });
+      const query = queryBuilder({ name, queryParams });
 
       expect(query).to.deep.equal(expectedQueryObject);
     });
@@ -595,7 +673,7 @@ describe('Test database utils', () => {
         'queryString': `DELETE FROM ${name} WHERE email = $1 AND id = $2`,
         'values': ['manager@mail.com', '123'],
       };
-      const query = selectQueryBuilderV2({ name, queryParams });
+      const query = queryBuilder({ name, queryParams });
 
       expect(query).to.deep.equal(expectedQueryObject);
     });
