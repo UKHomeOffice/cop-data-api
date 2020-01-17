@@ -16,10 +16,10 @@ const keycloak = {
 
 const config = {
   'logLevel': process.env.API_COP_LOG_LEVEL || 'info',
-
   'dbConnectionString': process.env.DB_COP_CONNECTION_STRING || `${db.protocol}${db.username}:${db.password}@${db.hostname}:${db.port}/${db.name}${db.options}`,
+  'dbRead': process.env.DB_REF_READ_ROLE || 'readonly',
+  'dbWrite': process.env.DB_REF_WRITE_ROLE || 'service',
   'searchSchema': process.env.DB_COP_OPERATION_SCHEMA || 'transaction',
-
   'iss': process.env.ISS || `${keycloak.protocol}${keycloak.url}/realms/${keycloak.realm}`,
   'keycloak_client_id': process.env.API_COP_KEYCLOAK_CLIENT_ID || 'api-cop',
   'port': process.env.API_COP_PORT || '5000',
