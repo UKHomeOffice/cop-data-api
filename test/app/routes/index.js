@@ -6,7 +6,7 @@ const { expect } = require('chai');
 // local imports
 const app = require('../../../app/routes');
 const config = require('../../../app/config/core');
-const { readPool } = require('../../../app/db/index');
+const getPool = require('../../../app/db/index');
 
 describe('Test routes', () => {
   describe('GET - endpoint', () => {
@@ -55,7 +55,8 @@ describe('Test routes', () => {
       }));
 
     it('Should return 400 when the table does not exist', () => {
-      const queryStub = sinon.stub(readPool, 'query');
+      const pool = getPool();
+      const queryStub = sinon.stub(pool, 'query');
       queryStub.onCall(0).rejects();
 
       return request(app)
@@ -68,7 +69,8 @@ describe('Test routes', () => {
     });
 
     it('Should return all data for an entity', () => {
-      const queryStub = sinon.stub(readPool, 'query');
+      const pool = getPool();
+      const queryStub = sinon.stub(pool, 'query');
       queryStub.onCall(0).resolves(data);
 
       return request(app)

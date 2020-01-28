@@ -1,6 +1,6 @@
 // local imports
 const logger = require('../config/logger')(__filename);
-const { getPool } = require('./index');
+const getPool = require('./index');
 
 const query = (role, name, queryString, values) => new Promise((resolve, reject) => {
   const pool = getPool(role);

@@ -39,8 +39,4 @@ const getPool = (role = undefined) => {
   return writePool;
 };
 
-module.exports = {
-  getPool,
-  readPool,
-  writePool,
-};
+module.exports = getPool;
