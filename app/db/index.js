@@ -8,16 +8,35 @@ const { dbConnectionString, searchSchema } = config;
 
 // todo -> searchSchema = operation;
 
-const pool = new Pool({ 'connectionString': dbConnectionString });
+const readPool = new Pool({ 'connectionString': dbConnectionString });
+const writePool = new Pool({ 'connectionString': dbConnectionString });
 
-pool.on('connect', (client) => {
-  logger.info('New database connection established');
+readPool.on('connect', (client) => {
   client.query(`SET search_path TO "${searchSchema}";`);
+  client.query(`SET ROLE ${config.dbRead}`);
 });
 
-pool.on('error', (err, client) => {
+readPool.on('error', (err, client) => {
   logger.error('Unexpected error on idle client', err);
   process.exit(-1);
 });
 
-module.exports = pool;
+writePool.on('connect', (client) => {
+  client.query(`SET search_path TO "${config.dbSchema}";`);
+  client.query(`SET ROLE ${config.dbWrite}`);
+});
+
+writePool.on('error', (err, client) => {
+  logger.error('Unexpected error on idle client', err);
+  process.exit(-1);
+});
+
+const getPool = (role = undefined) => {
+  if (role === undefined || role === config.dbRead) {
+    return readPool;
+  }
+  // when role allows write to db
+  return writePool;
+};
+
+module.exports = getPool;
