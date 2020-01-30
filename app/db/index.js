@@ -34,7 +34,9 @@ writePool.on('error', (err, client) => {
 const getPool = (role = undefined) => {
   if (role === undefined || role === config.dbRead) {
     return readPool;
-  } else if (role === config.dbWrite) {
+  }
+
+  if (role === config.dbWrite) {
     return writePool;
   }
 };
