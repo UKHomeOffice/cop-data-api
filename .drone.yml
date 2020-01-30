@@ -125,6 +125,10 @@ pipeline:
         target: DB_COP_OPTIONS
       - source: DB_COP_PORT
         target: DB_COP_PORT
+      - source: DB_COP_READ_ROLE
+        target: 'readonly'
+      - source: DB_COP_WRITE_ROLE
+        target: 'service'
       - source: PROTOCOL_POSTGRES
         target: DB_COP_PROTOCOL
       - source: PROTOCOL_HTTPS
