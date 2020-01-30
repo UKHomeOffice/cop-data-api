@@ -22,7 +22,7 @@ readPool.on('error', (err, client) => {
 });
 
 writePool.on('connect', (client) => {
-  client.query(`SET search_path TO "${config.dbSchema}";`);
+  client.query(`SET search_path TO "${config.searchSchema}";`);
   client.query(`SET ROLE ${config.dbWrite}`);
 });
 
@@ -34,9 +34,9 @@ writePool.on('error', (err, client) => {
 const getPool = (role = undefined) => {
   if (role === undefined || role === config.dbRead) {
     return readPool;
+  } else if (role === config.dbWrite) {
+    return writePool;
   }
-  // when role allows write to db
-  return writePool;
 };
 
 module.exports = getPool;
