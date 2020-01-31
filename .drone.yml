@@ -125,10 +125,6 @@ pipeline:
         target: DB_COP_OPTIONS
       - source: DB_COP_PORT
         target: DB_COP_PORT
-      - source: DB_COP_READ_ROLE
-        target: 'readonly'
-      - source: DB_COP_WRITE_ROLE
-        target: 'service'
       - source: PROTOCOL_POSTGRES
         target: DB_COP_PROTOCOL
       - source: PROTOCOL_HTTPS
@@ -149,6 +145,8 @@ pipeline:
         target: NGINX_TAG
     commands:
       - export API_COP_TAG=$${DRONE_COMMIT_SHA}
+      - export DB_COP_READ_ROLE="readonly"
+      - export DB_COP_WRITE_ROLE="service"
       - kd --insecure-skip-tls-verify -f kube/cert.yml -f kube/deployment.yml -f kube/service.yml -f kube/ingress.yml -f kube/network-policy.yml
     when:
       branch: master
@@ -205,6 +203,8 @@ pipeline:
         target: NGINX_TAG
     commands:
       - export API_COP_TAG=$${DRONE_COMMIT_SHA}
+      - export DB_COP_READ_ROLE="readonly"
+      - export DB_COP_WRITE_ROLE="service"
       - kd --insecure-skip-tls-verify -f kube/cert.yml -f kube/deployment.yml -f kube/service.yml -f kube/ingress.yml -f kube/network-policy.yml
     when:
       event: deployment
@@ -262,6 +262,8 @@ pipeline:
         target: NGINX_TAG
     commands:
       - export API_COP_TAG=$${DRONE_COMMIT_SHA}
+      - export DB_COP_READ_ROLE="readonly"
+      - export DB_COP_WRITE_ROLE="service"
       - kd --insecure-skip-tls-verify -f kube/cert.yml -f kube/deployment.yml -f kube/service.yml -f kube/ingress.yml -f kube/network-policy.yml
     when:
       event: deployment
