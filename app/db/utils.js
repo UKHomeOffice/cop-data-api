@@ -226,8 +226,10 @@ function isPositiveInteger(stringValue) {
 function queryBuilder({ body, name, prefer, queryParams }) {
   const returning = prefer ? ' RETURNING *' : '';
   let args = '';
+  let columns = '';
   let conditions = '';
   let index = 1;
+  let invalidQueryParams = false;
   let limit = '';
   let newData = '';
   let order = '';
@@ -249,6 +251,18 @@ function queryBuilder({ body, name, prefer, queryParams }) {
   }
 
   if (queryParams.select) {
+    // column params should be comma separated words
+    columns = queryParams.select.split(',');
+    columns.map((col) => {
+      if (col.match(/\W/)) {
+        invalidQueryParams = true;
+      }
+    });
+
+    if (invalidQueryParams) {
+      logger.debug(`Select params: ${queryParams.select}`);
+      return { queryString, values };
+    }
     method = `SELECT ${queryParams.select} FROM ${name}`;
   } else if (queryParams.delete) {
     method = `DELETE FROM ${name}`;
@@ -273,12 +287,20 @@ function queryBuilder({ body, name, prefer, queryParams }) {
     let sortParams = queryParams.sort.split(',');
     sortParams.map((params) => {
       // 'name|asc' -> ['name', 'asc']
-      params = params.replace('.', '|').split('|');
-      let [field, filter] = params;
-      filter = filter.toUpperCase();
-      // unfortunately parameters are not supported in `ORDER BY`, `IS`, `IS NOT`, `GROUP`
-      order += order.includes('ORDER BY') ? `, ${field} ${filter}` : ` ORDER BY ${field} ${filter}`;
+      params = params.replace(/;/g, ' ').replace('.', '|').split('|');
+
+      if (params.length > 1) {
+        let [field, filter] = params;
+        filter = filter.toUpperCase();
+        order += order.includes('ORDER BY') ? `, ${field} ${filter}` : ` ORDER BY ${field} ${filter}`;
+        invalidQueryParams = (params[0].indexOf(' ') >= 0);
+      }
     });
+
+    if (invalidQueryParams) {
+      logger.debug(`Sort params: ${queryParams.sort}`);
+      return { queryString, values };
+    }
   }
 
   if (queryParams.filter) {

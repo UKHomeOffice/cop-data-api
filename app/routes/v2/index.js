@@ -12,6 +12,10 @@ app.get('/:name', (req, res) => {
   const { name } = req.params;
   const { dbrole } = res.locals.user;
 
+  if (name.startsWith('pg_') || Boolean(name.match(/\W/))) {
+    return res.status(400).json({ 'error': 'Invalid entity' });
+  }
+
   logger.debug(`Query parameters received: ${queryParams}`);
 
   if (queryParams.filter && !Array.isArray(queryParams.filter)) {
