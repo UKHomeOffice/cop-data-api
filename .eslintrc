@@ -1,6 +1,5 @@
 {
   "rules": {
-    "quote-props": ["error", "always"],
     "func-names": ["error", "never"],
     "no-unused-expressions": "off",
     "no-underscore-dangle": "off",
@@ -14,7 +13,7 @@
     "prefer-destructuring": "off",
     "object-curly-newline": ["error", { "multiline": true }],
     "no-loop-func": "off",
-    "operator-assignment": "off",
+    "operator-assignment": "off"
   },
   "extends": "airbnb/base",
   "env": {
