@@ -13,8 +13,8 @@ describe('Test database utils', () => {
       const method = 'get';
       const queryParams = 'select=developer,linemanager';
       const expectedQueryObject = {
-        text: `SELECT developer, linemanager FROM ${name}`,
-        values: [],
+        'text': `SELECT developer, linemanager FROM ${name}`,
+        'values': [],
       };
       const query = parameterizedQueryBuilder({ name, method, queryParams });
 
@@ -26,8 +26,8 @@ describe('Test database utils', () => {
       const method = 'get';
       const queryParams = 'select=firstname,lastname,email';
       const expectedQueryObject = {
-        text: `SELECT firstname, lastname, email FROM ${name}`,
-        values: [],
+        'text': `SELECT firstname, lastname, email FROM ${name}`,
+        'values': [],
       };
       const query = parameterizedQueryBuilder({ name, method, queryParams });
 
@@ -39,8 +39,8 @@ describe('Test database utils', () => {
       const method = 'get';
       const queryParams = 'select=';
       const expectedQueryObject = {
-        text: '',
-        values: [],
+        'text': '',
+        'values': [],
       };
       const query = parameterizedQueryBuilder({ name, method, queryParams });
 
@@ -52,8 +52,8 @@ describe('Test database utils', () => {
       const method = 'get';
       const queryParams = '';
       const expectedQueryObject = {
-        text: `SELECT * FROM ${name}`,
-        values: [],
+        'text': `SELECT * FROM ${name}`,
+        'values': [],
       };
       const query = parameterizedQueryBuilder({ name, method });
 
@@ -65,8 +65,8 @@ describe('Test database utils', () => {
       const method = 'get';
       const queryParams = 'name=eq.Tilbury%202';
       const expectedQueryObject = {
-        text: `SELECT * FROM ${name} WHERE name = $1`,
-        values: ['Tilbury 2'],
+        'text': `SELECT * FROM ${name} WHERE name = $1`,
+        'values': ['Tilbury 2'],
       };
       const query = parameterizedQueryBuilder({ name, method, queryParams });
 
@@ -78,8 +78,8 @@ describe('Test database utils', () => {
       const method = 'get';
       const queryParams = 'email=eq.john@mail.com';
       const expectedQueryObject = {
-        text: `SELECT * FROM ${name} WHERE email = $1`,
-        values: ['john@mail.com'],
+        'text': `SELECT * FROM ${name} WHERE email = $1`,
+        'values': ['john@mail.com'],
       };
       const query = parameterizedQueryBuilder({ name, method, queryParams });
 
@@ -91,8 +91,8 @@ describe('Test database utils', () => {
       const method = 'get';
       const queryParams = 'name=eq.null';
       const expectedQueryObject = {
-        text: `SELECT * FROM ${name} WHERE name IS NULL`,
-        values: [],
+        'text': `SELECT * FROM ${name} WHERE name IS NULL`,
+        'values': [],
       };
       const query = parameterizedQueryBuilder({ name, method, queryParams });
 
@@ -104,8 +104,8 @@ describe('Test database utils', () => {
       const method = 'get';
       const queryParams = 'select=email&staffid=in.%28123,222%29';
       const expectedQueryObject = {
-        text: `SELECT email FROM ${name} WHERE staffid IN ($1, $2)`,
-        values: ['123', '222'],
+        'text': `SELECT email FROM ${name} WHERE staffid IN ($1, $2)`,
+        'values': ['123', '222'],
       };
       const query = parameterizedQueryBuilder({ name, method, queryParams });
 
@@ -117,8 +117,8 @@ describe('Test database utils', () => {
       const method = 'get';
       const queryParams = 'select=email,name&staffid=in.%28123,222%29';
       const expectedQueryObject = {
-        text: `SELECT email, name FROM ${name} WHERE staffid IN ($1, $2)`,
-        values: ['123', '222'],
+        'text': `SELECT email, name FROM ${name} WHERE staffid IN ($1, $2)`,
+        'values': ['123', '222'],
       };
       const query = parameterizedQueryBuilder({ name, method, queryParams });
 
@@ -130,8 +130,8 @@ describe('Test database utils', () => {
       const method = 'get';
       const queryParams = 'id=eq.3,&continent=eq.Asia';
       const expectedQueryObject = {
-        text: `SELECT * FROM ${name} WHERE id = $1 AND continent = $2`,
-        values: ['3', 'Asia'],
+        'text': `SELECT * FROM ${name} WHERE id = $1 AND continent = $2`,
+        'values': ['3', 'Asia'],
       };
       const query = parameterizedQueryBuilder({ name, method, queryParams });
 
@@ -143,8 +143,8 @@ describe('Test database utils', () => {
       const method = 'get';
       const queryParams = 'select=name,id,continent&id=eq.3,&continent=eq.Asia';
       const expectedQueryObject = {
-        text: `SELECT name, id, continent FROM ${name} WHERE id = $1 AND continent = $2`,
-        values: ['3', 'Asia'],
+        'text': `SELECT name, id, continent FROM ${name} WHERE id = $1 AND continent = $2`,
+        'values': ['3', 'Asia'],
       };
       const query = parameterizedQueryBuilder({ name, method, queryParams });
 
@@ -156,8 +156,8 @@ describe('Test database utils', () => {
       const method = 'get';
       const queryParams = 'email=eq.manager@mail.com';
       const expectedQueryObject = {
-        text: `SELECT * FROM ${name} WHERE email = $1`,
-        values: ['manager@mail.com'],
+        'text': `SELECT * FROM ${name} WHERE email = $1`,
+        'values': ['manager@mail.com'],
       };
       const query = parameterizedQueryBuilder({ name, method, queryParams });
 
@@ -169,8 +169,8 @@ describe('Test database utils', () => {
       const method = 'get';
       const queryParams = 'shiftstartdatetime=gte.2019-06-20T12:00:00,&shiftstartdatetime=lt.2019-06-22T12:00:00';
       const expectedQueryObject = {
-        text: `SELECT * FROM ${name} WHERE shiftstartdatetime >= $1 AND shiftstartdatetime < $2`,
-        values: ['2019-06-20T12:00:00', '2019-06-22T12:00:00'],
+        'text': `SELECT * FROM ${name} WHERE shiftstartdatetime >= $1 AND shiftstartdatetime < $2`,
+        'values': ['2019-06-20T12:00:00', '2019-06-22T12:00:00'],
       };
       const query = parameterizedQueryBuilder({ name, method, queryParams });
 
@@ -182,8 +182,8 @@ describe('Test database utils', () => {
       const method = 'get';
       const queryParams = 'select=firstname&firstname=eq.Julius,&shiftstartdatetime=gt.2019-06-20T12:00:00,&shiftstartdatetime=lte.2019-06-22T12:00:00';
       const expectedQueryObject = {
-        text: `SELECT firstname FROM ${name} WHERE firstname = $1 AND shiftstartdatetime > $2 AND shiftstartdatetime <= $3`,
-        values: ['Julius', '2019-06-20T12:00:00', '2019-06-22T12:00:00'],
+        'text': `SELECT firstname FROM ${name} WHERE firstname = $1 AND shiftstartdatetime > $2 AND shiftstartdatetime <= $3`,
+        'values': ['Julius', '2019-06-20T12:00:00', '2019-06-22T12:00:00'],
       };
       const query = parameterizedQueryBuilder({ name, method, queryParams });
 
@@ -197,15 +197,15 @@ describe('Test database utils', () => {
       const method = 'post';
       const body = [
         {
-          name: 'John',
-          age: 34,
-          email: 'john@mail.com',
-          roles: ['linemanager', 'systemuser'],
+          'name': 'John',
+          'age': 34,
+          'email': 'john@mail.com',
+          'roles': ['linemanager', 'systemuser'],
         },
       ];
       const expectedQueryObject = {
-        text: `INSERT INTO ${name} (name, age, email, roles) VALUES ($1, $2, $3, $4)`,
-        values: ['John', 34, 'john@mail.com', `${JSON.stringify(['linemanager', 'systemuser'])}`],
+        'text': `INSERT INTO ${name} (name, age, email, roles) VALUES ($1, $2, $3, $4)`,
+        'values': ['John', 34, 'john@mail.com', `${JSON.stringify(['linemanager', 'systemuser'])}`],
       };
       const query = parameterizedQueryBuilder({ name, method, body });
 
@@ -215,10 +215,10 @@ describe('Test database utils', () => {
     it('Should return a querystring with option to return all inserted data', () => {
       const name = 'staff';
       const method = 'post';
-      const body = { name: 'John', age: 34, email: 'john@mail.com' };
+      const body = { 'name': 'John', 'age': 34, 'email': 'john@mail.com' };
       const expectedQueryObject = {
-        text: `INSERT INTO ${name} (name, age, email) VALUES ($1, $2, $3) RETURNING *`,
-        values: ['John', 34, 'john@mail.com'],
+        'text': `INSERT INTO ${name} (name, age, email) VALUES ($1, $2, $3) RETURNING *`,
+        'values': ['John', 34, 'john@mail.com'],
       };
       const prefer = 'return=representation';
       const query = parameterizedQueryBuilder({ name, method, body, prefer });
@@ -230,12 +230,12 @@ describe('Test database utils', () => {
       const name = 'staff';
       const method = 'post';
       const body = [
-        { name: 'John', age: 34, email: 'john@mail.com' },
-        { name: 'Rachel', age: 32, email: 'rachel@mail.com' },
+        { 'name': 'John', 'age': 34, 'email': 'john@mail.com' },
+        { 'name': 'Rachel', 'age': 32, 'email': 'rachel@mail.com' },
       ];
       const expectedQueryObject = {
-        text: `INSERT INTO ${name} (name, age, email) VALUES ($1, $2, $3),($4, $5, $6)`,
-        values: ['John', 34, 'john@mail.com', 'Rachel', 32, 'rachel@mail.com'],
+        'text': `INSERT INTO ${name} (name, age, email) VALUES ($1, $2, $3),($4, $5, $6)`,
+        'values': ['John', 34, 'john@mail.com', 'Rachel', 32, 'rachel@mail.com'],
       };
       const query = parameterizedQueryBuilder({ name, method, body });
 
@@ -246,13 +246,13 @@ describe('Test database utils', () => {
       const name = 'staff';
       const method = 'post';
       const body = [
-        { name: 'John', age: 34, email: 'john@mail.com' },
-        { name: 'Rachel', age: 32, email: 'rachel@mail.com' },
-        { name: 'Wendy', age: 29, email: null },
+        { 'name': 'John', 'age': 34, 'email': 'john@mail.com' },
+        { 'name': 'Rachel', 'age': 32, 'email': 'rachel@mail.com' },
+        { 'name': 'Wendy', 'age': 29, 'email': null },
       ];
       const expectedQueryObject = {
-        text: `INSERT INTO ${name} (name, age, email) VALUES ($1, $2, $3),($4, $5, $6),($7, $8, NULL) RETURNING *`,
-        values: ['John', 34, 'john@mail.com', 'Rachel', 32, 'rachel@mail.com', 'Wendy', 29],
+        'text': `INSERT INTO ${name} (name, age, email) VALUES ($1, $2, $3),($4, $5, $6),($7, $8, NULL) RETURNING *`,
+        'values': ['John', 34, 'john@mail.com', 'Rachel', 32, 'rachel@mail.com', 'Wendy', 29],
       };
       const prefer = 'return=representation';
       const query = parameterizedQueryBuilder({ name, method, body, prefer });
@@ -266,10 +266,10 @@ describe('Test database utils', () => {
       const name = 'identity';
       const method = 'update';
       const queryParams = 'id=eq.2553b00e-3cb0-441d-b29d-17196491a1e5';
-      const body = { email: 'john@mail.com', roles: ['linemanager', 'systemuser'] };
+      const body = { 'email': 'john@mail.com', 'roles': ['linemanager', 'systemuser'] };
       const expectedQueryObject = {
-        text: `UPDATE ${name} SET email=$1, roles=$2 WHERE id = $3`,
-        values: ['john@mail.com', `${JSON.stringify(['linemanager', 'systemuser'])}`, '2553b00e-3cb0-441d-b29d-17196491a1e5'],
+        'text': `UPDATE ${name} SET email=$1, roles=$2 WHERE id = $3`,
+        'values': ['john@mail.com', `${JSON.stringify(['linemanager', 'systemuser'])}`, '2553b00e-3cb0-441d-b29d-17196491a1e5'],
       };
       const query = parameterizedQueryBuilder({ name, method, body, queryParams });
 
@@ -281,10 +281,10 @@ describe('Test database utils', () => {
       const method = 'update';
       const queryParams = 'id=eq.2553b00e-3cb0-441d-b29d-17196491a1e5';
       const prefer = 'return=representation';
-      const body = { age: 34, email: 'john@mail.com', roles: ['linemanager', 'systemuser'] };
+      const body = { 'age': 34, 'email': 'john@mail.com', 'roles': ['linemanager', 'systemuser'] };
       const expectedQueryObject = {
-        text: `UPDATE ${name} SET age=$1, email=$2, roles=$3 WHERE id = $4 RETURNING *`,
-        values: [34, 'john@mail.com', `${JSON.stringify(['linemanager', 'systemuser'])}`, '2553b00e-3cb0-441d-b29d-17196491a1e5'],
+        'text': `UPDATE ${name} SET age=$1, email=$2, roles=$3 WHERE id = $4 RETURNING *`,
+        'values': [34, 'john@mail.com', `${JSON.stringify(['linemanager', 'systemuser'])}`, '2553b00e-3cb0-441d-b29d-17196491a1e5'],
       };
       const query = parameterizedQueryBuilder({ name, method, body, prefer, queryParams });
 
@@ -295,10 +295,10 @@ describe('Test database utils', () => {
       const name = 'identity';
       const method = 'update';
       const queryParams = 'firstname=eq.Pedro,&id=eq.2553b00e-3cb0-441d-b29d-17196491a1e5';
-      const body = { firstname: 'John' };
+      const body = { 'firstname': 'John' };
       const expectedQueryObject = {
-        text: `UPDATE ${name} SET firstname=$1 WHERE firstname = $2 AND id = $3`,
-        values: ['John', 'Pedro', '2553b00e-3cb0-441d-b29d-17196491a1e5'],
+        'text': `UPDATE ${name} SET firstname=$1 WHERE firstname = $2 AND id = $3`,
+        'values': ['John', 'Pedro', '2553b00e-3cb0-441d-b29d-17196491a1e5'],
       };
       const query = parameterizedQueryBuilder({ name, method, body, queryParams });
 
@@ -312,10 +312,10 @@ describe('Test database utils', () => {
       const firstname = 'Pedro';
       const lastname = 'Miguel';
       const queryParams = `firstname=eq.${firstname},&lastname=eq.${lastname},&id=eq.${id}`;
-      const body = { firstname: 'John', lastname: null };
+      const body = { 'firstname': 'John', 'lastname': null };
       const expectedQueryObject = {
-        text: 'UPDATE identity SET firstname=$1, lastname=NULL WHERE firstname = $2 AND lastname = $3 AND id = $4',
-        values: ['John', 'Pedro', 'Miguel', '2553b00e-3cb0-441d-b29d-17196491a1e5'],
+        'text': 'UPDATE identity SET firstname=$1, lastname=NULL WHERE firstname = $2 AND lastname = $3 AND id = $4',
+        'values': ['John', 'Pedro', 'Miguel', '2553b00e-3cb0-441d-b29d-17196491a1e5'],
       };
       const query = parameterizedQueryBuilder({ name, method, body, queryParams });
 
@@ -330,8 +330,8 @@ describe('Test database utils', () => {
       const queryParams = 'email=eq.manager@mail.com';
       const expectedQuery = `DELETE FROM ${name} WHERE email = 'manager@mail.com';`;
       const expectedQueryObject = {
-        text: `DELETE FROM ${name} WHERE email = $1`,
-        values: ['manager@mail.com'],
+        'text': `DELETE FROM ${name} WHERE email = $1`,
+        'values': ['manager@mail.com'],
       };
       const query = parameterizedQueryBuilder({ name, method, queryParams });
 
@@ -343,8 +343,8 @@ describe('Test database utils', () => {
       const method = 'delete';
       const queryParams = 'email=eq.manager@mail.com,&id=eq.123';
       const expectedQueryObject = {
-        text: `DELETE FROM ${name} WHERE email = $1 AND id = $2`,
-        values: ['manager@mail.com', '123'],
+        'text': `DELETE FROM ${name} WHERE email = $1 AND id = $2`,
+        'values': ['manager@mail.com', '123'],
       };
       const query = parameterizedQueryBuilder({ name, method, queryParams });
 
@@ -356,10 +356,10 @@ describe('Test database utils', () => {
     it('Should return a querystring for a function view', () => {
       const name = 'staffdetails';
       const method = 'post-rpc';
-      const body = { argstaffemail: 'daisy@mail.com' };
+      const body = { 'argstaffemail': 'daisy@mail.com' };
       const expectedQueryObject = {
-        text: `SELECT * FROM ${name}(argstaffemail=>$1)`,
-        values: ['daisy@mail.com'],
+        'text': `SELECT * FROM ${name}(argstaffemail=>$1)`,
+        'values': ['daisy@mail.com'],
       };
       const query = parameterizedQueryBuilder({ name, method, body });
 
@@ -369,10 +369,10 @@ describe('Test database utils', () => {
     it('Should return a querystring for a function view with multiple arguments', () => {
       const name = 'staffdetails';
       const method = 'post-rpc';
-      const body = { argfirstname: 'Andy', argstaffid: 'af4601db-1640-4ff2-a4cc-da44bce99226' };
+      const body = { 'argfirstname': 'Andy', 'argstaffid': 'af4601db-1640-4ff2-a4cc-da44bce99226' };
       const expectedQueryObject = {
-        text: `SELECT * FROM ${name}(argfirstname=>$1, argstaffid=>$2)`,
-        values: ['Andy', 'af4601db-1640-4ff2-a4cc-da44bce99226'],
+        'text': `SELECT * FROM ${name}(argfirstname=>$1, argstaffid=>$2)`,
+        'values': ['Andy', 'af4601db-1640-4ff2-a4cc-da44bce99226'],
       };
       const query = parameterizedQueryBuilder({ name, method, body });
 
@@ -383,10 +383,10 @@ describe('Test database utils', () => {
       const name = 'staffdetails';
       const method = 'post-rpc';
       const queryParams = 'select=email';
-      const body = { argfirstname: 'Lauren', argstaffid: 'af4601db-1640-4ff2-a4cc-da44bce99226' };
+      const body = { 'argfirstname': 'Lauren', 'argstaffid': 'af4601db-1640-4ff2-a4cc-da44bce99226' };
       const expectedQueryObject = {
-        text: `SELECT email FROM ${name}(argfirstname=>$1, argstaffid=>$2)`,
-        values: ['Lauren', 'af4601db-1640-4ff2-a4cc-da44bce99226'],
+        'text': `SELECT email FROM ${name}(argfirstname=>$1, argstaffid=>$2)`,
+        'values': ['Lauren', 'af4601db-1640-4ff2-a4cc-da44bce99226'],
       };
       const query = parameterizedQueryBuilder({ name, method, body, queryParams });
 
@@ -397,10 +397,10 @@ describe('Test database utils', () => {
       const name = 'staffdetails';
       const method = 'post-rpc';
       const queryParams = 'select=email&lastname=eq.Smith';
-      const body = { argfirstname: 'John', arglastname: null, argstaffid: 'af4601db-1640-4ff2-a4cc-da44bce99226' };
+      const body = { 'argfirstname': 'John', 'arglastname': null, 'argstaffid': 'af4601db-1640-4ff2-a4cc-da44bce99226' };
       const expectedQueryObject = {
-        text: `SELECT email FROM ${name}(argfirstname=>$1, arglastname=>NULL, argstaffid=>$2) WHERE lastname = $3`,
-        values: ['John', 'af4601db-1640-4ff2-a4cc-da44bce99226', 'Smith'],
+        'text': `SELECT email FROM ${name}(argfirstname=>$1, arglastname=>NULL, argstaffid=>$2) WHERE lastname = $3`,
+        'values': ['John', 'af4601db-1640-4ff2-a4cc-da44bce99226', 'Smith'],
       };
       const query = parameterizedQueryBuilder({ name, method, body, queryParams });
 
@@ -412,16 +412,16 @@ describe('Test database utils', () => {
     it('Should return a querystring with two columns selected filtered by name and city and a limit of 5 rows', () => {
       const name = 'roles';
       const queryParams = {
-        select: 'name,city',
-        filter: [
+        'select': 'name,city',
+        'filter': [
           'name=eq.Tilbury 1',
           'city=eq.London',
         ],
-        limit: '5',
+        'limit': '5',
       };
       const expectedQueryObject = {
-        queryString: `SELECT name,city FROM ${name} WHERE name = $2 AND city = $3 LIMIT $1`,
-        values: ['5', 'Tilbury 1', 'London'],
+        'queryString': `SELECT name,city FROM ${name} WHERE name = $2 AND city = $3 LIMIT $1`,
+        'values': ['5', 'Tilbury 1', 'London'],
       };
       const query = queryBuilder({ name, queryParams });
 
@@ -431,14 +431,14 @@ describe('Test database utils', () => {
     it('Should return a querystring with all columns filtering by firstname and a limit of 1 row', () => {
       const name = 'roles';
       const queryParams = {
-        filter: [
+        'filter': [
           'firstname=eq.Pedro',
         ],
-        limit: '1',
+        'limit': '1',
       };
       const expectedQueryObject = {
-        queryString: `SELECT * FROM ${name} WHERE firstname = $2 LIMIT $1`,
-        values: ['1', 'Pedro'],
+        'queryString': `SELECT * FROM ${name} WHERE firstname = $2 LIMIT $1`,
+        'values': ['1', 'Pedro'],
       };
       const query = queryBuilder({ name, queryParams });
 
@@ -447,10 +447,10 @@ describe('Test database utils', () => {
 
     it('Should return a querystring with all columns and a limit of 1 row', () => {
       const name = 'roles';
-      const queryParams = { limit: '1' };
+      const queryParams = { 'limit': '1' };
       const expectedQueryObject = {
-        queryString: `SELECT * FROM ${name} LIMIT $1`,
-        values: ['1'],
+        'queryString': `SELECT * FROM ${name} LIMIT $1`,
+        'values': ['1'],
       };
       const query = queryBuilder({ name, queryParams });
 
@@ -460,12 +460,12 @@ describe('Test database utils', () => {
     it('Should return an empty querystring if there is more than one select in the query params', () => {
       const name = 'roles';
       const queryParams = {
-        limit: ['3', '77'],
-        select: ['name,age', 'location'],
+        'limit': ['3', '77'],
+        'select': ['name,age', 'location'],
       };
       const expectedQueryObject = {
-        queryString: '',
-        values: [],
+        'queryString': '',
+        'values': [],
       };
       const query = queryBuilder({ name, queryParams });
 
@@ -475,13 +475,13 @@ describe('Test database utils', () => {
     it('Should return a querystring with a column selected ordered by column ascending', () => {
       const name = 'team';
       const queryParams = {
-        limit: '3',
-        select: 'name',
-        sort: 'name.asc',
+        'limit': '3',
+        'select': 'name',
+        'sort': 'name.asc',
       };
       const expectedQueryObject = {
-        queryString: `SELECT name FROM ${name} ORDER BY name ASC LIMIT $1`,
-        values: ['3'],
+        'queryString': `SELECT name FROM ${name} ORDER BY name ASC LIMIT $1`,
+        'values': ['3'],
       };
       const query = queryBuilder({ name, queryParams });
 
@@ -491,15 +491,15 @@ describe('Test database utils', () => {
     it('Should return a querystring with all columns selected, filtered by name, sorted by name asc, size desc, and a limit of 3 rows', () => {
       const name = 'team';
       const queryParams = {
-        limit: '3',
-        filter: [
+        'limit': '3',
+        'filter': [
           'name=eq.Blue Team',
         ],
-        sort: 'name.asc,size.desc',
+        'sort': 'name.asc,size.desc',
       };
       const expectedQueryObject = {
-        queryString: `SELECT * FROM ${name} WHERE name = $2 ORDER BY name ASC, size DESC LIMIT $1`,
-        values: ['3', 'Blue Team'],
+        'queryString': `SELECT * FROM ${name} WHERE name = $2 ORDER BY name ASC, size DESC LIMIT $1`,
+        'values': ['3', 'Blue Team'],
       };
       const query = queryBuilder({ name, queryParams });
 
@@ -509,14 +509,14 @@ describe('Test database utils', () => {
     it('Should return a querystring with all columns selected filtered by any value provided', () => {
       const name = 'country';
       const queryParams = {
-        filter: [
+        'filter': [
           'region=in.(EU)',
         ],
       };
       const expectedQueryFilter = `SELECT * FROM ${name} WHERE region IN ('EU');`;
       const expectedQueryObject = {
-        queryString: `SELECT * FROM ${name} WHERE region IN ($1)`,
-        values: ['EU'],
+        'queryString': `SELECT * FROM ${name} WHERE region IN ($1)`,
+        'values': ['EU'],
       };
       const queryFilter = queryBuilder({ name, queryParams });
 
@@ -527,14 +527,14 @@ describe('Test database utils', () => {
     it('Should return a querystring with all columns selected filtered by value equal to, and any value in tuple', () => {
       const name = 'country';
       const queryParams = {
-        filter: [
+        'filter': [
           'name=eq.Portugal',
           'region=in.(EU, AS)',
         ],
       };
       const expectedQueryObject = {
-        queryString: `SELECT * FROM ${name} WHERE name = $1 AND region IN ($2, $3)`,
-        values: ['Portugal', 'EU', 'AS'],
+        'queryString': `SELECT * FROM ${name} WHERE name = $1 AND region IN ($2, $3)`,
+        'values': ['Portugal', 'EU', 'AS'],
       };
       const queryFilter = queryBuilder({ name, queryParams });
 
@@ -544,7 +544,7 @@ describe('Test database utils', () => {
 
     it('Should return an empty querystring if limit is a string', () => {
       const name = 'roles';
-      const queryParams = { limit: '-13' };
+      const queryParams = { 'limit': '-13' };
       const queryFilter = queryBuilder({ name, queryParams });
 
       expect(queryFilter).to.be.an('object');
@@ -556,15 +556,15 @@ describe('Test database utils', () => {
     it('should return a queryString to update existing data matching an id', () => {
       const name = 'identity';
       const queryParams = {
-        update: true,
-        filter: [
+        'update': true,
+        'filter': [
           'id=eq.2553b00e-3cb0-441d-b29d-17196491a1e5',
         ],
       };
-      const body = { email: 'john@mail.com', roles: ['linemanager', 'systemuser'] };
+      const body = { 'email': 'john@mail.com', 'roles': ['linemanager', 'systemuser'] };
       const expectedQueryObject = {
-        queryString: `UPDATE ${name} SET email=$1, roles=$2 WHERE id = $3`,
-        values: ['john@mail.com', `${JSON.stringify(['linemanager', 'systemuser'])}`, '2553b00e-3cb0-441d-b29d-17196491a1e5'],
+        'queryString': `UPDATE ${name} SET email=$1, roles=$2 WHERE id = $3`,
+        'values': ['john@mail.com', `${JSON.stringify(['linemanager', 'systemuser'])}`, '2553b00e-3cb0-441d-b29d-17196491a1e5'],
       };
       const query = queryBuilder({ body, name, queryParams });
 
@@ -574,16 +574,16 @@ describe('Test database utils', () => {
     it('Should return a querystring to update existing data mathing an id, with option to return all updated data', () => {
       const name = 'identity';
       const queryParams = {
-        update: true,
-        filter: [
+        'update': true,
+        'filter': [
           'id=eq.2553b00e-3cb0-441d-b29d-17196491a1e5',
         ],
       };
       const prefer = 'return=representation';
-      const body = { age: 34, email: 'john@mail.com', roles: ['linemanager', 'systemuser'] };
+      const body = { 'age': 34, 'email': 'john@mail.com', 'roles': ['linemanager', 'systemuser'] };
       const expectedQueryObject = {
-        queryString: `UPDATE ${name} SET age=$1, email=$2, roles=$3 WHERE id = $4 RETURNING *`,
-        values: [34, 'john@mail.com', `${JSON.stringify(['linemanager', 'systemuser'])}`, '2553b00e-3cb0-441d-b29d-17196491a1e5'],
+        'queryString': `UPDATE ${name} SET age=$1, email=$2, roles=$3 WHERE id = $4 RETURNING *`,
+        'values': [34, 'john@mail.com', `${JSON.stringify(['linemanager', 'systemuser'])}`, '2553b00e-3cb0-441d-b29d-17196491a1e5'],
       };
       const query = queryBuilder({ body, name, prefer, queryParams });
 
@@ -593,16 +593,16 @@ describe('Test database utils', () => {
     it('Should return a querystring to update existing data matching query parameters', () => {
       const name = 'identity';
       const queryParams = {
-        update: true,
-        filter: [
+        'update': true,
+        'filter': [
           'firstname=eq.Pedro',
           'id=eq.2553b00e-3cb0-441d-b29d-17196491a1e5',
         ],
       };
-      const body = { firstname: 'John' };
+      const body = { 'firstname': 'John' };
       const expectedQueryObject = {
-        queryString: `UPDATE ${name} SET firstname=$1 WHERE firstname = $2 AND id = $3`,
-        values: ['John', 'Pedro', '2553b00e-3cb0-441d-b29d-17196491a1e5'],
+        'queryString': `UPDATE ${name} SET firstname=$1 WHERE firstname = $2 AND id = $3`,
+        'values': ['John', 'Pedro', '2553b00e-3cb0-441d-b29d-17196491a1e5'],
       };
       const query = queryBuilder({ body, name, queryParams });
 
@@ -612,17 +612,17 @@ describe('Test database utils', () => {
     it('Should return a querystring to update existing data matching the query parameters are provided', () => {
       const name = 'identity';
       const queryParams = {
-        update: true,
-        filter: [
+        'update': true,
+        'filter': [
           'firstname=eq.Pedro',
           'lastname=eq.Miguel',
           'id=eq.2553b00e-3cb0-441d-b29d-17196491a1e5',
         ],
       };
-      const body = { firstname: 'John', lastname: null };
+      const body = { 'firstname': 'John', 'lastname': null };
       const expectedQueryObject = {
-        queryString: 'UPDATE identity SET firstname=$1, lastname=NULL WHERE firstname = $2 AND lastname = $3 AND id = $4',
-        values: ['John', 'Pedro', 'Miguel', '2553b00e-3cb0-441d-b29d-17196491a1e5'],
+        'queryString': 'UPDATE identity SET firstname=$1, lastname=NULL WHERE firstname = $2 AND lastname = $3 AND id = $4',
+        'values': ['John', 'Pedro', 'Miguel', '2553b00e-3cb0-441d-b29d-17196491a1e5'],
       };
       const query = queryBuilder({ body, name, queryParams });
 
@@ -633,10 +633,10 @@ describe('Test database utils', () => {
   describe('v2 DELETE - querystring builder', () => {
     it('should return a querystring to delete all rows in a database table', () => {
       const name = 'staff';
-      const queryParams = { delete: true };
+      const queryParams = { 'delete': true };
       const expectedQueryObject = {
-        queryString: `DELETE FROM ${name}`,
-        values: [],
+        'queryString': `DELETE FROM ${name}`,
+        'values': [],
       };
       const query = queryBuilder({ name, queryParams });
 
@@ -646,14 +646,14 @@ describe('Test database utils', () => {
     it('should return a querystring to delete a row matching the id', () => {
       const name = 'staff';
       const queryParams = {
-        delete: true,
-        filter: [
+        'delete': true,
+        'filter': [
           'id=eq.123',
         ],
       };
       const expectedQueryObject = {
-        queryString: `DELETE FROM ${name} WHERE id = $1`,
-        values: ['123'],
+        'queryString': `DELETE FROM ${name} WHERE id = $1`,
+        'values': ['123'],
       };
       const query = queryBuilder({ name, queryParams });
 
@@ -663,15 +663,15 @@ describe('Test database utils', () => {
     it('should return a querystring to delete a row matching the email address and id', () => {
       const name = 'staff';
       const queryParams = {
-        delete: true,
-        filter: [
+        'delete': true,
+        'filter': [
           'email=eq.manager@mail.com',
           'id=eq.123',
         ],
       };
       const expectedQueryObject = {
-        queryString: `DELETE FROM ${name} WHERE email = $1 AND id = $2`,
-        values: ['manager@mail.com', '123'],
+        'queryString': `DELETE FROM ${name} WHERE email = $1 AND id = $2`,
+        'values': ['manager@mail.com', '123'],
       };
       const query = queryBuilder({ name, queryParams });
 
