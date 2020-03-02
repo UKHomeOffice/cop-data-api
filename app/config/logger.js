@@ -14,16 +14,16 @@ module.exports = function (modulePath) {
   modulePath = path.join(pathParts[pathParts.length - 2], pathParts.pop());
 
   return createLogger({
-    level: config.logLevel,
-    silent: process.env.NODE_ENV === 'testing',
-    format: combine(
-      label({ label: modulePath }),
-      timestamp({ format: 'DD-MM-YYYY HH:mm:ss' }),
+    'level': config.logLevel,
+    'silent': process.env.NODE_ENV === 'testing',
+    'format': combine(
+      label({ 'label': modulePath }),
+      timestamp({ 'format': 'DD-MM-YYYY HH:mm:ss' }),
       prettyPrint(),
       format.json(),
     ),
-    transports: [
-      new transports.Console({ format: combine(colorize({ all: true })) }),
+    'transports': [
+      new transports.Console({ 'format': combine(colorize({ 'all': true })) }),
     ],
   });
 };
