@@ -14,14 +14,14 @@ app.get('/:name', (req, res) => {
   const { dbrole } = res.locals.user;
 
   if (name.startsWith('pg_') || Boolean(name.match(/\W/))) {
-    return res.status(400).json({ 'error': 'Invalid entity' });
+    return res.status(400).json({ error: 'Invalid entity' });
   }
 
   logger.debug(`Query parameters received: ${queryParams || 'None'}`);
   const { text, values } = parameterizedQueryBuilder({ name, method, queryParams });
 
   if (!text) {
-    return res.status(400).json({ 'error': 'Invalid query parameters' });
+    return res.status(400).json({ error: 'Invalid query parameters' });
   }
 
   const data = query(dbrole, name, text, values);
@@ -30,7 +30,7 @@ app.get('/:name', (req, res) => {
     .then(resultsArray => res.status(200).json(resultsArray[0]))
     .catch((error) => {
       logger.error(error.stack);
-      res.status(400).json({ 'error': error.message });
+      res.status(400).json({ error: error.message });
     });
 });
 
@@ -44,7 +44,7 @@ app.post('/:name', (req, res) => {
   logger.debug(`Body received: ${JSON.stringify(body)}`);
 
   if (Object.entries(body).length === 0) {
-    return res.status(400).json({ 'error': 'Invalid post request' });
+    return res.status(400).json({ error: 'Invalid post request' });
   }
 
   const { text, values } = parameterizedQueryBuilder({ name, method, body, prefer });
@@ -54,7 +54,7 @@ app.post('/:name', (req, res) => {
     .then(resultsArray => res.status(200).json(resultsArray[0]))
     .catch((error) => {
       logger.error(error.stack);
-      res.status(400).json({ 'error': error.message });
+      res.status(400).json({ error: error.message });
     });
 });
 
@@ -70,7 +70,7 @@ app.patch('/:name/:id?', (req, res) => {
   logger.debug(`Body received: ${JSON.stringify(body)}`);
 
   if (Object.entries(body).length === 0 && (!id || !queryParams)) {
-    return res.status(400).json({ 'error': 'Invalid patch request' });
+    return res.status(400).json({ error: 'Invalid patch request' });
   }
 
   const { text, values } = parameterizedQueryBuilder({ name, method, body, queryParams, prefer });
@@ -80,7 +80,7 @@ app.patch('/:name/:id?', (req, res) => {
     .then(resultsArray => res.status(200).json(resultsArray[0]))
     .catch((error) => {
       logger.error(error.stack);
-      res.status(400).json({ 'error': error.message });
+      res.status(400).json({ error: error.message });
     });
 });
 
@@ -93,7 +93,7 @@ app.delete('/:name', (req, res) => {
   logger.debug(`Query parameters received: ${queryParams || 'None'}`);
 
   if (!queryParams) {
-    return res.status(400).json({ 'error': 'Invalid query parameters' });
+    return res.status(400).json({ error: 'Invalid query parameters' });
   }
 
   const { text, values } = parameterizedQueryBuilder({ name, method, queryParams });
@@ -103,7 +103,7 @@ app.delete('/:name', (req, res) => {
     .then(resultsArray => res.status(200).json(resultsArray[0]))
     .catch((error) => {
       logger.error(error.stack);
-      res.status(400).json({ 'error': error.message });
+      res.status(400).json({ error: error.message });
     });
 });
 
@@ -119,7 +119,7 @@ app.post('/rpc/:name', (req, res) => {
   const { text, values } = parameterizedQueryBuilder({ name, method, body, queryParams });
 
   if (!text) {
-    return res.status(400).json({ 'error': 'Invalid query parameters' });
+    return res.status(400).json({ error: 'Invalid query parameters' });
   }
 
   const data = query(dbrole, name, text, values);
@@ -127,7 +127,7 @@ app.post('/rpc/:name', (req, res) => {
     .then(resultsArray => res.status(200).json(resultsArray[0]))
     .catch((error) => {
       logger.error(error.stack);
-      res.status(400).json({ 'error': error.message });
+      res.status(400).json({ error: error.message });
     });
 });
 

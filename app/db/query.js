@@ -4,7 +4,7 @@ const getPool = require('./index');
 
 const query = (role, name, queryString, values) => new Promise((resolve, reject) => {
   const pool = getPool(role);
-  const queryObject = { 'text': queryString, values };
+  const queryObject = { text: queryString, values };
 
   logger.info('Running query');
   logger.debug(`Running query: ${queryString}, values: ${values}`);
