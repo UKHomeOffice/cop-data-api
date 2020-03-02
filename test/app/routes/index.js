@@ -15,44 +15,46 @@ describe('Test routes', () => {
     expiryTime.setHours(expiryTime.getHours() + 1);
     expiryTime = Math.round(expiryTime / 1000);
     const payload = {
-      'name': 'John',
-      'email': 'john@mail.com',
-      'exp': expiryTime,
-      'dbrole': 'readonly',
-      'iss': config.iss,
-      'aud': ['operational-data-api', 'api-cop'],
+      name: 'John',
+      email: 'john@mail.com',
+      exp: expiryTime,
+      dbrole: 'readonly',
+      iss: config.iss,
+      aud: ['operational-data-api', 'api-cop'],
     };
-    const secret = 'super-secret-19';
-    const token = jwtSimple.encode(payload, secret);
+    const token = jwtSimple.encode(payload, config.keycloakClientSecret);
+
     const data = {
-      'rows': [
+      rows: [
         {
-          'id': '45995acb-8908-4d10-b9ff-4220d0838586',
-          'name': 'Tilbury Management Team',
-          'code': 'TILBURY',
-          'description': null,
-          'costcentrecode': 'TILBURY',
-          'parentteamid': '9a56319a-416a-4346-94dd-58bed59199d5',
-          'bffunctiontypeid': '63d59d5c-e1d0-4f16-9607-7aa2613cc695',
-          'ministryid': 1,
-          'departmentid': 1,
-          'directorateid': 2,
-          'branchid': 23,
-          'divisionid': 6,
-          'commandid': 43,
-          'validfrom': null,
-          'validto': null,
+          id: '45995acb-8908-4d10-b9ff-4220d0838586',
+          name: 'Tilbury Management Team',
+          code: 'TILBURY',
+          description: null,
+          costcentrecode: 'TILBURY',
+          parentteamid: '9a56319a-416a-4346-94dd-58bed59199d5',
+          bffunctiontypeid: '63d59d5c-e1d0-4f16-9607-7aa2613cc695',
+          ministryid: 1,
+          departmentid: 1,
+          directorateid: 2,
+          branchid: 23,
+          divisionid: 6,
+          commandid: 43,
+          validfrom: null,
+          validto: null,
         },
       ],
     };
 
-    it('Should return 400 when query parameters do not include filter and value', () => request(app)
-      .get('/v1/team?name')
-      .set('Authorization', `Bearer ${token}`)
-      .then((response) => {
-        expect(response.status).to.equal(400);
-        expect(response.body).to.deep.equal({ 'error': 'Invalid query parameters' });
-      }));
+    it('Should return 400 when query parameters do not include filter and value', () => {
+      request(app)
+        .get('/v1/team?name')
+        .set('Authorization', `Bearer ${token}`)
+        .then((response) => {
+          expect(response.status).to.equal(400);
+          expect(response.body).to.deep.equal({ error: 'Invalid query parameters' });
+        });
+    });
 
     it('Should return 400 when the table does not exist', () => {
       const pool = getPool();
@@ -64,7 +66,7 @@ describe('Test routes', () => {
         .set('Authorization', `Bearer ${token}`)
         .then((response) => {
           expect(response.status).to.equal(400);
-          expect(response.body).to.deep.equal({ 'error': 'Unable to run query in table teams' });
+          expect(response.body).to.deep.equal({ error: 'Unable to run query in table teams' });
         });
     });
 
