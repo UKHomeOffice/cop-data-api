@@ -39,7 +39,7 @@ app.use((req, res, next) => {
     }
 
     try {
-      const token = jwt.verify(encodedToken, config.keycloakClientSecret, {
+      const token = jwt.verify(encodedToken, config.keycloakClientPublicKey, {
         audience: config.keycloakClientId, // check the token audience matches keycloak
         issuer: config.iss, // check the issuer matches config
         ignoreExpiration: false, // check the expiry

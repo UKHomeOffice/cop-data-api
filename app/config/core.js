@@ -24,7 +24,7 @@ const config = {
   searchSchema: process.env.DB_COP_OPERATION_SCHEMA || 'transaction',
   iss: process.env.ISS || `${keycloak.protocol}${keycloak.url}/realms/${keycloak.realm}`,
   keycloak_client_id: process.env.API_COP_KEYCLOAK_CLIENT_ID || 'api-cop',
-  keycloakClientSecret: process.env.API_COP_KEYCLOAK_CLIENT_SECRET || 's0m3s3cr3t',
+  keycloakClientPublicKey: process.env.API_COP_KEYCLOAK_CLIENT_PUBLIC_KEY || 'some-public-key',
   port: process.env.API_COP_PORT || '5000',
 };
 

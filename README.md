@@ -83,7 +83,7 @@ http://localhost:5000/v1/roles
 ```bash
 docker network create db
 docker network create web
-KEYCLOAK_CLIENT_ID=cop-data-db KEYCLOAK_CLIENT_SECRET=s0m3s3cr3t KEYCLOAK_URL=http://keycloak.lodev.xyz/auth/realms/dev OPERATIONAL_FLYWAY=/FULL_PATH_TO_FLYWAY_SOURCE/private_operational_flyway docker-compose up
+KEYCLOAK_CLIENT_ID=cop-data-db KEYCLOAK_CLIENT_PUBLIC_KEY=s0m3s3cr3t KEYCLOAK_URL=http://keycloak.lodev.xyz/auth/realms/dev OPERATIONAL_FLYWAY=/FULL_PATH_TO_FLYWAY_SOURCE/private_operational_flyway docker-compose up
 ```
 
 ### Clean up
@@ -177,7 +177,7 @@ mode=dataOnly&filter=name=eq.John
 | drone_public_token                          | Drone token (Global for all github repositories and environments)                                                                              |
 | env_api_cop_image                           | quay.io/ukhomeofficedigital/cop-data-api                                                                                                       |
 | env_api_cop_keycloak_client_id              | keycloak client name                                                                                                                           |
-| env_api_cop_keycloak_client_secret          | keycloak client secret                                                                                                                         |
+| env_api_cop_keycloak_client_public_key          | keycloak client public key                                                                                                                         |
 | env_api_cop_name                            | operational-data-api                                                                                                                           |
 | env_api_cop_port                            | 5000                                                                                                                                           |
 | env_api_cop_protocol                        | https://                                                                                                                                       |

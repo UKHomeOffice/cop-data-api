@@ -22,7 +22,7 @@ describe('Test routes', () => {
       iss: config.iss,
       aud: ['operational-data-api', 'api-cop'],
     };
-    const token = jwtSimple.encode(payload, config.keycloakClientSecret);
+    const token = jwtSimple.encode(payload, config.keycloakClientPublicKey);
 
     const data = {
       rows: [
