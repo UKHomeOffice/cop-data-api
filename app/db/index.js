@@ -8,8 +8,8 @@ const { dbConnectionString, searchSchema } = config;
 
 // todo -> searchSchema = operation;
 
-const readPool = new Pool({ connectionString: dbConnectionString });
-const writePool = new Pool({ connectionString: dbConnectionString });
+const readPool = new Pool({ 'connectionString': dbConnectionString });
+const writePool = new Pool({ 'connectionString': dbConnectionString });
 
 readPool.on('connect', (client) => {
   client.query(`SET search_path TO "${searchSchema}";`);

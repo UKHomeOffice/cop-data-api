@@ -10,7 +10,7 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: mysecretpassword
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U postgres']
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -34,7 +34,7 @@ services:
       POSTGRES_PORT: 5432
     volumes:
       - ${OPERATIONAL_FLYWAY}:/mnt
-    depends_on:
+    depends_on: 
       - postgres_operational_data
     networks:
       - db
@@ -49,19 +49,18 @@ services:
       PORT: 5000
       DB_CONNECTION_STRING: postgres://authenticatoroperation:auth1234@postgres_operational_data:5432/operation
       KEYCLOAK_CLIENT_ID: ${COP_DATA_API_KEYCLOAK_CLIENT_ID}
-      KEYCLOAK_CLIENT_PUBLIC_KEY: ${COP_DATA_API_KEYCLOAK_CLIENT_PUBLIC_KEY}
       KEYCLOAK_URL: ${KEYCLOAK_URL}
     depends_on:
       - postgres_operational_data
       - operational_flyway
     healthcheck:
-      test: ['CMD-SHELL', 'node', '/src/healthcheck.js']
+      test: ["CMD-SHELL", "node", "/src/healthcheck.js"]
       interval: 10s
       timeout: 5s
       retries: 5
       start_period: 20s
     ports:
-      - 5000:5000
+     - 5000:5000
     networks:
       - db
       - web

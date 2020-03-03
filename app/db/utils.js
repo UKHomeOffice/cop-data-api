@@ -53,7 +53,7 @@ function argsBuilder({ body, assignment = '', index }) {
   }
 
   if (!assignment) {
-    return { columns: `(${columns})`, args: `(${args})`, values, index };
+    return { 'columns': `(${columns})`, 'args': `(${args})`, values, index };
   }
   return { args, values, index };
 }
@@ -175,7 +175,7 @@ function parameterizedQueryBuilder({ name, method, body = '', prefer = '', query
 
     if (Array.isArray(body)) {
       body.map((item) => {
-        newData = argsBuilder({ body: item, index });
+        newData = argsBuilder({ 'body': item, index });
         index = newData.index;
         rowArgs += rowArgs ? ',' : '';
         rowArgs += newData.args ? newData.args : '';
@@ -193,7 +193,7 @@ function parameterizedQueryBuilder({ name, method, body = '', prefer = '', query
     assignment = '=>';
     newData = argsBuilder({ body, assignment, index });
     index = newData.index;
-    data = queryParamsBuilder({ queryParams, index, name, args: newData.args });
+    data = queryParamsBuilder({ queryParams, index, name, 'args': newData.args });
     text = queryParams ? `${data.text}` : `SELECT * FROM ${name}${newData.args}`;
     values = newData.values.concat(data.values);
   } else if (method === 'update') {
@@ -268,7 +268,7 @@ function queryBuilder({ body, name, prefer, queryParams }) {
     method = `DELETE FROM ${name}`;
   } else if (queryParams.update) {
     method = `UPDATE ${name} SET `;
-    newData = argsBuilder({ body, assignment: '=', index });
+    newData = argsBuilder({ body, 'assignment': '=', index });
     index = newData.index;
     args = newData.args;
     values = values.concat(newData.values);

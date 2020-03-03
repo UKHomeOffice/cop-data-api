@@ -101,8 +101,6 @@ pipeline:
         target: API_COP_IMAGE
       - source: DEV_API_COP_KEYCLOAK_CLIENT_ID
         target: API_COP_KEYCLOAK_CLIENT_ID
-      - source: DEV_API_COP_KEYCLOAK_CLIENT_PUBLIC_KEY
-        target: API_COP_KEYCLOAK_CLIENT_PUBLIC_KEY
       - source: LOG_LEVEL_DEBUG
         target: API_COP_LOG_LEVEL
       - source: DEV_API_COP_NAME
@@ -161,8 +159,6 @@ pipeline:
         target: API_COP_IMAGE
       - source: STAGING_API_COP_KEYCLOAK_CLIENT_ID
         target: API_COP_KEYCLOAK_CLIENT_ID
-      - source: STAGING_API_COP_KEYCLOAK_CLIENT_PUBLIC_KEY
-        target: API_COP_KEYCLOAK_CLIENT_PUBLIC_KEY
       - source: LOG_LEVEL_INFO
         target: API_COP_LOG_LEVEL
       - source: STAGING_API_COP_NAME
@@ -222,8 +218,6 @@ pipeline:
         target: API_COP_IMAGE
       - source: PRODUCTION_API_COP_KEYCLOAK_CLIENT_ID
         target: API_COP_KEYCLOAK_CLIENT_ID
-      - source: PRODUCTION_API_COP_KEYCLOAK_CLIENT_PUBLIC_KEY
-        target: API_COP_KEYCLOAK_CLIENT_PUBLIC_KEY
       - source: LOG_LEVEL_INFO
         target: API_COP_LOG_LEVEL
       - source: PRODUCTION_API_COP_NAME
