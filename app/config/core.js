@@ -18,6 +18,8 @@ const keycloak = {
 
 const dbConnectionString = `${db.protocol}${db.username}:${db.password}@${db.hostname}:${db.port}/${db.name}${db.options}`;
 
+const decodedKey = Buffer.from(process.env.API_COP_KEYCLOAK_CLIENT_PUBLIC_KEY, 'base64').toString();
+
 const config = {
   logLevel: process.env.API_COP_LOG_LEVEL || 'info',
   dbConnectionString: process.env.DB_COP_CONNECTION_STRING || dbConnectionString,
@@ -26,7 +28,7 @@ const config = {
   searchSchema: process.env.DB_COP_OPERATION_SCHEMA || 'transaction',
   iss: process.env.ISS || `${keycloak.protocol}${keycloak.url}/realms/${keycloak.realm}`,
   keycloakClientId: process.env.API_COP_KEYCLOAK_CLIENT_ID || 'api-cop',
-  keycloakClientPublicKey: formatKey(process.env.API_COP_KEYCLOAK_CLIENT_PUBLIC_KEY),
+  keycloakClientPublicKey: formatKey(decodedKey),
   port: process.env.API_COP_PORT || '5000',
 };
 
