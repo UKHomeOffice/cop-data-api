@@ -8,6 +8,10 @@ const app = require('../../../app/routes');
 const config = require('../../../app/config/core');
 const getPool = require('../../../app/db/index');
 
+config.keycloakClientPublicKey = 'keycloakClientPublicKey';
+config.iss = 'iss';
+config.keycloakClientId = 'keycloakClientId';
+
 describe('Test routes', () => {
   describe('GET - endpoint', () => {
     // create a token with an expiry date 1 hour in the future
@@ -20,7 +24,7 @@ describe('Test routes', () => {
       exp: expiryTime,
       dbrole: 'readonly',
       iss: config.iss,
-      aud: ['operational-data-api', 'api-cop'],
+      aud: ['operational-data-api', 'api-cop', 'keycloakClientId'],
     };
     const token = jwtSimple.encode(payload, config.keycloakClientPublicKey);
 

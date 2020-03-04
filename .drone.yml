@@ -20,8 +20,10 @@ pipeline:
 
   unit_tests:
     image: quay.io/ukhomeofficedigital/drone-docker
+    secrets:
+      - DEV_API_COP_KEYCLOAK_CLIENT_PUBLIC_KEY
     commands:
-      - docker run -t cop-data-api:$${DRONE_COMMIT_SHA} sh -c "npm test"
+      - docker run -e API_COP_KEYCLOAK_CLIENT_PUBLIC_KEY=$DEV_API_COP_KEYCLOAK_CLIENT_PUBLIC_KEY -t cop-data-api:$${DRONE_COMMIT_SHA} sh -c "npm test"
     when:
       event: push
 
