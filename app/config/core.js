@@ -1,3 +1,5 @@
+const formatKey = require('./formatKey');
+
 const db = {
   protocol: process.env.DB_COP_PROTOCOL || 'postgres://',
   port: process.env.DB_COP_PORT || '5434',
@@ -23,8 +25,8 @@ const config = {
   dbWrite: process.env.DB_COP_WRITE_ROLE || 'service',
   searchSchema: process.env.DB_COP_OPERATION_SCHEMA || 'transaction',
   iss: process.env.ISS || `${keycloak.protocol}${keycloak.url}/realms/${keycloak.realm}`,
-  keycloak_client_id: process.env.API_COP_KEYCLOAK_CLIENT_ID || 'api-cop',
-  keycloakClientPublicKey: process.env.API_COP_KEYCLOAK_CLIENT_PUBLIC_KEY || 'some-public-key',
+  keycloakClientId: process.env.API_COP_KEYCLOAK_CLIENT_ID || 'api-cop',
+  keycloakClientPublicKey: formatKey(process.env.API_COP_KEYCLOAK_CLIENT_PUBLIC_KEY),
   port: process.env.API_COP_PORT || '5000',
 };
 
