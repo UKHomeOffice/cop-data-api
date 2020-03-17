@@ -1,8 +1,8 @@
 const jwt = require('jsonwebtoken');
 const moment = require('moment');
 
-const config = require('../config/core');
-const logger = require('../config/logger')(__filename);
+const config = require('../../config/core');
+const logger = require('../../config/logger')(__filename);
 
 const BEARER = 'Bearer ';
 const ONE_SECOND = 1000;
@@ -40,7 +40,6 @@ const authMiddleware = (req, res, next) => {
       next();
     } catch (error) {
       const { name, message } = error;
-
       logger.error(
         `${req.method} - ${req.url} - Token not valid for our SSO endpoint - ${name} - ${message}`,
       );

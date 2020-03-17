@@ -1,8 +1,8 @@
 const sinon = require('sinon');
 const jwtSimple = require('jwt-simple');
 
-const config = require('../../../app/config/core');
-const authMiddleware = require('../../../app/routes/authMiddleware');
+const config = require('../../../../app/config/core');
+const authMiddleware = require('../../../../app/routes/middlewares/auth');
 
 // create a token with an expiry date 1 hour in the future
 let expiryTime = new Date();
@@ -19,12 +19,12 @@ const payload = {
   exp: expiryTime,
   dbrole: 'readonly',
   iss: config.iss,
-  aud: ['operational-data-api', 'api-cop', 'keycloakClientId'],
+  aud: ['operational-data-api', 'api-cop', config.keycloakClientId],
 };
 
 const token = jwtSimple.encode(payload, config.keycloakClientPublicKey);
 
-describe('authMiddleware', () => {
+describe('Test authMiddleware', () => {
   describe('when it is called', () => {
     describe('and there is an authorization header', () => {
       describe('and the JWT is valid', () => {
