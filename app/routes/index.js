@@ -4,7 +4,8 @@ const express = require('express');
 
 // local imports
 
-const authMiddleware = require('./authMiddleware');
+const authMiddleware = require('./middlewares/auth');
+const containsSQLMiddleware = require('./middlewares/contains-sql');
 const logger = require('../config/logger')(__filename);
 const v1 = require('./v1');
 const v2 = require('./v2');
@@ -25,6 +26,7 @@ app.options('*', cors(corsConfiguration));
 
 // check each request for authorization token
 app.use(authMiddleware);
+app.use(containsSQLMiddleware);
 
 app.use('/v1', v1);
 app.use('/v2', v2);
