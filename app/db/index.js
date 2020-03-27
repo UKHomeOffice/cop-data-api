@@ -1,3 +1,4 @@
+const moment = require('moment');
 const { Pool } = require('pg');
 
 // local imports
@@ -16,8 +17,11 @@ readPool.on('connect', (client) => {
   client.query(`SET ROLE ${config.dbRead}`);
 });
 
-readPool.on('error', (err, client) => {
-  logger.error('Unexpected error on idle client', err);
+readPool.on('error', (error, client) => {
+  logger.error('Unexpected error on idle client', {
+    error,
+    timestamp: moment().utc().format('D/MMM/YYYY:HH:mm:ss ZZ'),
+  });
   process.exit(-1);
 });
 
@@ -26,8 +30,11 @@ writePool.on('connect', (client) => {
   client.query(`SET ROLE ${config.dbWrite}`);
 });
 
-writePool.on('error', (err, client) => {
-  logger.error('Unexpected error on idle client', err);
+writePool.on('error', (error, client) => {
+  logger.error('Unexpected error on idle client', {
+    error,
+    timestamp: moment().utc().format('D/MMM/YYYY:HH:mm:ss ZZ'),
+  });
   process.exit(-1);
 });
 
