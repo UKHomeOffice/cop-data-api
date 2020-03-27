@@ -1,4 +1,5 @@
-// local imports
+const moment = require('moment');
+
 const logger = require('../config/logger')(__filename);
 const getPool = require('./index');
 
@@ -11,11 +12,13 @@ const query = (role, name, queryString, values) => new Promise((resolve, reject)
   pool.query(queryObject)
     .then(data => resolve(data.rows))
     .catch((error) => {
-      const errorMsg = `Unable to run query in table ${name}`;
-      logger.error(errorMsg);
-      logger.error(error.stack);
-      error.message = errorMsg;
-      reject(new Error(errorMsg));
+      const errorMessage = `Unable to run query in table ${name}`;
+      logger.error(errorMessage, {
+        stack: error.stack,
+        timestamp: moment().utc().format('D/MMM/YYYY:HH:mm:ss ZZ'),
+      });
+
+      reject(new Error(errorMessage));
     });
 });
 

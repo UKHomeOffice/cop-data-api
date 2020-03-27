@@ -1,6 +1,6 @@
 const express = require('express');
+const moment = require('moment');
 
-// local imports
 const logger = require('../../config/logger')(__filename);
 const query = require('../../db/query');
 const { queryBuilder } = require('../../db/utils');
@@ -33,7 +33,12 @@ app.get('/:name', (req, res) => {
   Promise.all([data])
     .then(resultsArray => res.status(200).json(resultsArray[0]))
     .catch((error) => {
-      logger.error(error.stack);
+      logger.error('Error getting entity - 2', {
+        stack: error.stack,
+        error: error.message,
+        timestamp: moment().utc().format('D/MMM/YYYY:HH:mm:ss ZZ'),
+      });
+
       res.status(400).json({ error: error.message });
     });
 });
@@ -68,7 +73,12 @@ app.patch('/:name/:id?', (req, res) => {
   Promise.all([data])
     .then(resultsArray => res.status(200).json(resultsArray[0]))
     .catch((error) => {
-      logger.error(error.stack);
+      logger.error('Error updating entity - 2', {
+        stack: error.stack,
+        error: error.message,
+        timestamp: moment().utc().format('D/MMM/YYYY:HH:mm:ss ZZ'),
+      });
+
       res.status(400).json({ error: error.message });
     });
 });
@@ -96,7 +106,12 @@ app.delete('/:name', (req, res) => {
   Promise.all([data])
     .then(resultsArray => res.status(200).json(resultsArray[0]))
     .catch((error) => {
-      logger.error(error.stack);
+      logger.error('Error deleting entity - 2', {
+        stack: error.stack,
+        error: error.message,
+        timestamp: moment().utc().format('D/MMM/YYYY:HH:mm:ss ZZ'),
+      });
+
       res.status(400).json({ error: error.message });
     });
 });
