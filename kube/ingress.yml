@@ -22,4 +22,4 @@ spec:
   tls:
   - hosts:
     - {{.API_COP_URL}}
-    secretName: operational-data-api-tls
+    secretName: operational-data-api-cmio
