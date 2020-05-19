@@ -55,6 +55,42 @@ describe('Test containsSQLMiddleware', () => {
       });
     });
 
+    describe('and the originalUrl does NOT contain SQL', () => {
+      describe('and the originalUrl contains an apostrophe', () => {
+        it('should  call next and should NOT return Unauthorized message', () => {
+          const json = sinon.spy();
+          const originalUrl = 'http://localhost:8080/v2/roles?email=eq.dermot.o%27leary@notahacker.com';
+          const request = { originalUrl };
+          const status = sinon.stub().returns({ json });
+          const response = { status, locals: { user: null } };
+          const next = sinon.spy();
+
+          containsSQLMiddleware(request, response, next);
+
+          sinon.assert.notCalled(status);
+          sinon.assert.notCalled(json);
+          sinon.assert.calledWith(next);
+        });
+      });
+
+      describe('and the originalUrl contains more than one apostrophe', () => {
+        it('should NOT call next and should return Unauthorized message', () => {
+          const json = sinon.spy();
+          const originalUrl = 'http://localhost:8080/v2/roles?email=eq.dermot.o%27leary@definitely%27ahacker.com';
+          const request = { originalUrl };
+          const status = sinon.stub().returns({ json });
+          const response = { status, locals: { user: null } };
+          const next = sinon.spy();
+
+          containsSQLMiddleware(request, response, next);
+
+          sinon.assert.calledWith(status, 403);
+          sinon.assert.calledWith(json, { error: 'Unauthorized' });
+          sinon.assert.notCalled(next);
+        });
+      });
+    });
+
     describe('and the originalUrl is undefined', () => {
       it('should call next and NOT return Unauthorized message', () => {
         const json = sinon.spy();
