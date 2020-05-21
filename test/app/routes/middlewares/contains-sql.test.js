@@ -36,6 +36,40 @@ describe('Test containsSQLMiddleware', () => {
         sinon.assert.notCalled(json);
         sinon.assert.calledWith(next);
       });
+
+      describe('and the originalUrl contains an email that is valid', () => {
+        it('should call next and NOT return Unauthorized message', () => {
+          const json = sinon.spy();
+          const originalUrl = 'http://localhost/my/cool/url/has?email=eq.email@email.com';
+          const request = { originalUrl };
+          const status = sinon.stub().returns({ json });
+          const response = { status, locals: { user: null } };
+          const next = sinon.spy();
+
+          containsSQLMiddleware(request, response, next);
+
+          sinon.assert.notCalled(status);
+          sinon.assert.notCalled(json);
+          sinon.assert.calledWith(next);
+        });
+      });
+
+      describe('and the originalUrl contains an email that is NOT valid', () => {
+        it('should NOT call next and return Unauthorized message', () => {
+          const json = sinon.spy();
+          const originalUrl = 'http://localhost/my/cool/url/has?email=SELECT * FROM admin;;';
+          const request = { originalUrl };
+          const status = sinon.stub().returns({ json });
+          const response = { status, locals: { user: null } };
+          const next = sinon.spy();
+
+          containsSQLMiddleware(request, response, next);
+
+          sinon.assert.calledWith(status, 403);
+          sinon.assert.calledWith(json, { error: 'Unauthorized' });
+          sinon.assert.notCalled(next);
+        });
+      });
     });
 
     describe('and the originalUrl is null', () => {
