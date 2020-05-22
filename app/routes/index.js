@@ -25,8 +25,8 @@ app.use(bodyParser.json());
 app.options('*', cors(corsConfiguration));
 
 // check each request for authorization token
-app.use(authMiddleware);
 app.use(containsSQLMiddleware);
+app.use(authMiddleware);
 
 app.use('/v1', v1);
 app.use('/v2', v2);

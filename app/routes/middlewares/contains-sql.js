@@ -1,37 +1,23 @@
-function hasSql(value) {
-  // NOTE: SQL RegEx reference:
-  // http://www.symantec.com/connect/articles/detection-sql-injection-and-cross-site-scripting-attacks
-  const sqlMeta = new RegExp('(%27)|(\')|(--)|(%23)|(#)', 'i');
-  const sqlMetaModified = new RegExp('((%3D)|(=))[^\n]*((%27)|(\')|(--)|(%3B)|(;))', 'i'); // eslint-disable-line no-control-regex
-  const sqlTypical = new RegExp('w*((%27)|(\'))((%6F)|o|(%4F))((%72)|r|(%52))', 'i');
-  const sqlUnion = new RegExp('((%27)|(\'))union', 'i');
-
-  if (value === null || value === undefined || !value) {
-    return false;
-  }
-
-  if (
-    sqlMeta.test(value)
-    || sqlMetaModified.test(value)
-    || sqlTypical.test(value)
-    || sqlUnion.test(value)) {
-    return true;
-  }
-
-  return false;
-}
+const logger = require('../../config/logger')(__filename);
+const {
+  getEmailFromRequest,
+  isEmailValid,
+} = require('../../utils/email');
+const hasSql = require('../../utils/has-sql');
 
 function containsSQLMiddleware(request, response, next) {
-  let containsSql = false;
-
-  if (request.originalUrl !== null && request.originalUrl !== undefined) {
-    containsSql = hasSql(request.originalUrl);
-  }
-
-  if (containsSql) {
-    response.status(403).json({ error: 'Unauthorized' });
-  } else {
+  if (request.originalUrl === null || request.originalUrl === undefined) {
     next();
+  } else {
+    const email = getEmailFromRequest(request);
+
+    // NOTE: Some email address queries showed up as containing SQL, so let's allow these requests
+    if (hasSql(request.originalUrl) && !isEmailValid(email)) {
+      logger.error(`${request.method} - ${request.url} - SQL Injection detected`);
+      response.status(403).json({ error: 'Unauthorized' });
+    } else {
+      next();
+    }
   }
 }
 

@@ -41,7 +41,7 @@ services:
 
   cop_data_api:
     build: .
-    image: ${COP_DATA_API_IMAGE_REPO}:dev
+    image: ${COP_DATA_API_IMAGE_REPO}:latest
     volumes:
       - ./app:/src/app
     environment:
