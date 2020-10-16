@@ -1,0 +1,410 @@
+---
+kind: pipeline
+type: kubernetes
+name: matrix-1
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: build
+  pull: if-not-exists
+  image: quay.io/ukhomeofficedigital/drone-docker
+  commands:
+  - docker build -t cop-data-api:$${DRONE_COMMIT_SHA} .
+  when:
+    event:
+    - push
+
+- name: vulnerability-scan
+  pull: if-not-exists
+  image: quay.io/ukhomeofficedigital/anchore-submission:latest
+  settings:
+    dockerfile: Dockerfile
+    image_name: cop-data-api:${DRONE_COMMIT_SHA}
+    local_image: true
+    tolerate: low
+  when:
+    branch:
+    - master
+    event:
+    - push
+
+- name: unit_tests
+  pull: if-not-exists
+  image: quay.io/ukhomeofficedigital/drone-docker
+  commands:
+  - docker run -e API_COP_KEYCLOAK_CLIENT_PUBLIC_KEY=$DEV_API_COP_KEYCLOAK_CLIENT_PUBLIC_KEY -t cop-data-api:$${DRONE_COMMIT_SHA} sh -c "npm test"
+  environment:
+    DEV_API_COP_KEYCLOAK_CLIENT_PUBLIC_KEY:
+      from_secret: DEV_API_COP_KEYCLOAK_CLIENT_PUBLIC_KEY
+  when:
+    event:
+    - push
+
+- name: lint_checks
+  pull: if-not-exists
+  image: quay.io/ukhomeofficedigital/drone-docker
+  commands:
+  - docker run -t cop-data-api:$${DRONE_COMMIT_SHA} sh -c "npm run lint -- app/"
+  when:
+    event:
+    - push
+
+- name: synch_dev_secrets
+  pull: if-not-exists
+  image: quay.io/ukhomeofficedigital/cop-secrets
+  environment:
+    AWS_ACCESS_KEY_ID:
+      from_secret: DEV_DRONE_AWS_ACCESS_KEY_ID
+    AWS_SECRET_ACCESS_KEY:
+      from_secret: DEV_DRONE_AWS_SECRET_ACCESS_KEY
+    DEPLOY_ENV: dev
+    DRONE_SERVER: https://drone.acp.homeoffice.gov.uk
+    DRONE_TOKEN:
+      from_secret: DRONE_PUBLIC_TOKEN
+  when:
+    event:
+    - promote
+    target:
+    - secrets
+
+- name: synch_staging_secrets
+  pull: if-not-exists
+  image: quay.io/ukhomeofficedigital/cop-secrets
+  environment:
+    AWS_ACCESS_KEY_ID:
+      from_secret: STAGING_DRONE_AWS_ACCESS_KEY_ID
+    AWS_SECRET_ACCESS_KEY:
+      from_secret: STAGING_DRONE_AWS_SECRET_ACCESS_KEY
+    DEPLOY_ENV: staging
+    DRONE_SERVER: https://drone.acp.homeoffice.gov.uk
+    DRONE_TOKEN:
+      from_secret: DRONE_PUBLIC_TOKEN
+  when:
+    event:
+    - promote
+    target:
+    - secrets
+
+- name: synch_production_secrets
+  pull: if-not-exists
+  image: quay.io/ukhomeofficedigital/cop-secrets
+  environment:
+    AWS_ACCESS_KEY_ID:
+      from_secret: PRODUCTION_DRONE_AWS_ACCESS_KEY_ID
+    AWS_SECRET_ACCESS_KEY:
+      from_secret: PRODUCTION_DRONE_AWS_SECRET_ACCESS_KEY
+    DEPLOY_ENV: production
+    DRONE_SERVER: https://drone.acp.homeoffice.gov.uk
+    DRONE_TOKEN:
+      from_secret: DRONE_PUBLIC_TOKEN
+  when:
+    event:
+    - promote
+    target:
+    - secrets
+
+- name: image_to_quay
+  pull: if-not-exists
+  image: quay.io/ukhomeofficedigital/drone-docker
+  settings:
+    registry: quay.io
+    repo: quay.io/ukhomeofficedigital/cop-data-api
+    tags: ${DRONE_COMMIT_SHA}
+  environment:
+    DOCKER_PASSWORD:
+      from_secret: QUAY_PASSWORD
+    DOCKER_USERNAME:
+      from_secret: QUAY_USERNAME
+  when:
+    branch:
+    - master
+    event:
+    - push
+
+- name: deploy_to_dev
+  pull: if-not-exists
+  image: quay.io/ukhomeofficedigital/kd
+  commands:
+  - export API_COP_TAG=$${DRONE_COMMIT_SHA}
+  - export DB_COP_READ_ROLE="readonly"
+  - export DB_COP_WRITE_ROLE="service"
+  - kd --insecure-skip-tls-verify -f kube/cert.yml -f kube/deployment.yml -f kube/service.yml -f kube/ingress.yml -f kube/network-policy.yml
+  environment:
+    API_COP_IMAGE:
+      from_secret: API_COP_IMAGE
+    API_COP_KEYCLOAK_CLIENT_ID:
+      from_secret: DEV_API_COP_KEYCLOAK_CLIENT_ID
+    API_COP_KEYCLOAK_CLIENT_PUBLIC_KEY:
+      from_secret: DEV_API_COP_KEYCLOAK_CLIENT_PUBLIC_KEY
+    API_COP_LOG_LEVEL:
+      from_secret: LOG_LEVEL_DEBUG
+    API_COP_NAME:
+      from_secret: DEV_API_COP_NAME
+    API_COP_PORT:
+      from_secret: API_COP_PORT
+    API_COP_PROTOCOL:
+      from_secret: PROTOCOL_HTTPS
+    API_COP_URL:
+      from_secret: DEV_API_COP_URL
+    DB_COP_HOSTNAME:
+      from_secret: DEV_DB_COP_HOSTNAME
+    DB_COP_OPERATION_AUTHENTICATOR_PASSWORD:
+      from_secret: DEV_DB_COP_OPERATION_AUTHENTICATOR_PASSWORD
+    DB_COP_OPERATION_AUTHENTICATOR_USERNAME:
+      from_secret: DEV_DB_COP_OPERATION_AUTHENTICATOR_USERNAME
+    DB_COP_OPERATION_DBNAME:
+      from_secret: DEV_DB_COP_OPERATION_DBNAME
+    DB_COP_OPERATION_SCHEMA:
+      from_secret: DEV_DB_COP_OPERATION_SCHEMA
+    DB_COP_OPTIONS:
+      from_secret: DEV_DB_COP_OPTIONS
+    DB_COP_PORT:
+      from_secret: DB_COP_PORT
+    DB_COP_PROTOCOL:
+      from_secret: PROTOCOL_POSTGRES
+    KEYCLOAK_PROTOCOL:
+      from_secret: PROTOCOL_HTTPS
+    KEYCLOAK_REALM:
+      from_secret: DEV_KEYCLOAK_REALM
+    KEYCLOAK_URL:
+      from_secret: DEV_KEYCLOAK_URL
+    KUBE_NAMESPACE:
+      from_secret: DEV_KUBE_NAMESPACE_PRIVATE_COP
+    KUBE_SERVER:
+      from_secret: DEV_KUBE_SERVER
+    KUBE_TOKEN:
+      from_secret: DEV_KUBE_TOKEN
+    NGINX_IMAGE:
+      from_secret: NGINX_IMAGE
+    NGINX_TAG:
+      from_secret: NGINX_TAG
+  when:
+    branch:
+    - master
+    event:
+    - push
+
+- name: deploy_to_staging
+  pull: if-not-exists
+  image: quay.io/ukhomeofficedigital/kd
+  commands:
+  - export API_COP_TAG=$${DRONE_COMMIT_SHA}
+  - export DB_COP_READ_ROLE="readonly"
+  - export DB_COP_WRITE_ROLE="service"
+  - kd --insecure-skip-tls-verify -f kube/cert.yml -f kube/deployment.yml -f kube/service.yml -f kube/ingress.yml -f kube/network-policy.yml
+  environment:
+    API_COP_IMAGE:
+      from_secret: API_COP_IMAGE
+    API_COP_KEYCLOAK_CLIENT_ID:
+      from_secret: STAGING_API_COP_KEYCLOAK_CLIENT_ID
+    API_COP_KEYCLOAK_CLIENT_PUBLIC_KEY:
+      from_secret: STAGING_API_COP_KEYCLOAK_CLIENT_PUBLIC_KEY
+    API_COP_LOG_LEVEL:
+      from_secret: LOG_LEVEL_INFO
+    API_COP_NAME:
+      from_secret: STAGING_API_COP_NAME
+    API_COP_PORT:
+      from_secret: API_COP_PORT
+    API_COP_PROTOCOL:
+      from_secret: PROTOCOL_HTTPS
+    API_COP_URL:
+      from_secret: STAGING_API_COP_URL
+    DB_COP_HOSTNAME:
+      from_secret: STAGING_DB_COP_HOSTNAME
+    DB_COP_OPERATION_AUTHENTICATOR_PASSWORD:
+      from_secret: STAGING_DB_COP_OPERATION_AUTHENTICATOR_PASSWORD
+    DB_COP_OPERATION_AUTHENTICATOR_USERNAME:
+      from_secret: STAGING_DB_COP_OPERATION_AUTHENTICATOR_USERNAME
+    DB_COP_OPERATION_DBNAME:
+      from_secret: STAGING_DB_COP_OPERATION_DBNAME
+    DB_COP_OPERATION_SCHEMA:
+      from_secret: STAGING_DB_COP_OPERATION_SCHEMA
+    DB_COP_OPTIONS:
+      from_secret: STAGING_DB_COP_OPTIONS
+    DB_COP_PORT:
+      from_secret: DB_COP_PORT
+    DB_COP_PROTOCOL:
+      from_secret: PROTOCOL_POSTGRES
+    KEYCLOAK_PROTOCOL:
+      from_secret: PROTOCOL_HTTPS
+    KEYCLOAK_REALM:
+      from_secret: STAGING_KEYCLOAK_REALM
+    KEYCLOAK_URL:
+      from_secret: STAGING_KEYCLOAK_URL
+    KUBE_NAMESPACE:
+      from_secret: STAGING_KUBE_NAMESPACE_PRIVATE_COP
+    KUBE_SERVER:
+      from_secret: STAGING_KUBE_SERVER
+    KUBE_TOKEN:
+      from_secret: STAGING_KUBE_TOKEN
+    NGINX_IMAGE:
+      from_secret: NGINX_IMAGE
+    NGINX_TAG:
+      from_secret: NGINX_TAG
+  when:
+    branch:
+    - master
+    event:
+    - promote
+    target:
+    - staging
+
+- name: deploy_to_production
+  pull: if-not-exists
+  image: quay.io/ukhomeofficedigital/kd
+  commands:
+  - export API_COP_TAG=$${DRONE_COMMIT_SHA}
+  - export DB_COP_READ_ROLE="readonly"
+  - export DB_COP_WRITE_ROLE="service"
+  - kd --insecure-skip-tls-verify -f kube/cert.yml -f kube/deployment.yml -f kube/service.yml -f kube/ingress.yml -f kube/network-policy.yml
+  environment:
+    API_COP_IMAGE:
+      from_secret: API_COP_IMAGE
+    API_COP_KEYCLOAK_CLIENT_ID:
+      from_secret: PRODUCTION_API_COP_KEYCLOAK_CLIENT_ID
+    API_COP_KEYCLOAK_CLIENT_PUBLIC_KEY:
+      from_secret: PRODUCTION_API_COP_KEYCLOAK_CLIENT_PUBLIC_KEY
+    API_COP_LOG_LEVEL:
+      from_secret: LOG_LEVEL_INFO
+    API_COP_NAME:
+      from_secret: PRODUCTION_API_COP_NAME
+    API_COP_PORT:
+      from_secret: API_COP_PORT
+    API_COP_PROTOCOL:
+      from_secret: PROTOCOL_HTTPS
+    API_COP_URL:
+      from_secret: PRODUCTION_API_COP_URL
+    DB_COP_HOSTNAME:
+      from_secret: PRODUCTION_DB_COP_HOSTNAME
+    DB_COP_OPERATION_AUTHENTICATOR_PASSWORD:
+      from_secret: PRODUCTION_DB_COP_OPERATION_AUTHENTICATOR_PASSWORD
+    DB_COP_OPERATION_AUTHENTICATOR_USERNAME:
+      from_secret: PRODUCTION_DB_COP_OPERATION_AUTHENTICATOR_USERNAME
+    DB_COP_OPERATION_DBNAME:
+      from_secret: PRODUCTION_DB_COP_OPERATION_DBNAME
+    DB_COP_OPERATION_SCHEMA:
+      from_secret: PRODUCTION_DB_COP_OPERATION_SCHEMA
+    DB_COP_OPTIONS:
+      from_secret: PRODUCTION_DB_COP_OPTIONS
+    DB_COP_PORT:
+      from_secret: DB_COP_PORT
+    DB_COP_PROTOCOL:
+      from_secret: PROTOCOL_POSTGRES
+    KEYCLOAK_PROTOCOL:
+      from_secret: PROTOCOL_HTTPS
+    KEYCLOAK_REALM:
+      from_secret: PRODUCTION_KEYCLOAK_REALM
+    KEYCLOAK_URL:
+      from_secret: PRODUCTION_KEYCLOAK_URL
+    KUBE_NAMESPACE:
+      from_secret: PRODUCTION_KUBE_NAMESPACE_PRIVATE_COP
+    KUBE_SERVER:
+      from_secret: PRODUCTION_KUBE_SERVER
+    KUBE_TOKEN:
+      from_secret: PRODUCTION_KUBE_TOKEN
+    NGINX_IMAGE:
+      from_secret: NGINX_IMAGE
+    NGINX_TAG:
+      from_secret: NGINX_TAG
+  when:
+    branch:
+    - master
+    event:
+    - promote
+    target:
+    - production
+
+- name: create-change-desc-production
+  pull: if-not-exists
+  image: docker:git
+  commands:
+  - git show --name-only >> $SNOW_DESC_FILE
+  when:
+    event:
+    - promote
+    target:
+    - production
+
+- name: open-snow-change-production
+  pull: if-not-exists
+  image: quay.io/ukhomeofficedigital/snowtify:latest
+  environment:
+    SNOW_ENDPOINT:
+      from_secret: PRODUCTION_SERVICE_NOW_URL
+    SNOW_EXTERNAL_ID: ${DRONE_REPO}:${DRONE_COMMIT_SHA}
+    SNOW_PROD_PASS:
+      from_secret: PRODUCTION_SERVICE_NOW_PASSWORD
+    SNOW_PROD_USER:
+      from_secret: PRODUCTION_SERVICE_NOW_USERNAME
+  when:
+    event:
+    - promote
+    target:
+    - production
+
+- name: complete-snow-change-production
+  pull: if-not-exists
+  image: quay.io/ukhomeofficedigital/snowtify:latest
+  settings:
+    comments: Successful deployment of ${DRONE_REPO}:${DRONE_COMMIT_SHA}
+    deployment_outcome: success
+  environment:
+    SNOW_ENDPOINT:
+      from_secret: PRODUCTION_SERVICE_NOW_URL
+    SNOW_PROD_PASS:
+      from_secret: PRODUCTION_SERVICE_NOW_PASSWORD
+    SNOW_PROD_USER:
+      from_secret: PRODUCTION_SERVICE_NOW_USERNAME
+  when:
+    event:
+    - promote
+    status:
+    - success
+    target:
+    - production
+
+- name: cancel-snow-change-production
+  pull: if-not-exists
+  image: quay.io/ukhomeofficedigital/snowtify:latest
+  settings:
+    comments: Failed deployment of ${DRONE_REPO}:${DRONE_COMMIT_SHA}
+    deployment_outcome: fail
+  environment:
+    SNOW_ENDPOINT:
+      from_secret: PRODUCTION_SERVICE_NOW_URL
+    SNOW_PROD_PASS:
+      from_secret: PRODUCTION_SERVICE_NOW_PASSWORD
+    SNOW_PROD_USER:
+      from_secret: PRODUCTION_SERVICE_NOW_USERNAME
+  when:
+    event:
+    - promote
+    status:
+    - failure
+    target:
+    - production
+
+- name: notify
+  pull: if-not-exists
+  image: plugins/slack
+  settings:
+    channel: cop-deployments
+    template: "{{#build.deployTo}}\n  *{{repo.name}} - Build {{build.number}} - {{uppercasefirst build.deployTo}} - {{uppercase build.status}}*\n  {{build.link}}\n{{else}}\n  *{{repo.name}} - Build {{build.number}} - Development - {{uppercase build.status}}*\n  {{build.link}}\n{{/build.deployTo}}\n"
+    username: Drone Build Watcher
+  environment:
+    SLACK_WEBHOOK:
+      from_secret: SLACK_WEBHOOK
+  when:
+    branch:
+    - master
+    event:
+    - push
+    - promote
+    status:
+    - success
+    - failure
+
+...
